@@ -1,0 +1,10 @@
+{
+  "name": "intuition-uniswapv2-fork",
+  "private": true,
+  "packageManager": "pnpm@9.9.0",
+  "workspaces": ["contracts", "frontend"],
+  "scripts": {
+    "build": "pnpm -C contracts compile && pnpm -C frontend build",
+    "dev": "pnpm -C frontend dev"
+  }
+}
