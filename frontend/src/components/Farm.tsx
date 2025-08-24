@@ -1,6 +1,6 @@
 // src/components/Farm.tsx
 import { useEffect, useState, useMemo } from "react";
-import { Address, erc20Abi, parseUnits } from "viem";
+import { Address, erc20Abi, parseUnits, formatUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 // 👉 tes helpers de format
@@ -18,6 +18,18 @@ function overrideNativeSymbol(addr?: string, onchain?: string) {
   }
   return onchain || 'TKN';
 }
+
+// 🔒 parseUnits sûr pour l'UI
+const tryParseUnits = (v: string, decimals: number): bigint | null => {
+  try {
+    if (!v) return 0n;
+    const s = v.trim().replace(/\s+/g, '').replace(/,/g, '.'); // 1 234,56 -> 1234.56
+    if (!/^\d+(\.\d+)?$/.test(s)) return null;
+    return parseUnits(s, decimals);
+  } catch {
+    return null;
+  }
+};
 
 // ABI minimal StakingRewards (Uniswap V2 style)
 const SR_ABI = [
@@ -84,6 +96,7 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
   // ui
   const [amount, setAmount] = useState("0");
   const [pending, setPending] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const poolLabel = useMemo(() => {
     const pair = sym0 && sym1 ? `${sym0}-${sym1}` : "LP";
@@ -122,7 +135,6 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
       ]);
       setSym0(overrideNativeSymbol(token0, s0));
       setSym1(overrideNativeSymbol(token1, s1));
-      
       setDec0(Number(d0 ?? 18)); setDec1(Number(d1 ?? 18));
       setR0(res0); setR1(res1);
     } catch {
@@ -138,6 +150,7 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
       publicClient.readContract({ address: stakingRewards, abi: SR_ABI, functionName: "earned", args: [address] }) as Promise<bigint>,
     ]);
     setLpBal(bal); setLpAllow(allow); setStaked(st); setEarned(er);
+    setLoaded(true);
   };
 
   useEffect(() => { load(); }, [address, publicClient, stakingRewards, stakingToken, rewardsToken]);
@@ -157,9 +170,10 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
 
   const stake = async () => {
     if (!walletClient || !address) return;
+    const amt = tryParseUnits(amount, decLP);
+    if (amt === null || amt <= 0n) { alert('Montant invalide'); return; }
     setPending(true);
     try {
-      const amt = parseUnits(amount || "0", decLP);
       const tx = await walletClient.writeContract({
         address: stakingRewards,
         abi: SR_ABI,
@@ -174,9 +188,10 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
 
   const unstake = async () => {
     if (!walletClient || !address) return;
+    const amt = tryParseUnits(amount, decLP);
+    if (amt === null || amt <= 0n) { alert('Montant invalide'); return; }
     setPending(true);
     try {
-      const amt = parseUnits(amount || "0", decLP);
       const tx = await walletClient.writeContract({
         address: stakingRewards,
         abi: SR_ABI,
@@ -205,10 +220,27 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
     } finally { setPending(false); }
   };
 
-  const needApprove = useMemo(() => {
-    const need = parseUnits(amount || "0", decLP);
-    return isConnected && need > 0n && lpAllow < need;
-  }, [amount, decLP, lpAllow, isConnected]);
+  // 🔍 dérivés UI
+  const amt = useMemo(() => tryParseUnits(amount, decLP), [amount, decLP]);
+  const needsApproval = useMemo(() => {
+    if (!isConnected || !loaded || amt === null) return false;
+    return amt > 0n && lpAllow < amt;
+  }, [isConnected, loaded, amt, lpAllow]);
+
+  const canStake = useMemo(() => {
+    if (!loaded || amt === null) return false;
+    return amt > 0n && lpBal >= amt && (!needsApproval);
+  }, [loaded, amt, lpBal, needsApproval]);
+
+  const canUnstake = useMemo(() => {
+    if (!loaded || amt === null) return false;
+    return amt > 0n && staked >= amt;
+  }, [loaded, amt, staked]);
+
+  const onMax = () => {
+    // ⚠️ pour l'input on veut une chaîne décimale simple et non localisée
+    setAmount(formatUnits(lpBal, decLP));
+  };
 
   return (
     <div style={{ maxWidth: 620, display: 'grid', gap: 10, border: '1px solid #e5e7eb', borderRadius: 12, padding: 12 }}>
@@ -237,17 +269,17 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
           placeholder="Amount LP"
           className="border rounded px-2 py-1"
         />
-        <button onClick={() => setAmount(String(Number(fmtLP(lpBal))))} style={{ opacity: .8 }}>Max</button>
+        <button onClick={onMax} style={{ opacity: .8 }}>Max</button>
 
-        {needApprove ? (
-          <button onClick={approve} disabled={pending}>Approve LP</button>
+        {needsApproval ? (
+          <button onClick={approve} disabled={pending || !loaded}>Approve LP</button>
         ) : (
           <>
-            <button onClick={stake} disabled={pending}>Stake</button>
-            <button onClick={unstake} disabled={pending}>Unstake</button>
+            <button onClick={stake} disabled={pending || !loaded || !canStake}>Stake</button>
+            <button onClick={unstake} disabled={pending || !loaded || !canUnstake}>Unstake</button>
           </>
         )}
-        <button onClick={claim} disabled={pending}>Claim</button>
+        <button onClick={claim} disabled={pending || !loaded}>Claim</button>
       </div>
     </div>
   );
