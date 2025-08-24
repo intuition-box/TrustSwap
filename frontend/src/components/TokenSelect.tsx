@@ -38,7 +38,7 @@ onChange(t)
 >
 {items.map(t => (
 <option key={t.symbol} value={t.symbol}>
-{t.symbol}{t.isNative ? ' (native)' : ''}
+{t.symbol}
 </option>
 ))}
 </select>
