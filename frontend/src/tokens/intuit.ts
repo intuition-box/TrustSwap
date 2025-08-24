@@ -20,44 +20,51 @@ logoURI?: string
 
 
 export const TOKENS: Currency[] = [
-{
-symbol: 'tTRUST',
-name: 'Intuition Native',
-decimals: 18,
-isNative: true,
-wrapped: import.meta.env.VITE_WETH_ADDRESS as Address,
-logoURI: ''
-},
-{
-symbol: 'WTTRUST',
-name: 'Wrapped tTRUST',
-decimals: 18,
-address: import.meta.env.VITE_WETH_ADDRESS as Address,
-logoURI: ''
-},
-{
-symbol: 'TKA',
-name: 'Token A',
-decimals: 18,
-address: import.meta.env.VITE_TOKEN_A as Address,
-logoURI: ''
-},
-{
-symbol: 'TKB',
-name: 'Token B',
-decimals: 18,
-address: import.meta.env.VITE_TOKEN_B as Address,
-logoURI: ''
-}
+  {
+    symbol: 'tTRUST',
+    name: 'Intuition Native',
+    decimals: 18,
+    isNative: true,
+    wrapped: import.meta.env.VITE_WETH_ADDRESS as Address,
+    logoURI: ''
+  },
+  {
+    symbol: 'WTTRUST',
+    name: 'Wrapped tTRUST',
+    decimals: 18,
+    address: import.meta.env.VITE_WETH_ADDRESS as Address,
+    logoURI: ''
+  },
+  {
+    symbol: 'TSWP',
+    name: 'TrustSwap Token',
+    decimals: 18,
+    address: import.meta.env.VITE_TSWP_ADDRESS as Address,
+    logoURI: ''
+  },
+  {
+    symbol: 'TKA',
+    name: 'Token A',
+    decimals: 18,
+    address: import.meta.env.VITE_TOKEN_A as Address,
+    logoURI: ''
+  },
+  {
+    symbol: 'TKB',
+    name: 'Token B',
+    decimals: 18,
+    address: import.meta.env.VITE_TOKEN_B as Address,
+    logoURI: ''
+  }
 ]
 
 
 export function bySymbol(sym: string) {
-return TOKENS.find(t => t.symbol.toLowerCase() === sym.toLowerCase())
+  return TOKENS.find(t => t.symbol.toLowerCase() === sym.toLowerCase())
 }
 
 
 export function addrOrWrapped(t: Currency): Address {
-if (t.isNative) return t.wrapped!
-return t.address!
+  if (t.isNative) return t.wrapped!
+  return t.address!
 }

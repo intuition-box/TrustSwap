@@ -360,7 +360,7 @@ export default function AddLiquidityPro() {
     }
   }
 
-  // --- indicateurs ---
+  // --- indicator ---
   const priceAB = reserves && reserves.rA>0n ? Number(reserves.rB)/Number(reserves.rA) : null
   const priceBA = reserves && reserves.rB>0n ? Number(reserves.rA)/Number(reserves.rB) : null
 
@@ -369,7 +369,7 @@ export default function AddLiquidityPro() {
       <h2>Add Liquidity</h2>
 
       <div style={{display:'grid', gap:12}}>
-        {/* Sélecteurs de token */}
+        {/* Select token */}
         <div style={{display:'flex', gap:12, alignItems:'center'}}>
           <span>Token A</span>
           <TokenSelector value={TA} onChange={(t: UiToken)=>{ setTA(t); setLockedB(false); }} />
@@ -418,7 +418,7 @@ export default function AddLiquidityPro() {
           <input type="number" min={1} value={deadlineMins} onChange={e=>setDeadlineMins(Number(e.target.value))} style={{width:80}}/> min
         </div>
 
-        {/* Approvals (seulement côté ERC-20) */}
+        {/* Approvals (ERC-20) */}
         {!TA.isNative && needApproveA && (
           <button onClick={()=>onApprove(TA, TA.symbol)} disabled={pending}>
             Approve {TA.symbol}
