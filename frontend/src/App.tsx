@@ -20,6 +20,7 @@ export default function App() {
       <hr />
       <PoolList />
       <hr />
+      <h3>Farms</h3>
       {farms.map((f) => (
         <Farm
           key={f.stakingRewards}
