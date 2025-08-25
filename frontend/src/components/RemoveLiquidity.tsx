@@ -14,7 +14,7 @@ import {
 } from 'viem'
 
 // --- UI / Token utils ---
-import TokenSelector from './TokenSelect'
+import TokenSelector from './TokenSelector'
 import { TOKENS } from '../tokens/intuit'
 import { fmtAmount, fmtLP, fmtAllowance, fmtPct, shortAddr } from '../lib/format'
 
