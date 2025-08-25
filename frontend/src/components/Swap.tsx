@@ -18,6 +18,8 @@ import TokenSelector from './TokenSelect'
 import { TOKENS } from '../tokens/intuit'
 import RouterABI from '../abis/Router02.min.json' 
 
+import styles from "../styles/swap.module.css";
+
 type UiToken = {
   symbol: string
   name?: string
@@ -224,36 +226,33 @@ export default function Swap() {
   const outPreview = quoteOut ? Number(formatUnits(quoteOut, TOut.decimals)).toLocaleString(undefined, { maximumFractionDigits: 6 }) : '—'
 
   return (
-    <div>
-
-
-      {/* Sélection des tokens */}
-      <div style={{display:'grid', gap:10}}>
-        <div style={{display:'flex', gap:8, alignItems:'center'}}>
+    <div className={styles.containerLcdAffiche}>
+      <span className={styles.title}>Swap</span>
+      <div>
+        <div>
           <span>From</span>
           <TokenSelector value={{ ...TIn, name: TIn.name ?? TIn.symbol }} onChange={(t: UiToken)=>setTIn(t)} />
           <input
             value={amountIn}
             onChange={e => setAmountIn(e.target.value)}
             placeholder="0.0"
-            style={{marginLeft:'auto', width:160}}
           />
         </div>
 
-        <div style={{display:'flex', justifyContent:'center'}}>
-          <button onClick={onFlip} style={{padding:'4px 10px'}}>⇅</button>
+        <div>
+          <button onClick={onFlip}>⇅</button>
         </div>
 
-        <div style={{display:'flex', gap:8, alignItems:'center'}}>
+        <div>
           <span>To</span>
           <TokenSelector value={{ ...TOut, name: TOut.name ?? TOut.symbol }} onChange={(t: UiToken)=>setTOut(t)} />
-          <div style={{marginLeft:'auto'}}>
+          <div>
             ≈ {outPreview} {TOut.symbol}
           </div>
         </div>
 
-        {/* Slippage & deadline */}
-        <div style={{display:'flex', alignItems:'center', gap:8}}>
+
+        <div>
           <span>Slippage:</span>
           {[0.1,0.5,1].map(p => (
             <button key={p} onClick={()=>setSlippage(p)} style={{padding:'2px 8px', border: slippage===p?'2px solid #888':'1px solid #ccc', borderRadius:8}}>
@@ -264,9 +263,8 @@ export default function Swap() {
             type="number" step="0.1" min="0"
             value={slippage}
             onChange={e=>setSlippage(Number(e.target.value))}
-            style={{width:70, marginLeft:4}}
           />
-          <span style={{marginLeft:12}}>Deadline:</span>
+          <span>Deadline:</span>
           <input type="number" min={1} value={deadlineMins} onChange={e=>setDeadlineMins(Number(e.target.value))} style={{width:80}}/> min
         </div>
 
@@ -282,7 +280,7 @@ export default function Swap() {
         </button>
 
         {/* Infos rapides */}
-        <small style={{opacity:0.7}}>
+        <small>
           Balance {TIn.symbol}: {Number(formatUnits(balIn, TIn.decimals)).toLocaleString(undefined,{maximumFractionDigits:6})}
         </small>
       </div>
