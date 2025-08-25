@@ -2,11 +2,12 @@
 import { useEffect, useState, useMemo } from "react";
 import { Address, erc20Abi, parseUnits, formatUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import FarmAprBadge from "./FarmAprBadge"
 
 // 👉 tes helpers de format
 import { fmtLP, fmtAmount, fmtAllowance, shortAddr } from "../lib/format";
 
-const WNATIVE = (import.meta.env.VITE_WNATIVE_ADDRESS || '').toLowerCase();
+const WNATIVE = (import.meta.env.VITE_WTTRUST_ADDRESS || '').toLowerCase();
 const NATIVE_SYM = import.meta.env.VITE_NATIVE_SYMBOL || 'tTRUST';
 const WRAPPED_SYM = import.meta.env.VITE_WRAPPED_SYMBOL || 'WTTRUST';
 const SHOW_WRAPPED = (import.meta.env.VITE_SHOW_WRAPPED_SYMBOL || 'false') === 'true';
@@ -19,7 +20,7 @@ function overrideNativeSymbol(addr?: string, onchain?: string) {
   return onchain || 'TKN';
 }
 
-// 🔒 parseUnits sûr pour l'UI
+// 🔒 parseUnits for UI
 const tryParseUnits = (v: string, decimals: number): bigint | null => {
   try {
     if (!v) return 0n;
@@ -73,13 +74,13 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
 
-  // décimaux des tokens
+  // decimals of tokens
   const [decLP, setDecLP] = useState(18);
   const [decRW, setDecRW] = useState(18);
   const [dec0, setDec0] = useState(18);
   const [dec1, setDec1] = useState(18);
 
-  // métadonnées LP
+  // LP metadata
   const [t0, setT0] = useState<Address>();
   const [t1, setT1] = useState<Address>();
   const [sym0, setSym0] = useState<string>();
@@ -87,7 +88,7 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
   const [r0, setR0] = useState<bigint>(0n);
   const [r1, setR1] = useState<bigint>(0n);
 
-  // état utilisateur
+  // state user
   const [lpBal, setLpBal] = useState<bigint>(0n);
   const [lpAllow, setLpAllow] = useState<bigint>(0n);
   const [staked, setStaked] = useState<bigint>(0n);
@@ -106,7 +107,7 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
   const load = async () => {
     if (!publicClient || !address) return;
 
-    // décimaux TSWP & LP
+    // decimals TSWP & LP
     const [dLP, dRW] = await Promise.all([
       publicClient.readContract({ address: stakingToken, abi: erc20Abi, functionName: "decimals" }) as Promise<number>,
       publicClient.readContract({ address: rewardsToken, abi: erc20Abi, functionName: "decimals" }) as Promise<number>,
@@ -138,11 +139,11 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
       setDec0(Number(d0 ?? 18)); setDec1(Number(d1 ?? 18));
       setR0(res0); setR1(res1);
     } catch {
-      // tolérant si un token ne respecte pas ERC20 metadata
+      // tolerant if a token does not respect ERC20 metadata
       setDec0(18); setDec1(18);
     }
 
-    // État wallet + SR
+    // State wallet + SR
     const [bal, allow, st, er] = await Promise.all([
       publicClient.readContract({ address: stakingToken, abi: erc20Abi, functionName: "balanceOf", args: [address] }) as Promise<bigint>,
       publicClient.readContract({ address: stakingToken, abi: erc20Abi, functionName: "allowance", args: [address, stakingRewards] }) as Promise<bigint>,
@@ -220,7 +221,7 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
     } finally { setPending(false); }
   };
 
-  // 🔍 dérivés UI
+  // UI derivatives
   const amt = useMemo(() => tryParseUnits(amount, decLP), [amount, decLP]);
   const needsApproval = useMemo(() => {
     if (!isConnected || !loaded || amt === null) return false;
@@ -238,7 +239,6 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
   }, [loaded, amt, staked]);
 
   const onMax = () => {
-    // ⚠️ pour l'input on veut une chaîne décimale simple et non localisée
     setAmount(formatUnits(lpBal, decLP));
   };
 
@@ -247,6 +247,15 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
         <div>
           <h3 style={{ margin: 0 }}>{poolLabel}</h3>
+          <FarmAprBadge
+            sr={"0xc43172A7e92614d1fb043948ddb04f60fF29Aae9"}
+            lp={"0xfEeb70B047808c0eA4510716259513C2E50F2Cd3"}
+            wnative={"0x51379Cc2C942EE2AE2fF0BD67a7b475F0be39Dcf"}
+            factory={"0xd103E057242881214793d5A1A7c2A5B84731c75c"}
+            // rewardToken={"0x7da120065e104C085fAc6f800d257a6296549cF3"} // optionnel (sinon lu via SR)
+            refreshMs={12000}
+            showDetails
+          />
           <small style={{ opacity: .8 }}>
             Reserves:&nbsp;
             <b>{fmtAmount(r0, dec0, { dp: 6, compact: true })} {sym0 ?? 'T0'}</b>

@@ -14,7 +14,7 @@ import {
   parseGwei,
 } from 'viem'
 
-import TokenSelector from './TokenSelect'
+import TokenSelector from './TokenSelector'
 import { TOKENS } from '../tokens/intuit'
 import RouterABI from '../abis/Router02.min.json' 
 

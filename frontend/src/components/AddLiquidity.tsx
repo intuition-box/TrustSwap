@@ -13,8 +13,7 @@ import {
 } from 'viem'
 import RouterABI from '../abis/Router02.min.json'
 
-// 👇 ajoute ces imports
-import TokenSelector from './TokenSelect'
+import TokenSelector from './TokenSelector'
 import { TOKENS } from '../tokens/intuit'
 
 // --- Types locaux (compatibles avec ton TokenSelector) ---
