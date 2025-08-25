@@ -224,8 +224,8 @@ export default function Swap() {
   const outPreview = quoteOut ? Number(formatUnits(quoteOut, TOut.decimals)).toLocaleString(undefined, { maximumFractionDigits: 6 }) : '—'
 
   return (
-    <div style={{maxWidth: 560}}>
-      <h2>Swap</h2>
+    <div>
+
 
       {/* Sélection des tokens */}
       <div style={{display:'grid', gap:10}}>
