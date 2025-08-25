@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Node / PNPM
 node_modules/
 **/node_modules/
@@ -22,3 +23,8 @@ contracts/typechain-types/
 Thumbs.db
 .vscode/
 .idea/
+=======
+node_modules/
+**/node_modules/
+.pnpm-store/
+>>>>>>> 2fa8f4116 (chore: stop tracking node_modules)
