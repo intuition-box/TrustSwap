@@ -1,359 +1,69 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
 :root {
-    --white: #FFFFFF;
-    --dark: #000000f4;
+  --white: #FFFFFF;
+  --dark: #000000;
+  --border-color: rgba(181, 181, 181, 0.7);
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --shadow-color-strong: rgba(0, 0, 0, 0.12);
+  --border: rgb(225, 225, 225);
+  --black-grey: rgb(29, 29, 29);
+  --grey: grey;
+  --secondary: #5D6BF8;
+  --secondary-border: #4552E5;
+  --btn-shadow-secondary: rgba(93, 107, 248, 0.4);
 }
 
 body {
-    font-family: "Inter", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-    letter-spacing: -0.6px;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    overflow: hidden;
-  }
-  
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: -1px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
 
-body.light {
-    --bg: #FFFFFF;
-    --bgLcd: rgb(231, 231, 231);
-    --border: #E5E5E5;
-    --textColor: #000000;
-    --cable: rgba(103, 103, 103, 0.1);
-    --shadow-color: rgba(0, 0, 0, 0.08);
-    --shadow-color-strong: rgba(0, 0, 0, 0.12);
-    background-color: var(--white);
+  background-color: var(--white);
 
-    background-image:
+  background-image:
     radial-gradient(rgba(90, 125, 184, 0.2) 1px, transparent 1px),
-    linear-gradient(to bottom, transparent 60%, rgba(0, 149, 255, 0.112) 80%,rgba(0, 149, 255, 0.152) 90%, rgba(0, 149, 255, 0.19) 100%);
+    linear-gradient(
+      to bottom,
+      transparent 60%,
+      rgba(0, 149, 255, 0.112) 80%,
+      rgba(0, 149, 255, 0.152) 90%,
+      rgba(0, 149, 255, 0.19) 100%
+    );
 
-background-size: 7px 7px, 100% 100%;
-background-blend-mode: normal;
-    color: var(--dark);
+  background-size: 7px 7px, 100% 100%;
+  background-blend-mode: normal;
+  color: var(--dark);
 }
-
-body.dark {
-    --bg: #151515;
-    --bgLcd: #000000;
-    --border: #000000;
-    --textColor: #FFFFFF;
-    --textColorLCD: #ffffff;
-    --ShadowInsetLcd: rgb(0, 0, 0);
-    --borderLcd: #000000;
-    --borderLcdTwo: rgba(59, 59, 59, 0.2);
-    --cable: rgba(200,200,200,0.1);
-    --shadow-color: rgba(0, 0, 0, 0.4);
-    --shadow-color-strong: rgba(0, 0, 0, 0.4);
-
-    background-color: var(--dark);
-
-    background-image:
-        radial-gradient(rgba(90, 125, 184, 0.2) 1px, transparent 1px),
-        linear-gradient(to bottom, transparent 60%, rgba(0, 149, 255, 0.112) 80%,rgba(0, 149, 255, 0.152) 90%, rgba(0, 149, 255, 0.19) 100%);
-    
-    background-size: 7px 7px, 100% 100%;
-    background-blend-mode: normal;
-
-    color: var(--textColor);
-}
-
 
 input:focus {
-    outline: none;
+  outline: none;
 }
 
 h2 {
-    color: var(--textColor);
+  color: var(--textColor);
 }
 
 .containerBody {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .contentContainer {
-    height: auto;
-    width: 95%;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 20px;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.LcdBorder {
-    margin-top: 5vh;
-    z-index: 2;
-    width: 95%;
-    max-width: 800px;
-}
-
-.Lcd {
-    height: 70vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.Ecran {
-    height: 100%;
-    width: 96%;
-    margin-left: auto;
-    margin-right: auto;
-  
-    animation: 2s EcranTop forwards;
-    animation-delay: 2.5s;
-    opacity: 0;
-    z-index: 1;
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 25px;
-    background: rgba(124, 124, 124, 0.08);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
-    border: 1px solid rgba(115, 115, 115, 0.15);
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-  }
-  
-
-@keyframes EcranTop {
-    0% {
-        transform: translateY(60vh);
-        opacity: 0;
-    }
-
-    1% {
-        opacity: 1;
-    }
-
-    100% {
-        transform: translateY(1vh);
-        opacity: 1;
-    }
-}
-
-.bodyEcran {
-    background-color: var(--bg);
-    border: 1px solid var(--border);
-    box-shadow: 
-      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
-      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
-      inset 0 -0.75px 0.5px var(--shadow-color),
-      0 4px 4px -1px var(--shadow-color),
-      0 2px 3px -1px var(--shadow-color),
-      0 0.5px 0.5px var(--shadow-color-strong),
-      0 0 0 0.75px var(--shadow-color);
-    height: 100%;
-    border-radius: 20px;
-}
-
-.holographic {
-    height: 80px;
-    width: 98%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 3px;
-    border-radius: 10px;
-    background-color: var(--bg);
-    color: var(--dark);
-    border: 1px solid var(--border);
-    box-shadow: 
-      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
-      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
-      inset 0 -0.75px 0.5px var(--shadow-color),
-      0 4px 4px -1px var(--shadow-color),
-      0 2px 3px -1px var(--shadow-color),
-      0 0.5px 0.5px var(--shadow-color-strong),
-      0 0 0 0.75px var(--shadow-color);
-    margin-top: auto;
-    position: relative;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: end;
-}
-
-.holographic::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translate(-50%);
-    height: 1px;
-    width: 0%;
-    background-color: #FFFFFF;
-    animation: 2s holoLum forwards;
-    animation-delay: 4s;
-    z-index: 3;
-}
-
-@keyframes holoLum {
-    0% {
-        width: 0%;
-    }
-
-    100% {
-        width: 90%;
-    }
-}
-
-.gravedTitle {
-    margin-right: 20px;
-    color: var(--textColor);
-}
-
-
-.ConnectorContainer {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    flex-grow: 1;
-    z-index: 1;
-    animation: riseUp 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes riseUp {
-    0% {
-        transform: translateY(100px);
-    }
-    90% {
-        transform: translateY(20px);
-    }
-    100% {
-        transform: translateY(-16px);
-    }
-}
-
-.PisteContainer {
-    width: 180px;
-    height: 15px;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    background-color: rgb(0, 133, 33);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    box-shadow: inset 0px -3px 10px rgb(0, 0, 0);
-    overflow: hidden;
-}
-
-.Piste {
-    height: 95%;
-    width: 10px;
-    background: linear-gradient(145deg, #ffd700, #ffa500);
-    border-top-left-radius: 1px;
-    border-top-right-radius: 1px;
-    box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.3),
-    inset 0 -1px 1px rgb(0, 0, 0);
-}
-
-.Connector {
-    width: 200px;
-    height: 60px;
-    background-color: var(--bg);
-    color: var(--dark);
-    border: 1px solid var(--border);
-    box-shadow: 
-      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
-      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
-      inset 0 -0.75px 0.5px var(--shadow-color),
-      0 4px 4px -1px var(--shadow-color),
-      0 2px 3px -1px var(--shadow-color),
-      0 0.5px 0.5px var(--shadow-color-strong),
-      0 0 0 0.75px var(--shadow-color);
-    border-bottom-right-radius: 15px;
-    border-bottom-left-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.Led {
-    height: 12px;
-    width: 12px;
-    border-radius: 50%;
-    background: #969696;
-    background: radial-gradient(40% 35%, #ccc, #969696 60%);
-    box-shadow:
-        inset 0 2px 4px 1px rgba(0,0,0,0.3),
-        0 1px 0 rgba(255,255,255,1),
-        inset 0 1px 0 white;
-    animation: ledOn 0.5s forwards;
-    animation-delay: 2s;
-}
-
-@keyframes ledOn {
-    0% {
-        background: #969696;
-        background: radial-gradient(40% 35%, #ccc, #969696 60%);
-        box-shadow:
-            inset 0 2px 4px 1px rgba(0,0,0,0.3),
-            0 1px 0 rgba(255,255,255,1),
-            inset 0 1px 0 white;
-    }
-    100% {
-        background: #25d025;
-        background: radial-gradient(40% 35%, #5aef5a, #25d025 60%);
-        box-shadow:
-            inset 0 3px 5px 1px rgba(0,0,0,0.1),
-            0 1px 0 rgba(255,255,255,0.4),
-            0 0 10px 2px rgba(0,210,0,0.5);
-    }
-}
-
-
-.BagueCable {
-    width: 50px;
-    height: 15px;
-    background-color: var(--bg);
-    color: var(--dark);
-    border: 1px solid var(--border);
-    box-shadow: 
-      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
-      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
-      inset 0 -0.75px 0.5px var(--shadow-color),
-      0 4px 4px -1px var(--shadow-color),
-      0 2px 3px -1px var(--shadow-color),
-      0 0.5px 0.5px var(--shadow-color-strong),
-      0 0 0 0.75px var(--shadow-color);
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius: 5px;
-}
-
-.Cable {
-    width: 25px;
-    flex-grow: 1;
-    background-color: var(--bg);
-    border-radius: 0 0 5px 5px;
-    border: 1px solid var(--border);
-    box-shadow: 
-      inset 0 1px 3px -0.25px rgba(255,255,255,0.12),
-      inset 0 0.5px 0.25px -0.25px rgba(255,255,255,0.16),
-      inset 0 -0.75px 0.5px var(--shadow-color),
-      0 4px 4px -1px var(--shadow-color),
-      0 2px 3px -1px var(--shadow-color),
-      0 0.5px 0.5px var(--shadow-color-strong),
-      0 0 0 0.75px var(--shadow-color);
-    background-image: repeating-linear-gradient(
-        45deg,
-        var(--cable) 0,
-        var(--cable) 1px,
-        transparent 2px,
-        transparent 4px
-    );
-    height: 1000px;
+  height: auto;
+  width: 95%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  flex-grow: 1;
 }

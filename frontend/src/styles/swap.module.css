@@ -1,7 +1,31 @@
 .containerLcdAffiche {
     padding: 10px;
-}
+    margin-top: 100px;
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    color: var(--dark);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--shadow-color),
+      0 4px 4px -1px var(--shadow-color),
+      0 2px 3px -1px var(--shadow-color),
+      0 0.5px 0.5px var(--shadow-color-strong),
+      0 0 0 0.75px var(--shadow-color),
+      0 6px 10px -2px var(--shadow-color);
+    border-radius: 20px;
+    height: auto;
+    width: 400px;
+  }
 
+  .swapContainer{
+    width: 100%;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+  }
+  
 .title {
     font-size: 50px;
     letter-spacing: -3px;
@@ -9,16 +33,107 @@
 }
 
 .inputSellContainer {
-    width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 50px;
-    border: 1px solid rgb(40, 40, 40);
-    border-radius: 20px;
-    background-color: rgb(14, 14, 14);
+    width: 100%;
+    height: 110px;
+    background-color: #F6F6F6;
+    border: 1px solid var(--border);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.inputBuyContainer {
+    width: 100%;
+    height: 110px;
+    background-color: #F6F6F6;
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    margin-top: 5px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.onFlip {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .labelSwap {
-    font-size: 20px;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
 }
+
+.label {
+    margin-left: 10px;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--black-grey);
+}
+
+.tokenBalance {
+    margin-right: 10px;
+    color: var(--grey);
+    font-size: 14px;
+}
+
+.balanceNumber {
+    color: var(--dark);
+    font-size: 16px;
+}
+
+.sellSelect {
+    display: flex;
+    align-items: end;
+    justify-content: end;
+}
+
+.InputSell {
+    height: 80px;
+    width: 170px;
+    font-size: 30px;
+    border: none;
+    background-color: transparent;
+    font-family: "Space Grotesk", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    letter-spacing: -1px;
+    text-align: right;
+    padding-right: 15px;
+  }
+  
+  .btnSwap {
+    background-color: var(--secondary);
+    border: 1px solid var(--secondary-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-secondary),
+      0 4px 4px -1px var(--btn-shadow-secondary),
+      0 2px 3px -1px var(--btn-shadow-secondary),
+      0 0.5px 0.5px var(--btn-shadow-secondary),
+      0 0 0 0.75px var(--btn-shadow-secondary),
+      0 6px 10px -2px var(--btn-shadow-secondary);
+    color: var(--white);
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    height: 45px;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -0.6px;
+    cursor: pointer;
+    border-top-left-radius: 0.6em 0.8em;
+    border-top-right-radius: 0.6em 0.8em;
+    border-bottom-left-radius: 0.6em 0.8em;
+    border-bottom-right-radius: 0.6em 0.8em;
+    margin-top: auto;
+    margin-bottom: 10px;
+  }

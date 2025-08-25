@@ -227,24 +227,34 @@ export default function Swap() {
 
   return (
     <div className={styles.containerLcdAffiche}>
-      <span className={styles.title}>Swap</span>
+      <div className={styles.swapContainer}>
 
         <div className={styles.inputSellContainer}>
-          <span className={styles.labelSwap}>Sell</span>
+        <span className={styles.labelSwap}>
+          <span className={styles.label}>From</span>
+          <span className={styles.tokenBalance}>Balance {TIn.symbol}: <span className={styles.balanceNumber}> {Number(formatUnits(balIn, TIn.decimals)).toLocaleString(undefined,{maximumFractionDigits:6})}</span></span>
+        </span>
+          <div className={styles.sellSelect}>
           <TokenSelector value={{ ...TIn, name: TIn.name ?? TIn.symbol }} onChange={(t: UiToken)=>setTIn(t)} />
           <input
-            value={amountIn}
-            onChange={e => setAmountIn(e.target.value)}
-            placeholder="0.0"
-          />
+  value={amountIn}
+  onChange={e => setAmountIn(e.target.value)}
+  placeholder="0.0"
+  className={styles.InputSell}
+/>
+
+          </div>
         </div>
 
-        <div>
+        <div className={styles.onFlip}>
           <button onClick={onFlip}>⇅</button>
         </div>
 
-        <div>
-          <span>Buy</span>
+        <div className={styles.inputBuyContainer}>
+        <span className={styles.labelSwap}>
+          <span className={styles.label}>To</span>
+          <span className={styles.tokenBalance}>Balance {TIn.symbol}: <span className={styles.balanceNumber}> {Number(formatUnits(balIn, TIn.decimals)).toLocaleString(undefined,{maximumFractionDigits:6})}</span></span>
+        </span>
           <TokenSelector value={{ ...TOut, name: TOut.name ?? TOut.symbol }} onChange={(t: UiToken)=>setTOut(t)} />
           <div>
             ≈ {outPreview} {TOut.symbol}
@@ -275,15 +285,15 @@ export default function Swap() {
           </button>
         )}
 
-        <button onClick={onSwap} disabled={!isConnected || pending || rawIn===0n || (!TIn.isNative && needApprove)}>
+        <button className={styles.btnSwap} onClick={onSwap} disabled={!isConnected || pending || rawIn===0n || (!TIn.isNative && needApprove)}>
           {pending ? 'Swapping…' : 'Swap'}
         </button>
 
-        {/* Infos rapides */}
+
         <small>
-          Balance {TIn.symbol}: {Number(formatUnits(balIn, TIn.decimals)).toLocaleString(undefined,{maximumFractionDigits:6})}
+         
         </small>
       </div>
-
+      </div>
   )
 }

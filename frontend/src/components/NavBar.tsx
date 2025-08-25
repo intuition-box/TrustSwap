@@ -1,4 +1,4 @@
-import ThemeToggleButton from "./ThemeToggleButton";
+
 import Connect from "./Connect";
 import styles from "../styles/navbar.module.css";
 
@@ -15,7 +15,6 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
       </div>
 
       <div className={styles.navBarRight}>
-        <ThemeToggleButton />
         <Connect />
       </div>
     </div>
