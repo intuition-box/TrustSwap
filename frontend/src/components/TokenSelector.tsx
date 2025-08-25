@@ -2,8 +2,14 @@ import { useEffect, useMemo, useState } from "react"
 import { isAddress, type Address } from "viem"
 import { usePublicClient } from "wagmi"
 import { fetchErc20Meta } from "../lib/erc20"
-import { getCustomTokens, addCustomToken, type UiToken } from "../lib/customTokens"
-import { TOKENS } from "../tokens/intuit" // your curated default list
+import {
+  getCustomTokens,
+  addCustomToken,
+  removeCustomToken,
+  // clearCustomTokens, // optional
+  type UiToken
+} from "../lib/customTokens"
+import { TOKENS } from "../tokens/intuit"
 
 const WNATIVE = (import.meta.env.VITE_WNATIVE_ADDRESS || "").toLowerCase()
 const NATIVE_SYM = import.meta.env.VITE_NATIVE_SYMBOL || "tTRUST"
@@ -15,10 +21,11 @@ function labelFor(addr?: string, onchain?: string) {
   if (addr.toLowerCase() === WNATIVE) return SHOW_WRAPPED ? WRAPPED_SYM : NATIVE_SYM
   return onchain || "TKN"
 }
+const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "")
 
 type Props = {
   value?: UiToken
-  onChange: (t: UiToken) => void
+  onChange: (t: UiToken | undefined) => void
   className?: string
 }
 
@@ -26,10 +33,20 @@ export default function TokenSelector({ value, onChange, className }: Props) {
   const publicClient = usePublicClient()
   const [customs, setCustoms] = useState<UiToken[]>([])
   const [showImport, setShowImport] = useState(false)
+  const [showManage, setShowManage] = useState(false)
   const [addrInput, setAddrInput] = useState("")
   const [preview, setPreview] = useState<{ ok: boolean; tok?: UiToken; err?: string }>({ ok: false })
 
-  useEffect(() => { setCustoms(getCustomTokens()) }, [])
+  // Load + keep in sync across tabs
+  useEffect(() => {
+    const sync = () => setCustoms(getCustomTokens())
+    sync()
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "trustswap.customTokens") sync()
+    }
+    window.addEventListener("storage", onStorage)
+    return () => window.removeEventListener("storage", onStorage)
+  }, [])
 
   const all = useMemo(() => {
     // dedupe by address (or wrapped) — native identified by isNative
@@ -46,7 +63,7 @@ export default function TokenSelector({ value, onChange, className }: Props) {
     return Array.from(byKey.values())
   }, [customs])
 
-  // stable key for the <select> option
+  // stable key for <select>
   const valueKey = useMemo(() => {
     const v = value
     if (!v) return ""
@@ -67,7 +84,7 @@ export default function TokenSelector({ value, onChange, className }: Props) {
         address: a,
         decimals: meta.decimals,
         symbol: labelFor(a, meta.symbol),
-        name: meta.name,
+        name: meta.name
       }
       setPreview({ ok: true, tok })
     } catch (e: any) {
@@ -85,6 +102,17 @@ export default function TokenSelector({ value, onChange, className }: Props) {
     setPreview({ ok: false })
   }
 
+  function handleRemove(addr?: Address) {
+    if (!addr) return
+    removeCustomToken(addr)
+    const updated = getCustomTokens()
+    setCustoms(updated)
+    // If the removed token is currently selected, clear selection
+    if (value?.address && value.address.toLowerCase() === addr.toLowerCase()) {
+      onChange(undefined)
+    }
+  }
+
   return (
     <div className={className ?? "inline-block"}>
       <div className="border rounded px-2 py-1 bg-white/5">
@@ -96,6 +124,10 @@ export default function TokenSelector({ value, onChange, className }: Props) {
               setShowImport(true)
               return
             }
+            if (key === "__manage__") {
+              setShowManage((s) => !s)
+              return
+            }
             const tok = all.find((t) => {
               const k =
                 t.address?.toLowerCase() ||
@@ -103,7 +135,7 @@ export default function TokenSelector({ value, onChange, className }: Props) {
                 (t.isNative ? `native:${NATIVE_SYM}` : t.symbol.toLowerCase())
               return k === key
             })
-            if (tok) onChange(tok)
+            onChange(tok)
           }}
         >
           {all.map((t) => {
@@ -115,16 +147,17 @@ export default function TokenSelector({ value, onChange, className }: Props) {
             return (
               <option key={key} value={key}>
                 {t.symbol}
-                {t.address ? ` (${t.address.slice(0, 6)}…${t.address.slice(-4)})` : ""}
+                {t.address ? ` (${short(t.address)})` : ""}
                 {imported ? " • Imported" : ""}
               </option>
             )
           })}
           <option value="__import__">+ Import token…</option>
+          <option value="__manage__">⚙ Manage imported…</option>
         </select>
       </div>
 
-      {/* Inline import (simple modal) */}
+      {/* Inline import panel */}
       {showImport && (
         <div className="mt-2 p-2 border rounded bg-amber-50">
           <div style={{ display: "grid", gap: 6 }}>
@@ -164,6 +197,53 @@ export default function TokenSelector({ value, onChange, className }: Props) {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Manage imported tokens panel */}
+      {showManage && (
+        <div className="mt-2 p-2 border rounded bg-white/5">
+          <div className="flex items-center justify-between mb-2">
+            <strong>Imported tokens</strong>
+            <button className="text-sm underline" onClick={() => setShowManage(false)}>Close</button>
+          </div>
+
+          {customs.length === 0 ? (
+            <div className="text-sm opacity-70">No imported tokens yet.</div>
+          ) : (
+            <ul className="space-y-2">
+              {customs.map((t) => (
+                <li key={t.address?.toLowerCase()} className="flex items-center justify-between gap-2">
+                  <div className="text-sm">
+                    <div><b>{t.symbol}</b> {t.address && <span className="opacity-70">({short(t.address)})</span>}</div>
+                    <div className="opacity-70">{t.name}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Remove button */}
+                    {t.address && (
+                      <button
+                        className="border rounded px-2 py-1 text-red-600 hover:bg-red-50"
+                        onClick={() => handleRemove(t.address as Address)}
+                        title="Remove from imported list"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Optional nuke-all
+          <div className="mt-3">
+            <button
+              className="text-xs underline opacity-70"
+              onClick={() => { clearCustomTokens(); setCustoms(getCustomTokens()); if (value?.address && !TOKENS.find(k => k.address?.toLowerCase() === value.address?.toLowerCase())) onChange(undefined) }}
+            >
+              Clear all imported tokens
+            </button>
+          </div> */}
         </div>
       )}
     </div>
