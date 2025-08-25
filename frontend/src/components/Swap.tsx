@@ -228,9 +228,9 @@ export default function Swap() {
   return (
     <div className={styles.containerLcdAffiche}>
       <span className={styles.title}>Swap</span>
-      <div>
-        <div>
-          <span>From</span>
+
+        <div className={styles.inputSellContainer}>
+          <span className={styles.labelSwap}>Sell</span>
           <TokenSelector value={{ ...TIn, name: TIn.name ?? TIn.symbol }} onChange={(t: UiToken)=>setTIn(t)} />
           <input
             value={amountIn}
@@ -244,7 +244,7 @@ export default function Swap() {
         </div>
 
         <div>
-          <span>To</span>
+          <span>Buy</span>
           <TokenSelector value={{ ...TOut, name: TOut.name ?? TOut.symbol }} onChange={(t: UiToken)=>setTOut(t)} />
           <div>
             ≈ {outPreview} {TOut.symbol}
@@ -284,6 +284,6 @@ export default function Swap() {
           Balance {TIn.symbol}: {Number(formatUnits(balIn, TIn.decimals)).toLocaleString(undefined,{maximumFractionDigits:6})}
         </small>
       </div>
-    </div>
+
   )
 }

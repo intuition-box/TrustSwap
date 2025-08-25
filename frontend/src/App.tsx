@@ -45,9 +45,16 @@ export default function App() {
       <Navbar setActiveTab={setActiveTab} />
       <div className="contentContainer">
         <div className="LcdBorder">
-          <div className="LcdContainer">
+    
             <div className="Lcd">
-            {renderContent()}
+
+            <div className="Ecran">
+              <div className="bodyEcran">
+              {renderContent()}
+              </div>
+            </div>
+            <div className="holographic">
+              <div className="gravedTitle">TrustSwap</div>
             </div>
           </div>
         </div>
