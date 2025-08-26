@@ -7,7 +7,7 @@ const NATIVE_SYM = import.meta.env.VITE_NATIVE_SYMBOL || "tTRUST"
 const NATIVE_DECIMALS = Number(import.meta.env.VITE_NATIVE_DECIMALS || 18)
 
 export default function SwapGasFees({
-  to, abi, functionName, args, value, enabled = true, fallbackGas = 200_000n,   // ⬅️ ajoute value ici
+  to, abi, functionName, args, value, enabled = true, fallbackGas = 200_000n, className,
 }: {
   to: Address
   abi: Abi
@@ -16,14 +16,14 @@ export default function SwapGasFees({
   value?: bigint
   enabled?: boolean
   fallbackGas?: bigint
+  className?: string
 }) {
   const { address } = useAccount()
   const fees = useNetworkFees()
   const est = useTxGasEstimate({
-    to, abi, functionName, args,
+    to, abi, functionName, args, value,
     account: address as Address | undefined,
     enabled, fallbackGas,
-    value,                                  
   })
 
   const cost = useMemo(() => computeTxCostText({
@@ -43,32 +43,14 @@ export default function SwapGasFees({
         : "—"
 
   return (
-    <div className="text-xs p-2 border rounded-lg flex items-center justify-between gap-3">
-      <div className="space-y-0.5">
-        <div>
-          <span className="opacity-70">Network gas:</span>{" "}
-          <b>{gwei} gwei</b>
-          {fees.baseFeePerGas && fees.maxPriorityFeePerGas && (
-            <span className="opacity-70">
-              {" "}· base {Math.floor(Number(fees.baseFeePerGas)/1e9)} + tip {(Number(fees.maxPriorityFeePerGas)/1e9).toFixed(2)}
-            </span>
-          )}
-        </div>
-        <div className="opacity-70">
-          {est.loading ? "Estimating tx gas…" :
-            est.gasLimit ? <>Est. gas: <b>{est.gasLimit.toString()}</b></> : "Est. gas: —"}
-        </div>
-        {est.error && <div className="text-amber-600">Using fallback gas (estimation failed)</div>}
+    <div className={className ?? "text-xs p-2 border rounded-lg space-y-1"}>
+      <div className="flex items-center justify-between">
+        <span className="opacity-70">Network gas:</span>
+        <b>{gwei} gwei</b>
       </div>
-
-      <div className="text-right">
-        <div className="opacity-70">Est. tx cost</div>
-        <div><b>{cost.text} {NATIVE_SYM}</b></div>
-        <div className="mt-1 flex gap-2 justify-end">
-          <button className="border rounded px-2 py-0.5" onClick={() => { fees.refresh(); est.refresh() }}>
-            Refresh
-          </button>
-        </div>
+      <div className="flex items-center justify-between">
+        <span className="opacity-70">Est. tx cost</span>
+        <b>{cost.text} {NATIVE_SYM}</b>
       </div>
     </div>
   )

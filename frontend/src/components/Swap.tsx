@@ -291,8 +291,8 @@ export default function Swap() {
             to={router}
             abi={RouterABI as any}
             functionName={swapCall.fn}
-            args={swapCall.args as any[]}
-            value={swapCall.value}                 // ⬅️ important pour ETH->token
+            args={swapCall.args as unknown as any[]}
+            value={swapCall.value}
             enabled={Boolean(address && rawIn > 0n && path.length >= 2)}
             fallbackGas={swapCall.fallback}
           />
