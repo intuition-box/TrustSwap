@@ -4,7 +4,7 @@ import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
 import type { Address } from 'viem'
 import { erc20Abi, encodeFunctionData, parseUnits, formatUnits, parseGwei } from 'viem'
 
-import TokenSelector from './TokenSelect'
+import TokenSelector from './TokenSelector'
 import { TOKENS } from '../tokens/intuit'
 import RouterABI from '../abis/Router02.min.json' 
 
