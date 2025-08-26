@@ -38,7 +38,7 @@ export default function Swap() {
 
   // Sélection des tokens
   const [TIn, setTIn] = useState<UiToken>(() => TOKENS.find(t => t.symbol === 'tTRUST') as UiToken)
-  const [TOut, setTOut] = useState<UiToken>(() => TOKENS.find(t => t.symbol === 'TKA') as UiToken)
+  const [TOut, setTOut] = useState<UiToken>(() => TOKENS.find(t => t.symbol === 'TSWP') as UiToken)
 
   // Montants / params trade
   const [amountIn, setAmountIn] = useState('1')
@@ -56,7 +56,13 @@ export default function Swap() {
   const [balOut, setBalOut] = useState<bigint>(0n)
 
   // Helpers
-  const path: Address[] = useMemo(() => [erc20Addr(TIn), erc20Addr(TOut)], [TIn, TOut])
+  const addrIn  = useMemo(() => (TIn?.isNative ? TIn?.wrapped : TIn?.address), [TIn])
+  const addrOut = useMemo(() => (TOut?.isNative ? TOut?.wrapped : TOut?.address), [TOut])
+
+  const path: Address[] = useMemo(
+    () => (addrIn && addrOut ? [addrIn, addrOut] as Address[] : []),
+    [addrIn, addrOut]
+  )
 
   const rawIn = useMemo(() => {
     try { return parseUnits(amountIn || '0', TIn.decimals) } catch { return 0n }
@@ -77,24 +83,28 @@ export default function Swap() {
     if (TIn.isNative) {
       const b = await publicClient.getBalance({ address })
       setBalIn(b)
-    } else {
-      const b = await publicClient.readContract({ address: erc20Addr(TIn), abi: erc20Abi, functionName: 'balanceOf', args: [address] }) as bigint
+    } else if (addrIn) {
+      const b = await publicClient.readContract({ address: addrIn, abi: erc20Abi, functionName: 'balanceOf', args: [address] }) as bigint
       setBalIn(b)
-      const a = await publicClient.readContract({ address: erc20Addr(TIn), abi: erc20Abi, functionName: 'allowance', args: [address, router] }) as bigint
+      const a = await publicClient.readContract({ address: addrIn, abi: erc20Abi, functionName: 'allowance', args: [address, router] }) as bigint
       setAllowIn(a)
     }
 
+    // OUT
     if (TOut.isNative) {
       const b = await publicClient.getBalance({ address })
       setBalOut(b)
-    } else {
-      const b = await publicClient.readContract({ address: erc20Addr(TOut), abi: erc20Abi, functionName: 'balanceOf', args: [address] }) as bigint
+    } else if (addrOut) {
+      const b = await publicClient.readContract({ address: addrOut, abi: erc20Abi, functionName: 'balanceOf', args: [address] }) as bigint
       setBalOut(b)
     }
 
-    if (rawIn === 0n) { setQuoteOut(null); return }
+    // Quote
+    if (rawIn === 0n || path.length < 2) { setQuoteOut(null); return }
     try {
-      const amounts = await publicClient.readContract({ address: router, abi: RouterABI as any, functionName: 'getAmountsOut', args: [rawIn, path] }) as bigint[]
+      const amounts = await publicClient.readContract({
+        address: router, abi: RouterABI as any, functionName: 'getAmountsOut', args: [rawIn, path]
+      }) as bigint[]
       setQuoteOut(amounts?.[amounts.length - 1] ?? null)
     } catch (e) {
       console.warn('[swap] getAmountsOut failed', e)
@@ -112,6 +122,7 @@ export default function Swap() {
   const wait = (hash: `0x${string}`) => publicClient!.waitForTransactionReceipt({ hash })
 
   const onFlip = () => {
+    if (!TIn || !TOut) return
     setTIn(TOut)
     setTOut(TIn)
     setAmountIn('')
@@ -119,16 +130,16 @@ export default function Swap() {
   }
 
   const onApprove = async () => {
-    if (!walletClient || !address || TIn.isNative) return
+    if (!walletClient || !address || TIn.isNative || !addrIn) return
     const data = encodeFunctionData({ abi: erc20Abi, functionName: 'approve', args: [router, MAX_UINT] })
-    const h = await sendLegacy(erc20Addr(TIn), data, 0n)
+    const h = await sendLegacy(addrIn, data, 0n)
     const rc = await wait(h)
     if (!(rc && rc.status === 'success')) throw new Error('Approve failed')
     await loadState()
   }
 
   const onSwap = async () => {
-    if (!walletClient || !publicClient || !address || rawIn === 0n) return
+    if (!walletClient || !publicClient || !address || rawIn === 0n || path.length < 2) return
     if (balIn < rawIn) { alert('Solde insuffisant'); return }
     if (needApprove) { alert('Veuillez approuver d’abord le token d’entrée'); return }
     if (!quoteOut || minOut === 0n) { alert('Pas de cotation disponible (liquidité insuffisante ?)'); return }
@@ -176,7 +187,7 @@ export default function Swap() {
 
   // Choisir la bonne fonction + args + "value" si natif en entrée
   const swapCall = useMemo(() => {
-    if (!address) return null
+    if (!address || path.length < 2) return null
     if (TIn.isNative) {
       // tTRUST -> ERC20
       return {

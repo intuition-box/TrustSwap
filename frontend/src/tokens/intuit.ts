@@ -20,14 +20,14 @@ export const TOKENS: Currency[] = [
     name: 'Intuition Native',
     decimals: 18,
     isNative: true,
-    wrapped: import.meta.env.VITE_WTTRUST_ADDRESS as Address,
+    wrapped: import.meta.env.VITE_WNATIVE_ADDRESS as Address,
     logoURI: ''
   },
   {
     symbol: 'WTTRUST',
     name: 'Wrapped tTRUST',
     decimals: 18,
-    address: import.meta.env.VITE_WTTRUST_ADDRESS as Address,
+    address: import.meta.env.VITE_WNATIVE_ADDRESS as Address,
     logoURI: ''
   },
   {
@@ -37,20 +37,7 @@ export const TOKENS: Currency[] = [
     address: import.meta.env.VITE_TSWP_ADDRESS as Address,
     logoURI: ''
   },
-  {
-    symbol: 'TKA',
-    name: 'Token A',
-    decimals: 18,
-    address: import.meta.env.VITE_TOKEN_A as Address,
-    logoURI: ''
-  },
-  {
-    symbol: 'TKB',
-    name: 'Token B',
-    decimals: 18,
-    address: import.meta.env.VITE_TOKEN_B as Address,
-    logoURI: ''
-  }
+
 ]
 
 
