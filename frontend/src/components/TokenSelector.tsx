@@ -11,7 +11,11 @@ import {
 import { TOKENS } from "../tokens/intuit"
 import styles from "../styles/swap.module.css"
 import tokenLogo from "../images/token.png"
+import loupe from "../images/loupe.png"
 import arrow from "../images/arrow.png"
+import plus from "../images/add.png"
+import corbeille from "../images/delete.png"
+
 import { createPortal } from "react-dom"
 import { WNATIVE_ADDRESS, NATIVE_SYMBOL, WRAPPED_SYMBOL, SHOW_WRAPPED_SYMBOL } from '../config/protocol'
 
@@ -181,7 +185,10 @@ export default function TokenSelector({ value, onChange, className }: Props) {
             }}
           >
             {/* interactive area (button + dropdown) */}
+
+            
             <div style={{ position: "relative", pointerEvents: "auto" }}>
+              
               {/* Replica of the button (interactive) */}
               <button
                 className={styles.selectSwap}
@@ -207,6 +214,58 @@ export default function TokenSelector({ value, onChange, className }: Props) {
                   zIndex: 10002
                 }}
               >
+
+
+        <div className={styles.importContainer}>
+          <div style={{ display: "grid", gap: 6 }}>
+          <div className={styles.searchInputContainer}>
+          <img
+                  src={loupe}
+                  alt="toggle"
+                  className={styles.loupe}
+                />
+            <input
+              placeholder="0x…"
+              value={addrInput}
+              onChange={(e) => setAddrInput(e.target.value.trim())}
+              onBlur={tryPreview}
+              onKeyDown={(e) => { if (e.key === "Enter") tryPreview() }}
+              className={styles.searchInput}
+            />
+            </div>
+            {preview.ok && preview.tok && <small style={{ color: "crimson" }}>{preview.err}</small>}
+            {preview.ok && preview.tok && (
+              <div className={styles.resultSearchToken}>
+                 <img src={tokenLogo} alt="Logo" className={styles.logoTokenDrop} />
+                <div>{preview.tok.symbol}</div>
+  
+             
+                <div className={styles.containerImportToken}>
+                  <button className={styles.addTokenBtn} onClick={add}>
+                  <img
+                  src={plus}
+                  alt="toggle"
+                  className={styles.addLogo}
+                />
+                    Import
+                  </button>
+                  <button
+                    className={styles.cancelBtnImport}
+                    onClick={() => { setShowImport(false); setAddrInput(""); setPreview({ ok: false }) }}
+                  >
+                      <img
+                  src={corbeille}
+                  alt="toggle"
+                  className={styles.deleteLogo}
+                />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+<div className={styles.trait}></div>
+
                 {all.map((t) => {
                   const key =
                     t.address?.toLowerCase() ||
@@ -231,15 +290,8 @@ export default function TokenSelector({ value, onChange, className }: Props) {
                     </div>
                   )
                 })}
-                <div
-                  className={styles.dropdownItem}
-                  onClick={() => {
-                    setShowImport(true)
-                    closeDropdown()
-                  }}
-                >
-                  + Import token…
-                </div>
+    
+
                 <div
                   className={styles.dropdownItem}
                   onClick={() => {
@@ -249,6 +301,8 @@ export default function TokenSelector({ value, onChange, className }: Props) {
                 >
                   ⚙ Manage imported…
                 </div>
+
+
               </div>
             </div>
           </div>
@@ -275,44 +329,7 @@ export default function TokenSelector({ value, onChange, className }: Props) {
         </button>
       </div>
 
-      {/* Inline import panel (unchanged) */}
-      {showImport && (
-        <div className="mt-2 p-2 border rounded bg-amber-50">
-          <div style={{ display: "grid", gap: 6 }}>
-            <strong>Import a token (ERC-20 address)</strong>
-            <input
-              placeholder="0x…"
-              value={addrInput}
-              onChange={(e) => setAddrInput(e.target.value.trim())}
-              onBlur={tryPreview}
-              onKeyDown={(e) => { if (e.key === "Enter") tryPreview() }}
-              className="border rounded px-2 py-1"
-            />
-            {preview.err && <small style={{ color: "crimson" }}>{preview.err}</small>}
-            {preview.ok && preview.tok && (
-              <div className="text-sm">
-                <div>Symbol: <b>{preview.tok.symbol}</b></div>
-                <div>Name: {preview.tok.name}</div>
-                <div>Decimals: {preview.tok.decimals}</div>
-                <div className="mt-2 text-amber-700">
-                  ⚠️ Unlisted token. Double-check the address to avoid honeypots.
-                </div>
-                <div className="mt-2 flex gap-2">
-                  <button className="border rounded px-2 py-1" onClick={add}>Add</button>
-                  <button
-                    className="border rounded px-2 py-1"
-                    onClick={() => { setShowImport(false); setAddrInput(""); setPreview({ ok: false }) }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
-      {/* Manage imported tokens panel (unchanged) */}
       {showManage && (
         <div className="mt-2 p-2 border rounded bg-white/5">
           <div className="flex items-center justify-between mb-2">

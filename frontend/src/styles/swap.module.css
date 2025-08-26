@@ -234,6 +234,8 @@
     background: linear-gradient(to left,rgb(128, 128, 128), #d5d5d5, grey, rgb(213, 213, 213), #7e7e7e);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
   }
 
   .logoSwapBtn {
@@ -468,8 +470,8 @@
 }
 
 .logoTokenDrop {
-  width: 16px;
-  margin-right: 10px;
+  width: 18px;
+  margin-right: 7px;
 }
 
 .arrowSelect {
@@ -493,4 +495,121 @@
   backdrop-filter: blur(5px);
   background-color: rgba(0,0,0,0.2);
   z-index: 10000;
+}
+
+.searchInputContainer {
+  background-color: #242424;
+  border: 1px solid rgb(56, 56, 56);
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+}
+
+.searchInput {
+  background-color: transparent;
+  border-radius: 10px;
+  height: 40px;
+  color: var(--white);
+  width: 100%;
+  border: none;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+.loupe {
+  width: 18px;
+  margin-left: 10px;
+}
+
+.resultSearchToken {
+  padding: 3px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--white);
+}
+
+.trait {
+  height: 1px;
+  background-color: rgb(40, 40, 40);
+  width: 100%;
+  margin-top: 7px;
+  margin-bottom: 5px;
+}
+
+
+.containerImportToken {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.addTokenBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary);
+  color: var(--black);
+  height: 30px;
+  width: 80px;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+
+.addLogo {
+  width: 10px;
+  margin-right: 5px;
+}
+
+.cancelBtnImport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.deleteLogo {
+  width: 16px;
+}
+
+.carburantLogo {
+  width: 15px;
+  margin-right: 4px;
+}
+
+@media (max-width: 768px) {
+  .containerLcdAffiche  {
+    margin-top: 20px;
+    width: 90%;
+  }
+
+  .inputPercentWrapper {
+    display: flex;
+    align-items: center;
+    background-color: #242424;
+    border: 1px solid rgb(47, 47, 47);
+    border-radius: 10px;
+    height: 28px;
+    width: 60px;
+  }
+
+  .inputCustom {
+    background: none;
+    border: none;
+    color: var(--white);
+    width: 100%;
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    padding-top: 4px;
+    outline: none;
+    cursor: pointer;
+  }
 }

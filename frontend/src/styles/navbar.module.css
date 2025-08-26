@@ -1,6 +1,6 @@
 .navBar{
     height: 60px;
-    width: 99%;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
     margin-top: 20px;
@@ -111,4 +111,19 @@
 
 .logoIconeNav {
   width: 16px;
+}
+
+@media (max-width: 768px) { 
+  .navBarMiddle {
+    position: fixed;
+    bottom: 20px;
+  }
+
+  .titleNav {
+    left: 0px;
+  }
+
+  .navBarRight {
+    right: 0px;
+  }
 }

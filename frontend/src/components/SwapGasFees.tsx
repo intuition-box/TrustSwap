@@ -7,6 +7,7 @@ const NATIVE_SYM = NATIVE_SYMBOL || "tTRUST"
 const NATIVE_DECIMALS = 18
 import styles from "../styles/swap.module.css";
 
+import carburant from "../images/carburant.png"
 
 export default function SwapGasFees({
   to, abi, functionName, args, value, enabled = true, fallbackGas = 200_000n, className,
@@ -48,7 +49,13 @@ export default function SwapGasFees({
     <div className={styles.containerGaz}>
       <div className={styles.ligneInfoLabel}>
         <span className={styles.nameLigne}>Network gas:</span>
-        <span className={styles.motGrey}>{gwei} gwei</span>
+        <span className={styles.motGrey}>
+           <img
+                src={carburant}
+                            alt="toggle"
+                            className={styles.carburantLogo}/>
+          {gwei} gwei
+        </span>
       </div>
 
       <div className={styles.ligneInfoLabel}>
