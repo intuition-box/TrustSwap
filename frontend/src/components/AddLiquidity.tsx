@@ -374,7 +374,14 @@ export default function AddLiquidityPro() {
 
       <div className={styles.inputSellContainer}>
           <span>Token A</span>
-          <TokenSelector value={TA} onChange={(t: UiToken)=>{ setTA(t); setLockedB(false); }} />
+          <TokenSelector
+            value={TA}
+            onChange={(t) => {
+              if (!t) return;
+              setTA(t);
+              setLockedB(false);
+            }}
+          />
           <input
             value={amountA}
             onChange={e => { setAmountA(e.target.value); setLockedB(false) }}
@@ -385,7 +392,14 @@ export default function AddLiquidityPro() {
 
         <div className={styles.inputSellContainer}>
           <span>Token B</span>
-          <TokenSelector value={TB} onChange={(t: UiToken)=>{ setTB(t); setLockedB(true); }} />
+          <TokenSelector
+            value={TB}
+            onChange={(t) => {
+              if (!t) return;          
+              setTB(t);
+              setLockedB(true);
+            }}
+          />
           <input
             value={amountB}
             onChange={e => { setAmountB(e.target.value); setLockedB(true) }}

@@ -311,9 +311,9 @@ export default function RemoveLiquidity() {
       {/* Sélection de la pool (A/B) */}
       <div style={{display:'flex', gap:12, alignItems:'center', marginBottom:8}}>
         <span>Pool</span>
-        <TokenSelector value={TA} onChange={(t: UiToken)=>setTA(t)} />
+        <TokenSelector value={TA} onChange={(t) => { if (!t) return; setTA(t); }} />
         <span>/</span>
-        <TokenSelector value={TB} onChange={(t: UiToken)=>setTB(t)} />
+        <TokenSelector value={TB} onChange={(t) => { if (!t) return; setTB(t); }} />
       </div>
 
       {/* Infos LP & réserves */}

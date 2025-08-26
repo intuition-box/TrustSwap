@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build": "hardhat compile",
     "compile": "hardhat compile",
     "deploy": "hardhat run scripts/00_deploy_core.ts --network intuition",
     "seed": "hardhat run scripts/01_seed_liquidity.ts --network intuition",

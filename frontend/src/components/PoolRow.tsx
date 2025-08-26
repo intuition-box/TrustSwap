@@ -205,7 +205,9 @@ export default function PoolRow({ pair }: { pair: Address }) {
   }, [amountAdd0, r0, r1, dec0, dec1])
 
   async function ensureApproval(token: Address, required: bigint) {
-    if (!walletClient || !address) return
+    if (!walletClient || !address) return;
+    if (!pc) return;
+
     const curr = await pc.readContract({
       address: token, abi: ERC20_MINI, functionName: "allowance", args: [address, router],
     }) as bigint
@@ -222,7 +224,8 @@ export default function PoolRow({ pair }: { pair: Address }) {
   }
 
   async function ensureLpApproval(required: bigint) {
-    if (!walletClient || !address) return
+    if (!walletClient || !address) return;
+    if (!pc) return;
     const curr = await pc.readContract({
       address: pair, abi: ERC20_MINI, functionName: "allowance", args: [address, router],
     }) as bigint
@@ -240,7 +243,9 @@ export default function PoolRow({ pair }: { pair: Address }) {
   }
 
   const onAdd = async () => {
-    if (!walletClient || !address || !t0 || !t1) return
+    if (!walletClient || !address || !t0 || !t1) return;
+    if (!pc) return;
+
     setPendingAdd(true)
     try {
       const a = parseUnits(amountAdd0 || "0", dec0)
@@ -273,7 +278,9 @@ export default function PoolRow({ pair }: { pair: Address }) {
   }
 
   const onRemove = async () => {
-    if (!walletClient || !address || !t0 || !t1) return
+    if (!walletClient || !address || !t0 || !t1) return;
+    if (!pc) return;
+
     setPendingRemove(true)
     try {
       const liq = parseUnits(liqToRemoveInput || "0", lpDecimals)

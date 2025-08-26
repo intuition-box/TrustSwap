@@ -6,10 +6,10 @@
     "frontend"
   ],
   "scripts": {
-    "build": "pnpm -C contracts build && pnpm -C frontend build",
-    "dev:fe": "pnpm -C frontend dev",
-    "dev:hh": "pnpm -C contracts hardhat",
-    "test": "pnpm -C contracts test",
+    "build": "pnpm --filter ./contracts build && pnpm --filter ./frontend build",
+    "dev:fe": "pnpm --filter ./frontend dev",
+    "dev:hh": "pnpm --filter ./contracts hardhat",
+    "test": "pnpm --filter ./contracts test",
     "clean": "rimraf node_modules contracts/node_modules frontend/node_modules && rimraf contracts/cache contracts/artifacts"
   },
   "devDependencies": {
