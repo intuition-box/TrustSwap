@@ -2,6 +2,7 @@ import React, { useMemo } from "react"
 import type { Address, Abi } from "viem"
 import { useAccount } from "wagmi"
 import { useNetworkFees, useTxGasEstimate, computeTxCostText } from "../hooks/useSwapGas"
+import styles from "../styles/swap.module.css";
 
 const NATIVE_SYM = import.meta.env.VITE_NATIVE_SYMBOL || "tTRUST"
 const NATIVE_DECIMALS = Number(import.meta.env.VITE_NATIVE_DECIMALS || 18)
@@ -43,14 +44,15 @@ export default function SwapGasFees({
         : "—"
 
   return (
-    <div className={className ?? "text-xs p-2 border rounded-lg space-y-1"}>
-      <div className="flex items-center justify-between">
-        <span className="opacity-70">Network gas:</span>
-        <b>{gwei} gwei</b>
+    <div className={styles.containerGaz}>
+      <div className={styles.ligneInfoLabel}>
+        <span className={styles.nameLigne}>Network gas:</span>
+        <span className={styles.motGrey}>{gwei} gwei</span>
       </div>
-      <div className="flex items-center justify-between">
-        <span className="opacity-70">Est. tx cost</span>
-        <b>{cost.text} {NATIVE_SYM}</b>
+
+      <div className={styles.ligneInfoLabel}>
+        <span className={styles.nameLigne}>Est. tx cost</span>
+        <span className={styles.motGrey}>{cost.text} {NATIVE_SYM}</span>
       </div>
     </div>
   )
