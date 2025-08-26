@@ -483,17 +483,12 @@ export default function PoolRow({ pair }: { pair: Address }) {
                   value={liqToRemoveInput}
                   onChange={e => setLiqToRemoveInput(e.target.value)}
                 />
-                {/* Preview what the user will receive */}
-                {removePreview && (
-                  <div className={styles.previewOut} style={{ marginTop: 6 }}>
-                    <span className={styles.textInfoHeader}>
-                      You’ll receive ≈ {fmtAmount(removePreview.exp0, dec0)} {sym0} + {fmtAmount(removePreview.exp1, dec1)} {sym1}
-                    </span>
-                  </div>
-                )}
+
+
               </div>
 
               <div className={styles.choicePercentRemoveContainer}>
+                <div className={styles.choicePercentRemove}>
                 {[25, 50, 75, 100].map(p => {
                   const active = percentRemove === p
                   return (
@@ -510,6 +505,15 @@ export default function PoolRow({ pair }: { pair: Address }) {
                     </button>
                   )
                 })}
+                </div>
+
+{removePreview && (
+                  <div className={styles.previewOut} style={{ marginTop: 6 }}>
+                    <span className={styles.textInfoHeader}>
+                      You’ll receive ≈ {fmtAmount(removePreview.exp0, dec0)} {sym0} + {fmtAmount(removePreview.exp1, dec1)} {sym1}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <button
