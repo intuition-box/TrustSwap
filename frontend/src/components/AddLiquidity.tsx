@@ -17,6 +17,8 @@ import RouterABI from '../abis/Router02.min.json'
 import TokenSelector from './TokenSelect'
 import { TOKENS } from '../tokens/intuit'
 
+import styles from "../styles/swap.module.css";
+
 // --- Types locaux (compatibles avec ton TokenSelector) ---
 type UiToken = {
   symbol: string
@@ -365,12 +367,13 @@ export default function AddLiquidityPro() {
   const priceBA = reserves && reserves.rB>0n ? Number(reserves.rA)/Number(reserves.rB) : null
 
   return (
-    <div style={{maxWidth: 720}}>
-      <h2>Add Liquidity</h2>
+    <div className={styles.containerLcdAffiche}>
+      <div className={styles.swapContainer}>
 
-      <div style={{display:'grid', gap:12}}>
-        {/* Select token */}
-        <div style={{display:'flex', gap:12, alignItems:'center'}}>
+      <div>
+
+
+      <div className={styles.inputSellContainer}>
           <span>Token A</span>
           <TokenSelector value={TA} onChange={(t: UiToken)=>{ setTA(t); setLockedB(false); }} />
           <input
@@ -380,7 +383,8 @@ export default function AddLiquidityPro() {
           />
         </div>
 
-        <div style={{display:'flex', gap:12, alignItems:'center'}}>
+
+        <div className={styles.inputSellContainer}>
           <span>Token B</span>
           <TokenSelector value={TB} onChange={(t: UiToken)=>{ setTB(t); setLockedB(true); }} />
           <input
@@ -430,14 +434,17 @@ export default function AddLiquidityPro() {
           </button>
         )}
 
-        <button onClick={onSupply} disabled={!canSupply || pending}>
-          {pending ? 'Supplying…' : 'Supply'}
-        </button>
+     
 
         <small>
           Tips: aucun approve nécessaire pour {TA.isNative ? TA.symbol : TB.isNative ? TB.symbol : 'le natif'} ; si natif impliqué, le Router utilise `addLiquidityETH` et wrappe vers WTTRUST. 
         </small>
       </div>
+    </div>
+    <button className={styles.btnSwap} onClick={onSupply} disabled={!canSupply || pending}>
+          {pending ? 'Supplying…' : 'Supply'}
+        </button>
+        <div className={styles.traitSwap}></div>
     </div>
   )
 }

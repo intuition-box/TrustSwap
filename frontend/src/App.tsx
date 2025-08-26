@@ -1,9 +1,7 @@
 import { useState } from "react";
 import Connect from "./components/Connect";
 import PoolList from "./components/PoolsList";
-import AddLiquidity from "./components/AddLiquidity";
 import Swap from "./components/Swap";
-import RemoveLiquidity from "./components/RemoveLiquidity";
 import Farm from "./components/Farm";
 import farms from "./farms/intuition.json";
 import Navbar from "./components/NavBar";
@@ -14,10 +12,6 @@ export default function App() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "addLiquidity":
-        return <AddLiquidity />;
-      case "removeLiquidity":
-        return <RemoveLiquidity />;
       case "swap":
         return <Swap />;
       case "pools":

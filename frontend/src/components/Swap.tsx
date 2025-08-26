@@ -1,24 +1,16 @@
 // src/components/Swap.tsx
 import { useEffect, useMemo, useState } from 'react'
-import {
-  useAccount,
-  usePublicClient,
-  useWalletClient,
-} from 'wagmi'
+import { useAccount, usePublicClient, useWalletClient } from 'wagmi'
 import type { Address } from 'viem'
-import {
-  erc20Abi,
-  encodeFunctionData,
-  parseUnits,
-  formatUnits,
-  parseGwei,
-} from 'viem'
+import { erc20Abi, encodeFunctionData, parseUnits, formatUnits, parseGwei } from 'viem'
 
 import TokenSelector from './TokenSelect'
 import { TOKENS } from '../tokens/intuit'
 import RouterABI from '../abis/Router02.min.json' 
 
 import styles from "../styles/swap.module.css";
+import swap from '../images/swap.png'
+import reverse from '../images/reverse.png'
 
 type UiToken = {
   symbol: string
@@ -28,11 +20,11 @@ type UiToken = {
   address?: Address
   wrapped?: Address
 }
+
 const erc20Addr = (t: UiToken): Address => (t.isNative ? (t.wrapped as Address) : (t.address as Address))
 
 // ENV
 const router = import.meta.env.VITE_ROUTER_ADDRESS as Address
-// gas caps (comme dans tes autres composants)
 const GAS_PRICE = parseGwei(import.meta.env.VITE_GAS_PRICE_GWEI ?? '0.2')
 const GAS_LIMIT_SWAP = BigInt(import.meta.env.VITE_GAS_LIMIT_SWAP ?? '900000')
 const MAX_UINT = (2n ** 256n) - 1n
@@ -43,26 +35,26 @@ export default function Swap() {
   const { data: walletClient } = useWalletClient()
 
   // Sélection des tokens
-  const [TIn,  setTIn]  = useState<UiToken>(() => TOKENS.find(t => t.symbol === 'tTRUST') as UiToken)
+  const [TIn, setTIn] = useState<UiToken>(() => TOKENS.find(t => t.symbol === 'tTRUST') as UiToken)
   const [TOut, setTOut] = useState<UiToken>(() => TOKENS.find(t => t.symbol === 'TKA') as UiToken)
 
   // Montants / params trade
-  const [amountIn, setAmountIn] = useState('1') // string user
+  const [amountIn, setAmountIn] = useState('1')
   const [quoteOut, setQuoteOut] = useState<bigint | null>(null)
-  const [slippage, setSlippage] = useState(0.5) // %
+  const [slippage, setSlippage] = useState(0.5)
   const [deadlineMins, setDeadlineMins] = useState(10)
   const [pending, setPending] = useState(false)
+
+  // Custom input slippage
+  const [showCustom, setShowCustom] = useState(false)
 
   // State allowance (pour tokenIn si ERC20)
   const [allowIn, setAllowIn] = useState<bigint>(0n)
   const [balIn, setBalIn] = useState<bigint>(0n)
+  const [balOut, setBalOut] = useState<bigint>(0n)
 
-  // helpers
-  const path: Address[] = useMemo(() => {
-    const aIn  = erc20Addr(TIn)
-    const aOut = erc20Addr(TOut)
-    return [aIn, aOut]
-  }, [TIn, TOut])
+  // Helpers
+  const path: Address[] = useMemo(() => [erc20Addr(TIn), erc20Addr(TOut)], [TIn, TOut])
 
   const rawIn = useMemo(() => {
     try { return parseUnits(amountIn || '0', TIn.decimals) } catch { return 0n }
@@ -70,42 +62,39 @@ export default function Swap() {
 
   const minOut = useMemo(() => {
     if (!quoteOut) return 0n
-    const bps = BigInt(Math.round(slippage * 100)) // 0.5% -> 50 bps
+    const bps = BigInt(Math.round(slippage * 100))
     return quoteOut - (quoteOut * bps / 10_000n)
   }, [quoteOut, slippage])
 
   const needApprove = useMemo(() => !TIn.isNative && rawIn > 0n && allowIn < rawIn, [TIn.isNative, rawIn, allowIn])
 
-  // lecture balance/allowance & quote
+  // Lecture balance/allowance & quote
   const loadState = async () => {
     if (!publicClient || !address) return
-    // balance tokenIn
+
     if (TIn.isNative) {
       const b = await publicClient.getBalance({ address })
       setBalIn(b)
     } else {
-      const b = await publicClient.readContract({
-        address: erc20Addr(TIn), abi: erc20Abi, functionName: 'balanceOf', args: [address]
-      }) as bigint
+      const b = await publicClient.readContract({ address: erc20Addr(TIn), abi: erc20Abi, functionName: 'balanceOf', args: [address] }) as bigint
       setBalIn(b)
-      const a = await publicClient.readContract({
-        address: erc20Addr(TIn), abi: erc20Abi, functionName: 'allowance', args: [address, router]
-      }) as bigint
+      const a = await publicClient.readContract({ address: erc20Addr(TIn), abi: erc20Abi, functionName: 'allowance', args: [address, router] }) as bigint
       setAllowIn(a)
     }
 
-    // quote
+    if (TOut.isNative) {
+      const b = await publicClient.getBalance({ address })
+      setBalOut(b)
+    } else {
+      const b = await publicClient.readContract({ address: erc20Addr(TOut), abi: erc20Abi, functionName: 'balanceOf', args: [address] }) as bigint
+      setBalOut(b)
+    }
+
     if (rawIn === 0n) { setQuoteOut(null); return }
     try {
-      const amounts = await publicClient.readContract({
-        address: router,
-        abi: RouterABI as any,
-        functionName: 'getAmountsOut',
-        args: [rawIn, path],
-      }) as bigint[]
+      const amounts = await publicClient.readContract({ address: router, abi: RouterABI as any, functionName: 'getAmountsOut', args: [rawIn, path] }) as bigint[]
       setQuoteOut(amounts?.[amounts.length - 1] ?? null)
     } catch (e) {
-      // si la pair n’existe pas ou pas de liquidité, getAmountsOut peut revert
       console.warn('[swap] getAmountsOut failed', e)
       setQuoteOut(null)
     }
@@ -113,109 +102,64 @@ export default function Swap() {
 
   useEffect(() => { loadState() }, [publicClient, address, TIn, TOut, amountIn])
 
-  // send legacy tx
+  // Send legacy tx
   const sendLegacy = async (to: Address, data: `0x${string}`, value: bigint = 0n) => {
-    const h = await walletClient!.sendTransaction({
-      account: address!,
-      to, data, value,
-      gas: GAS_LIMIT_SWAP,
-      gasPrice: GAS_PRICE,
-    })
-    return h
+    return await walletClient!.sendTransaction({ account: address!, to, data, value, gas: GAS_LIMIT_SWAP, gasPrice: GAS_PRICE })
   }
+
   const wait = (hash: `0x${string}`) => publicClient!.waitForTransactionReceipt({ hash })
 
   const onFlip = () => {
     setTIn(TOut)
     setTOut(TIn)
-    setAmountIn('')  // reset pour forcer un nouveau quote propre
+    setAmountIn('')
     setQuoteOut(null)
   }
 
   const onApprove = async () => {
     if (!walletClient || !address || TIn.isNative) return
-    const data = encodeFunctionData({
-      abi: erc20Abi,
-      functionName: 'approve',
-      args: [router, MAX_UINT] // approve infini (UX façon Uniswap)
-    })
+    const data = encodeFunctionData({ abi: erc20Abi, functionName: 'approve', args: [router, MAX_UINT] })
     const h = await sendLegacy(erc20Addr(TIn), data, 0n)
     const rc = await wait(h)
-    if (!(rc && (rc.status === 'success'))) throw new Error('Approve failed')
+    if (!(rc && rc.status === 'success')) throw new Error('Approve failed')
     await loadState()
   }
 
   const onSwap = async () => {
-    if (!walletClient || !publicClient || !address) return
-    if (rawIn === 0n) return
+    if (!walletClient || !publicClient || !address || rawIn === 0n) return
     if (balIn < rawIn) { alert('Solde insuffisant'); return }
     if (needApprove) { alert('Veuillez approuver d’abord le token d’entrée'); return }
     if (!quoteOut || minOut === 0n) { alert('Pas de cotation disponible (liquidité insuffisante ?)'); return }
 
     setPending(true)
     try {
-      const deadline = BigInt(Math.floor(Date.now()/1000) + deadlineMins*60)
+      const deadline = BigInt(Math.floor(Date.now() / 1000) + deadlineMins * 60)
 
       if (TIn.isNative) {
-        // tTRUST -> Token : swapExactETHForTokens
-        // simulate (utile pour message d’erreur net)
-        await publicClient.simulateContract({
-          account: address,
-          address: router,
-          abi: RouterABI as any,
-          functionName: 'swapExactETHForTokens',
-          args: [minOut, path, address, deadline],
-          value: rawIn,
-        })
-        const data = encodeFunctionData({
-          abi: RouterABI as any,
-          functionName: 'swapExactETHForTokens',
-          args: [minOut, path, address, deadline]
-        })
+        await publicClient.simulateContract({ account: address, address: router, abi: RouterABI as any, functionName: 'swapExactETHForTokens', args: [minOut, path, address, deadline], value: rawIn })
+        const data = encodeFunctionData({ abi: RouterABI as any, functionName: 'swapExactETHForTokens', args: [minOut, path, address, deadline] })
         const h = await sendLegacy(router, data, rawIn)
         const rc = await wait(h)
-        if (!(rc && (rc.status === 'success'))) throw new Error('swapExactETHForTokens reverted')
+        if (!(rc && rc.status === 'success')) throw new Error('swapExactETHForTokens reverted')
       } else if (TOut.isNative) {
-        // Token -> tTRUST : swapExactTokensForETH
-        await publicClient.simulateContract({
-          account: address,
-          address: router,
-          abi: RouterABI as any,
-          functionName: 'swapExactTokensForETH',
-          args: [rawIn, minOut, path, address, deadline],
-        })
-        const data = encodeFunctionData({
-          abi: RouterABI as any,
-          functionName: 'swapExactTokensForETH',
-          args: [rawIn, minOut, path, address, deadline]
-        })
+        await publicClient.simulateContract({ account: address, address: router, abi: RouterABI as any, functionName: 'swapExactTokensForETH', args: [rawIn, minOut, path, address, deadline] })
+        const data = encodeFunctionData({ abi: RouterABI as any, functionName: 'swapExactTokensForETH', args: [rawIn, minOut, path, address, deadline] })
         const h = await sendLegacy(router, data, 0n)
         const rc = await wait(h)
-        if (!(rc && (rc.status === 'success'))) throw new Error('swapExactTokensForETH reverted')
+        if (!(rc && rc.status === 'success')) throw new Error('swapExactTokensForETH reverted')
       } else {
-        // Token -> Token : swapExactTokensForTokens
-        await publicClient.simulateContract({
-          account: address,
-          address: router,
-          abi: RouterABI as any,
-          functionName: 'swapExactTokensForTokens',
-          args: [rawIn, minOut, path, address, deadline],
-        })
-        const data = encodeFunctionData({
-          abi: RouterABI as any,
-          functionName: 'swapExactTokensForTokens',
-          args: [rawIn, minOut, path, address, deadline]
-        })
+        await publicClient.simulateContract({ account: address, address: router, abi: RouterABI as any, functionName: 'swapExactTokensForTokens', args: [rawIn, minOut, path, address, deadline] })
+        const data = encodeFunctionData({ abi: RouterABI as any, functionName: 'swapExactTokensForTokens', args: [rawIn, minOut, path, address, deadline] })
         const h = await sendLegacy(router, data, 0n)
         const rc = await wait(h)
-        if (!(rc && (rc.status === 'success'))) throw new Error('swapExactTokensForTokens reverted')
+        if (!(rc && rc.status === 'success')) throw new Error('swapExactTokensForTokens reverted')
       }
 
       alert('Swap réussi ✅')
       setAmountIn('')
       setQuoteOut(null)
       await loadState()
-    } catch (e:any) {
+    } catch (e: any) {
       console.error('[swap] error', e)
       alert(e?.shortMessage || e?.message || 'Swap failed')
     } finally {
@@ -229,71 +173,98 @@ export default function Swap() {
     <div className={styles.containerLcdAffiche}>
       <div className={styles.swapContainer}>
 
+        {/* Input From */}
         <div className={styles.inputSellContainer}>
-        <span className={styles.labelSwap}>
-          <span className={styles.label}>From</span>
-          <span className={styles.tokenBalance}>Balance {TIn.symbol}: <span className={styles.balanceNumber}> {Number(formatUnits(balIn, TIn.decimals)).toLocaleString(undefined,{maximumFractionDigits:6})}</span></span>
-        </span>
+          <span className={styles.labelSwap}>
+            <span className={styles.label}>From</span>
+            <span className={styles.tokenBalance}>
+              Balance {TIn.symbol}: <span className={styles.balanceNumber}>{Number(formatUnits(balIn, TIn.decimals)).toLocaleString(undefined, { maximumFractionDigits: 6 })}</span>
+            </span>
+          </span>
           <div className={styles.sellSelect}>
-          <TokenSelector value={{ ...TIn, name: TIn.name ?? TIn.symbol }} onChange={(t: UiToken)=>setTIn(t)} />
-          <input
-  value={amountIn}
-  onChange={e => setAmountIn(e.target.value)}
-  placeholder="0.0"
-  className={styles.InputSell}
-/>
-
+            <TokenSelector value={{ ...TIn, name: TIn.name ?? TIn.symbol }} onChange={t => setTIn(t)} />
+            <input value={amountIn} onChange={e => setAmountIn(e.target.value)} placeholder="0.0" className={styles.InputSwap} />
           </div>
         </div>
 
-        <div className={styles.onFlip}>
-          <button onClick={onFlip}>⇅</button>
-        </div>
-
-        <div className={styles.inputBuyContainer}>
-        <span className={styles.labelSwap}>
-          <span className={styles.label}>To</span>
-          <span className={styles.tokenBalance}>Balance {TIn.symbol}: <span className={styles.balanceNumber}> {Number(formatUnits(balIn, TIn.decimals)).toLocaleString(undefined,{maximumFractionDigits:6})}</span></span>
-        </span>
-          <TokenSelector value={{ ...TOut, name: TOut.name ?? TOut.symbol }} onChange={(t: UiToken)=>setTOut(t)} />
-          <div>
-            ≈ {outPreview} {TOut.symbol}
-          </div>
-        </div>
-
-
+        {/* Flip button */}
         <div>
-          <span>Slippage:</span>
-          {[0.1,0.5,1].map(p => (
-            <button key={p} onClick={()=>setSlippage(p)} style={{padding:'2px 8px', border: slippage===p?'2px solid #888':'1px solid #ccc', borderRadius:8}}>
-              {p}%
-            </button>
-          ))}
-          <input
-            type="number" step="0.1" min="0"
-            value={slippage}
-            onChange={e=>setSlippage(Number(e.target.value))}
-          />
-          <span>Deadline:</span>
-          <input type="number" min={1} value={deadlineMins} onChange={e=>setDeadlineMins(Number(e.target.value))} style={{width:80}}/> min
+          <button className={styles.onFlip} onClick={onFlip}>
+            <img src={reverse} alt="Logo" className={styles.logoReverse} />
+          </button>
         </div>
 
-        {/* Approve si nécessaire (quand le token d’entrée est ERC-20) */}
+        {/* Input To */}
+        <div className={styles.inputBuyContainer}>
+          <span className={styles.labelSwap}>
+            <span className={styles.label}>To</span>
+            <span className={styles.tokenBalance}>
+              Balance {TOut.symbol}: <span className={styles.balanceNumber}>{Number(formatUnits(balOut, TOut.decimals)).toLocaleString(undefined, { maximumFractionDigits: 6 })}</span>
+            </span>
+          </span>
+          <div className={styles.sellSelect}>
+            <TokenSelector value={{ ...TOut, name: TOut.name ?? TOut.symbol }} onChange={t => setTOut(t)} />
+            <div className={styles.InputSwap}>{outPreview}</div>
+          </div>
+        </div>
+
+        {/* Slippage & deadline */}
+        <div className={styles.infosContainer}>
+          <div className={styles.ligneInfoLabel}>
+            <span className={styles.nameLigne}>Slippage:</span>
+            <div className={styles.choicePercent}>
+              {[0.1, 0.5, 1].map(p => (
+                <button
+                  key={p}
+                  className={`${styles.choice} ${slippage === p ? styles.activeChoice : ''}`}
+                  onClick={() => { setSlippage(p); setShowCustom(false) }}
+                >
+                  {p}%
+                </button>
+              ))}
+              {!showCustom ? (
+                <button className={styles.choice} onClick={() => setShowCustom(true)}>Custom</button>
+              ) : (
+                <div className={styles.inputPercentWrapper}>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={slippage}
+                  autoFocus
+                  onChange={e => setSlippage(Number(e.target.value))}
+                  onBlur={() => { if (!slippage) setSlippage(0.5) }}
+                  className={styles.inputCustom}
+                />
+                <span className={styles.Sign}>%</span>
+              </div>
+              
+              )}
+            </div>
+          </div>
+          <div className={styles.ligneInfoLabel}>
+          <span className={styles.nameLigne}>Deadline:</span>
+          <div className={styles.inputPercentWrapper}>
+          <input className={styles.inputCustom} type="number" min={1} value={deadlineMins} onChange={e => setDeadlineMins(Number(e.target.value))} /> 
+          <span className={styles.percentSign}>min</span>
+          </div>
+        </div>
+        </div>
+        {/* Approve */}
         {!TIn.isNative && needApprove && (
-          <button onClick={onApprove} disabled={pending}>
+          <button className={styles.btnSwap} onClick={onApprove} disabled={pending}>
             Approve {TIn.symbol}
           </button>
         )}
-
-        <button className={styles.btnSwap} onClick={onSwap} disabled={!isConnected || pending || rawIn===0n || (!TIn.isNative && needApprove)}>
-          {pending ? 'Swapping…' : 'Swap'}
-        </button>
-
-
-        <small>
-         
-        </small>
       </div>
-      </div>
+
+      {/* Swap button */}
+      <button className={styles.btnSwap} onClick={onSwap} disabled={!isConnected || pending || rawIn === 0n || (!TIn.isNative && needApprove)}>
+        <span className={styles.motGrey}>{pending ? 'Swapping…' : 'Swap'}</span>
+        <img src={swap} alt="Logo" className={styles.logoSwapBtn} />
+      </button>
+
+      <div className={styles.traitSwap}></div>
+    </div>
   )
 }

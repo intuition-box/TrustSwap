@@ -2,16 +2,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
 :root {
   --white: #FFFFFF;
-  --dark: #000000;
   --border-color: rgba(181, 181, 181, 0.7);
   --shadow-color: rgba(0, 0, 0, 0.08);
   --shadow-color-strong: rgba(0, 0, 0, 0.12);
-  --border: rgb(225, 225, 225);
+  --border: rgb(47, 47, 47);
   --black-grey: rgb(29, 29, 29);
   --grey: grey;
   --secondary: #5D6BF8;
   --secondary-border: #4552E5;
   --btn-shadow-secondary: rgba(93, 107, 248, 0.4);
+  --black: #111111;
+  --dark: #000000;
+  --black-border: #000000;
+  --btn-shadow-black: rgba(0, 0, 0, 0.4);
+  --primary: #99ff00;
 }
 
 body {
@@ -24,23 +28,15 @@ body {
   padding: 0;
   width: 100%;
   overflow: hidden;
-
-  background-color: var(--white);
-
-  background-image:
-    radial-gradient(rgba(90, 125, 184, 0.2) 1px, transparent 1px),
-    linear-gradient(
-      to bottom,
-      transparent 60%,
-      rgba(0, 149, 255, 0.112) 80%,
-      rgba(0, 149, 255, 0.152) 90%,
-      rgba(0, 149, 255, 0.19) 100%
-    );
-
-  background-size: 7px 7px, 100% 100%;
-  background-blend-mode: normal;
   color: var(--dark);
+
+  background-image: url('../images/back.png');
+  background-size: cover;
+  background-blend-mode: normal;
+  background-repeat: no-repeat;
+  background-position: center;
 }
+
 
 input:focus {
   outline: none;
