@@ -3,7 +3,8 @@ import { usePublicClient, useWatchContractEvent } from 'wagmi'
 import type { Address } from 'viem'
 import { TOKENS } from '../tokens/intuit' 
 import { fmtAmount, shortAddr } from '../lib/format'
-
+import AddLiquidity from "../components/AddLiquidity";
+import RemoveLiquidity from "../components/RemoveLiquidity";
 const PairABI = [
   { inputs: [], name: 'token0', outputs: [{ internalType:'address', type:'address' }], stateMutability:'view', type:'function' },
   { inputs: [], name: 'token1', outputs: [{ internalType:'address', type:'address' }], stateMutability:'view', type:'function' },

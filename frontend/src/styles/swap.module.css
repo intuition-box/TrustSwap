@@ -1,0 +1,328 @@
+.containerLcdAffiche {
+    padding: 10px;
+    margin-top: 100px;
+    background: rgba(80, 80, 80, 0.2);
+    border-radius: 30px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(101, 101, 101, 0.3);
+    border-radius: 20px;
+    height: auto;
+    width: 400px;
+    position: relative;
+    padding-bottom: 70px;
+  }
+
+  .containerLcdAffiche::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0px;
+    height: 1px;
+    border-radius: 2px 2px 0 0;
+    border-radius: 0 2px 2px 0;
+    background: var(--white);
+    box-shadow: 0 0 60px 6px var(--white);
+    z-index: 1;
+    animation: cardchoicestart 1s ease forwards;
+  }
+  
+  @keyframes cardchoicestart {
+    to {
+      width: 77%;
+      box-shadow: 0 0 100px 10px var(--white);
+    }
+  }
+
+  .swapContainer{
+    width: 100%;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    position: relative;
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    background-color: #111111;
+  }
+  
+.title {
+    font-size: 50px;
+    letter-spacing: -3px;
+    font-weight: 500;
+}
+
+.inputSellContainer {
+    width: 98%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 4px;
+    height: 110px;
+    background-color: #1a1a1a;
+    border: 1px solid var(--border);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.inputBuyContainer {
+  width: 98%;
+  margin-left: auto;
+  margin-right: auto;
+    height: 110px;
+    background-color: #1a1a1a;
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    margin-top: 5px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.onFlip {
+    position: absolute;
+    top: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--black);
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    color: var(--white);
+    height: 40px;
+    width: 40px;
+    font-size: 15px;
+    border-radius: 99vw;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logoReverse {
+  width: 15px;
+}
+
+.labelSwap {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.label {
+    margin-left: 10px;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--grey);
+}
+
+.tokenBalance {
+    margin-right: 10px;
+    color: var(--grey);
+    font-size: 13px;
+    letter-spacing: -0.4px;
+}
+
+.balanceNumber {
+  background: linear-gradient(to left,rgb(128, 128, 128), #ffffff, grey, rgb(213, 213, 213), #ffffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+    font-size: 15px;
+    letter-spacing: -0.6px;
+    margin-left: 5px;
+}
+
+.sellSelect {
+    display: flex;
+    align-items: end;
+    justify-content: end;
+}
+
+.InputSwap {
+    width: 170px;
+    font-size: 38px;
+    border: none;
+    background-color: transparent;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    text-align: right;
+    padding-right: 15px;
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    background: linear-gradient(to left,rgb(128, 128, 128), #ffffff, grey, rgb(213, 213, 213), #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    padding-top: 28px;
+  }
+  
+  .btnSwap {
+    height: 45px;
+    border-radius: 13px;
+    padding-left: 7px;
+    padding-right: 7px;
+    position: absolute;
+    bottom: 12px;
+    width: calc(100% - 20px);
+    border: none;
+    cursor: pointer;
+    font-size: 17px;
+    letter-spacing: -1px;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+    background-color: var(--black);
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    z-index: 2;
+  }
+
+  .traitSwap {
+    position: absolute;
+    bottom: 0;
+    width: calc(100% - 100px);
+    left: 50%;
+    transform: translateX(-50%);
+    height: 1px;
+    background: var(--primary);
+    box-shadow: 0 0 60px 6px var(--primary);
+  }
+
+  .motGrey{
+    background: linear-gradient(to left,rgb(128, 128, 128), #d5d5d5, grey, rgb(213, 213, 213), #7e7e7e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .logoSwapBtn {
+    width: 17px;
+  }
+
+  .infosContainer {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .ligneInfoLabel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: 10px;
+  }
+
+  .nameLigne {
+    color: var(--grey);
+    font-weight: 400;
+    letter-spacing: -0.7px;
+  }
+
+  .choicePercent {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .choice {
+    background-color: #242424;
+    border: 1px solid rgb(47, 47, 47);
+    height: 30px;
+    color: var(--white);
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .choice:hover {
+    border-color: var(--primary);
+  }
+  
+  .activeChoice {
+    border: 1px solid var(--primary);
+  }
+
+  .inputPercentWrapper {
+    display: flex;
+    align-items: center;
+    background-color: #242424;
+    border: 1px solid rgb(47, 47, 47);
+    border-radius: 10px;
+    padding: 0 6px;
+    height: 28px;
+    width: 50px;
+  }
+  
+  .inputCustom {
+    background: none;
+    border: none;
+    color: var(--white);
+    width: 100%;
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+  }
+  
+  .Sign {
+    margin-left: 2px;
+    color: var(--white);
+    font-size: 14px;
+  }
+
+  /* Chrome, Safari, Edge, Opera */
+.inputCustom::-webkit-outer-spin-button,
+.inputCustom::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.inputCustom[type="number"] {
+  -moz-appearance: textfield;
+}
+
+  

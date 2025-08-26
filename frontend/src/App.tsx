@@ -1,9 +1,7 @@
 import { useState } from "react";
 import Connect from "./components/Connect";
 import PoolList from "./components/PoolsList";
-import AddLiquidity from "./components/AddLiquidity";
 import Swap from "./components/Swap";
-import RemoveLiquidity from "./components/RemoveLiquidity";
 import Farm from "./components/Farm";
 import farms from "./farms/intuition.json";
 import Navbar from "./components/NavBar";
@@ -14,10 +12,6 @@ export default function App() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "addLiquidity":
-        return <AddLiquidity />;
-      case "removeLiquidity":
-        return <RemoveLiquidity />;
       case "swap":
         return <Swap />;
       case "pools":
@@ -44,25 +38,7 @@ export default function App() {
     <div className="containerBody">
       <Navbar setActiveTab={setActiveTab} />
       <div className="contentContainer">
-        <div className="LcdBorder">
-          <div className="LcdContainer">
-            <div className="Lcd">
-            {renderContent()}
-            </div>
-          </div>
-        </div>
-        <div className="ConnectorContainer">
-          <div className="PisteContainer">
-            {Array.from({ length: 13 }).map((_, index) => (
-              <div key={index} className="Piste"></div>
-            ))}
-          </div>
-          <div className="Connector">
-            <div className="Led"></div>
-          </div>
-          <div className="BagueCable"></div>
-          <div className="Cable"></div>
-        </div>
+        {renderContent()}
       </div>
     </div>
   );
