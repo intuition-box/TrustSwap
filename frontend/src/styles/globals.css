@@ -27,15 +27,18 @@ body {
   margin: 0;
   padding: 0;
   width: 100%;
-  overflow: hidden;
   color: var(--dark);
+  background-color: var(--black);
 
-  background-image: url('../images/back.png');
-  background-size: cover;
-  background-blend-mode: normal;
-  background-repeat: no-repeat;
-  background-position: center;
+  /* Points au-dessus du dégradé */
+  background-image: 
+  radial-gradient(rgba(255, 255, 255, 0.107) 1px, transparent 1px),
+  linear-gradient(to top, color-mix(in srgb, var(--primary) 5%, transparent), color-mix(in srgb, var(--primary) 5%, transparent), var(--black) 40%);
+
+  background-size: 7px 7px, 100% 100%;
+  background-repeat: repeat, no-repeat;
 }
+
 
 
 input:focus {

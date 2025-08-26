@@ -55,6 +55,8 @@
       0 0.5px 0.5px var(--btn-shadow-black),
       0 0 0 0.75px var(--btn-shadow-black);
     background-color: #111111;
+    z-index: 3;
+    position: relative;
   }
   
 .title {
@@ -324,5 +326,3 @@
 .inputCustom[type="number"] {
   -moz-appearance: textfield;
 }
-
-  
