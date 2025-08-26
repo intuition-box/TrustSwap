@@ -312,6 +312,21 @@ export default function PoolRow({ pair }: { pair: Address }) {
     }
   }, [liqToRemoveInput, lpDecimals, lpTotalSupply, r0, r1])
 
+  function formatPoolPct(lpBal: bigint, total: bigint, decimals = 2) {
+    if (total === 0n) return "0%"
+    const scale = 10n ** BigInt(decimals)              // 10^decimals
+    const scaled = (lpBal * 100n * scale) / total      // percent * 10^decimals
+    const intPart = scaled / scale
+    const fracPart = scaled % scale
+    const fracStr = fracPart.toString().padStart(decimals, "0")
+    return `${intPart.toString()}.${fracStr}%`
+  }
+
+  const sharePct = useMemo(
+    () => formatPoolPct(lpBalance, lpTotalSupply, 2),   
+    [lpBalance, lpTotalSupply]
+  )
+
   return (
     <div className={`${styles.listPool} ${expanded ? styles.openPool : ""}`}>
       {/* Header */}
@@ -339,10 +354,12 @@ export default function PoolRow({ pair }: { pair: Address }) {
               {price ? `1 ${sym0} ≈ ${price.toFixed(6)} ${sym1}` : "—"}
             </div>
           </div>
-          <div className={styles.reservePool}>
-            <span className={styles.labelPool}>LP Balance :</span>
-            <div className={styles.reserve}>{fmtAmount(lpBalance, lpDecimals)}</div>
-          </div>
+            <div className={styles.reservePool}>
+              <span className={styles.labelPool}>LP Balance :</span>
+              <div className={styles.reserve}>
+                {fmtAmount(lpBalance, lpDecimals)} <span className={styles.sharePct}> / {sharePct}</span>
+              </div>
+            </div>
           <img src={arrow} alt="toggle" className={expanded ? styles.arrowOpen : styles.arrowClosed} />
         </div>
       </div>

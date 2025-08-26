@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState, useRef } from 'react'
 import type { Address } from 'viem'
 import { erc20Abi, formatUnits } from 'viem'
 import { TOKENS } from '../tokens/intuit'
-import styles from "../styles/Connect.module.css"
+import styles from "../styles/connect.module.css"
 import metamask from '../images/metamask.png'
 
 type UiToken = {
