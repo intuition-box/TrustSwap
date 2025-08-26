@@ -1,15 +1,79 @@
-
+import { useState } from "react";
 import Connect from "./Connect";
 import styles from "../styles/navbar.module.css";
 
+// Import des icônes en blanc et gris
+import swapWhite from '../images/swap-white.png'
+import swapGrey from '../images/swap-grey.png'
+import poolWhite from '../images/pool-white.png'
+import poolGrey from '../images/pool-grey.png'
+import farmWhite from '../images/farm-white.png'
+import farmGrey from '../images/farm-grey.png'
+
 const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
+  const [active, setActive] = useState("swap"); // Swap actif par défaut
+
+  const handleClick = (tab: string) => {
+    setActive(tab);
+    setActiveTab(tab);
+  };
+
+  // Définir la position de l’indicateur en fonction de l’onglet actif
+  const indicatorLeft = active === "swap" ? "7%" : active === "pools" ? "37%" : "70%";
+
   return (
     <div className={styles.navBar}>
-      <div className={styles.navBarLeft}>
-        <h2>TrustSwap</h2>
-        <button onClick={() => setActiveTab("swap")}>Swap</button>
-        <button onClick={() => setActiveTab("pools")}>Pools</button>
-        <button onClick={() => setActiveTab("farms")}>Farms</button>
+      <span className={styles.titleNav}>TrustSwap</span>
+
+      <div
+        className={`${styles.navBarLeft} ${styles.navBarMiddle}`}
+        style={{ "--indicator-left": indicatorLeft } as React.CSSProperties}
+      >
+        <div className={styles.btnMenu}>
+
+          {/* Swap */}
+          <button
+            className={styles.btnNavLeft}
+            style={{ color: active === "swap" ? "var(--white)" : "grey" }}
+            onClick={() => handleClick("swap")}
+          >
+            <img
+              src={active === "swap" ? swapWhite : swapGrey}
+              alt="Swap Icon"
+              className={styles.logoIconeNav}
+            />
+            Swap
+          </button>
+
+          {/* Pools */}
+          <button
+            className={styles.btnNavLeft}
+            style={{ color: active === "pools" ? "var(--white)" : "grey" }}
+            onClick={() => handleClick("pools")}
+          >
+            <img
+              src={active === "pools" ? poolWhite : poolGrey}
+              alt="Pools Icon"
+              className={styles.logoIconeNav}
+            />
+            Pools
+          </button>
+
+          {/* Farms */}
+          <button
+            className={styles.btnNavLeft}
+            style={{ color: active === "farms" ? "var(--white)" : "grey" }}
+            onClick={() => handleClick("farms")}
+          >
+            <img
+              src={active === "farms" ? farmWhite : farmGrey}
+              alt="Farms Icon"
+              className={styles.logoIconeNav}
+            />
+            Farms
+          </button>
+
+        </div>
       </div>
 
       <div className={styles.navBarRight}>

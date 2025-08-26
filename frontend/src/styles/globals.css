@@ -7,7 +7,7 @@
   --shadow-color-strong: rgba(0, 0, 0, 0.12);
   --border: rgb(47, 47, 47);
   --black-grey: rgb(29, 29, 29);
-  --grey: grey;
+  --grey: rgb(121, 121, 121);
   --secondary: #5D6BF8;
   --secondary-border: #4552E5;
   --btn-shadow-secondary: rgba(93, 107, 248, 0.4);
@@ -42,7 +42,7 @@ body {
 
 
 
-input:focus {
+input:focus, select:focus {
   outline: none;
 }
 

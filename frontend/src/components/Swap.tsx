@@ -304,19 +304,30 @@ export default function Swap() {
           />
         )}
         </div>
-        {/* Approve */}
-        {!TIn.isNative && needApprove && (
-          <button className={styles.btnSwap} onClick={onApprove} disabled={pending}>
-            Approve {TIn.symbol}
-          </button>
-        )}
+       
       </div>
 
-      {/* Swap button */}
-      <button className={styles.btnSwap} onClick={onSwap} disabled={!isConnected || pending || rawIn === 0n || (!TIn.isNative && needApprove)}>
-        <span className={styles.motGrey}>{pending ? 'Swapping…' : 'Swap'}</span>
-        <img src={swap} alt="Logo" className={styles.logoSwapBtn} />
-      </button>
+      {/* Approve si nécessaire */}
+        {!TIn.isNative && needApprove && (
+          <button
+            className={styles.btnSwapApprove}
+            onClick={onApprove}
+            disabled={pending}
+          >
+            <span className={styles.motGrey}>{pending ? 'Pending Approval…' : `Approve ${TIn.symbol}`}</span>
+          </button>
+        )}
+
+{/* Swap */}
+<button
+  className={styles.btnSwap}
+  onClick={onSwap}
+  disabled={!isConnected || pending || rawIn === 0n || (!TIn.isNative && needApprove)}
+>
+  <span className={styles.motGrey}>{pending ? 'Swapping…' : 'Swap'}</span>
+  <img src={swap} alt="Logo" className={styles.logoSwapBtn} />
+</button>
+
 
       <div className={styles.traitSwap}></div>
     </div>

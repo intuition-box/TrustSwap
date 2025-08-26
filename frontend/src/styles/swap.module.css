@@ -163,7 +163,7 @@
 }
 
 .InputSwap {
-    width: 170px;
+    width: 100%;
     font-size: 38px;
     border: none;
     background-color: transparent;
@@ -325,4 +325,87 @@
 /* Firefox */
 .inputCustom[type="number"] {
   -moz-appearance: textfield;
+}
+
+.tokenSelector {
+  margin-right: auto;
+  margin-bottom: 10px;
+  margin-left: 15px;
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.selectContainer {
+  display: flex;
+  align-items: center;
+  background-color: var(--black);
+  color: var(--white);
+  border: 1px solid var(--black-border);
+  box-shadow: 
+    inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+    inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+    inset 0 -0.75px 0.5px var(--btn-shadow-black),
+    0 4px 4px -1px var(--btn-shadow-black),
+    0 2px 3px -1px var(--btn-shadow-black),
+    0 0.5px 0.5px var(--btn-shadow-black),
+    0 0 0 0.75px var(--btn-shadow-black);
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.logoToken {
+  width: 23px;
+  margin-left: 10px;
+}
+
+.selectSwap {
+  background-color: transparent;
+  color: var(--white);
+  border: none;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 14px;
+  padding-left: 5px;
+  padding-right: 5px;
+  cursor: pointer;
+  appearance: none;       /* enlève la flèche native */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+
+.btnSwapApprove {
+  height: 45px;
+    border-radius: 13px;
+    padding-left: 7px;
+    padding-right: 7px;
+    position: absolute;
+    bottom: 12px;
+    width: calc(100% - 20px);
+    border: none;
+    cursor: pointer;
+    font-size: 17px;
+    letter-spacing: -1px;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+    background-color: var(--black);
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    z-index: 100;
 }

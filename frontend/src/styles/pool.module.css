@@ -458,8 +458,23 @@ margin: 0;
   display: flex;
   align-items: center;
   flex-direction: column;
+  justify-content: center;
   gap: 5px;
   margin-right: 10px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.choicePercentRemove {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.textInfoReceive {
+  background: linear-gradient(to left,rgb(128, 128, 128), #ffffff, grey, rgb(213, 213, 213), #ffffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .choiceRemoveBtn {

@@ -516,7 +516,7 @@ export default function PoolRow({ pair }: { pair: Address }) {
 
 {removePreview && (
                   <div className={styles.previewOut} style={{ marginTop: 6 }}>
-                    <span className={styles.textInfoHeader}>
+                    <span className={styles.textInfoReceive}>
                       You’ll receive ≈ {fmtAmount(removePreview.exp0, dec0)} {sym0} + {fmtAmount(removePreview.exp1, dec1)} {sym1}
                     </span>
                   </div>
