@@ -9,7 +9,8 @@
     "seed": "hardhat run scripts/01_seed_liquidity.ts --network intuition",
     "test": "hardhat test",
     "fee:set": "tsx scripts/20_set_fee_to.ts",
-    "fee:unset": "tsx scripts/21_unset_fee_to.ts"
+    "fee:unset": "tsx scripts/21_unset_fee_to.ts",
+    "deploy:wttrust": "hardhat run scripts/30_deploy_wttrust_and_router.ts --network intuition"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.7",

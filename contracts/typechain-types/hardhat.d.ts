@@ -161,6 +161,10 @@ declare module "hardhat/types/runtime" {
       name: "WETH9",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WETH9__factory>;
+    getContractFactory(
+      name: "WTTRUST",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WTTRUST__factory>;
 
     getContractAt(
       name: "Ownable",
@@ -347,6 +351,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.WETH9>;
+    getContractAt(
+      name: "WTTRUST",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WTTRUST>;
 
     deployContract(
       name: "Ownable",
@@ -496,6 +505,10 @@ declare module "hardhat/types/runtime" {
       name: "WETH9",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WETH9>;
+    deployContract(
+      name: "WTTRUST",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.WTTRUST>;
 
     deployContract(
       name: "Ownable",
@@ -682,6 +695,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WETH9>;
+    deployContract(
+      name: "WTTRUST",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.WTTRUST>;
 
     // default types
     getContractFactory(

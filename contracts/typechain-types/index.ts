@@ -80,3 +80,5 @@ export type { UniswapV2Router02 } from "./contracts/UniswapV2Router02";
 export { UniswapV2Router02__factory } from "./factories/contracts/UniswapV2Router02__factory";
 export type { WETH9 } from "./contracts/WETH9";
 export { WETH9__factory } from "./factories/contracts/WETH9__factory";
+export type { WTTRUST } from "./contracts/WTTRUST .sol/WTTRUST";
+export { WTTRUST__factory } from "./factories/contracts/WTTRUST .sol/WTTRUST__factory";

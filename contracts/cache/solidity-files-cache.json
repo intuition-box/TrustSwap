@@ -968,41 +968,6 @@
         "SafeMath"
       ]
     },
-    "/home/james_dev/PROJET/HACKATON-INTUITION/intuition-uniswapv2-fork/contracts/contracts/WETH9.sol": {
-      "lastModificationDate": 1755955595955,
-      "contentHash": "b3bbf3b21847695179dbd6c9d0e8a98f",
-      "sourceName": "contracts/WETH9.sol",
-      "solcConfig": {
-        "version": "0.6.6",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.6.6"
-      ],
-      "artifacts": [
-        "WETH9"
-      ]
-    },
     "/home/james_dev/PROJET/HACKATON-INTUITION/intuition-uniswapv2-fork/contracts/contracts/StakingRewards.sol": {
       "lastModificationDate": 1756043537174,
       "contentHash": "6e67397b99e040e31caf5758cdc84d90",
@@ -1868,6 +1833,42 @@
       ],
       "artifacts": [
         "TSWP"
+      ]
+    },
+    "/home/james_dev/PROJET/HACKATON-INTUITION/intuition-uniswapv2-fork/contracts/contracts/WTTRUST .sol": {
+      "lastModificationDate": 1756231819941,
+      "contentHash": "7348566d6d505940bcbef8025894be7b",
+      "sourceName": "contracts/WTTRUST .sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "WTTRUST"
       ]
     }
   }
