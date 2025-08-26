@@ -25,8 +25,10 @@ const PairABI = [
 const ERC20_MINI = [
   { inputs: [], name: 'symbol', outputs: [{ type:'string' }], stateMutability:'view', type:'function' },
   { inputs: [], name: 'decimals', outputs: [{ type:'uint8' }], stateMutability:'view', type:'function' },
-  { inputs: [{ internalType:'address', name:'account', type:'address' }], name: 'balanceOf', outputs:[{ type:'uint256' }], stateMutability:'view', type:'function' }
+  { inputs: [{ internalType:'address', name:'account', type:'address' }], name: 'balanceOf', outputs:[{ type:'uint256' }], stateMutability:'view', type:'function' },
+  { inputs: [], name: 'totalSupply', outputs:[{ type:'uint256' }], stateMutability:'view', type:'function' }
 ] as const
+
 
 const router = import.meta.env.VITE_ROUTER_ADDRESS as Address
 const GAS_PRICE = parseGwei(import.meta.env.VITE_GAS_PRICE_GWEI ?? '0.2')
@@ -95,18 +97,30 @@ export default function PoolRow({ pair }: { pair: Address }) {
 
       if (address) {
         try {
-          const [lpBal, bal0, bal1] = await Promise.all([
+          const [lpBal, bal0, bal1, totalSupply] = await Promise.all([
             pc.readContract({ address: pair, abi: ERC20_MINI, functionName:'balanceOf', args:[address] }) as Promise<bigint>,
             pc.readContract({ address: a, abi: ERC20_MINI, functionName:'balanceOf', args:[address] }) as Promise<bigint>,
             pc.readContract({ address: b, abi: ERC20_MINI, functionName:'balanceOf', args:[address] }) as Promise<bigint>,
+            pc.readContract({ address: pair, abi: ERC20_MINI, functionName:'totalSupply' }) as Promise<bigint>,
           ])
+      
           if (!cancelled) {
             setLpBalance(lpBal)
             setBalance0(bal0)
             setBalance1(bal1)
+      
+            // 👇 calcul de la part utilisateur
+            const share = totalSupply > 0n ? Number(lpBal) / Number(totalSupply) : 0
+            console.log("Share %:", share * 100)
+      
+            // 👇 calcul des tokens équivalents détenus
+            const userToken0 = Number(r0) / 10**dec0 * share
+            const userToken1 = Number(r1) / 10**dec1 * share
+            console.log(`User has ~ ${userToken0} ${sym0} + ${userToken1} ${sym1} en pool`)
           }
         } catch {}
       }
+      
     })()
     return () => { cancelled = true }
   }, [pc, pair, address])
@@ -130,7 +144,7 @@ export default function PoolRow({ pair }: { pair: Address }) {
     const a = BigInt(Math.floor(Number(amountAdd0) * 10**dec0))
     const b = a * r1 / r0
     const value = Number(b) / 10**dec1
-    setAmountAdd1(value.toFixed(5)) // arrondi à 5 chiffres après la virgule
+    setAmountAdd1(value.toFixed(6))
   }, [amountAdd0, r0, r1, dec0, dec1])
   
   const onAdd = async () => {
@@ -172,7 +186,6 @@ export default function PoolRow({ pair }: { pair: Address }) {
     } catch(e:any) { console.error(e); alert('RemoveLiquidity failed') }
     finally { setPendingRemove(false) }
   }
-
   return (
     <div className={`${styles.listPool} ${expanded ? styles.openPool : ''}`}>
          
@@ -314,25 +327,43 @@ export default function PoolRow({ pair }: { pair: Address }) {
           {!showAdd && (
             <div className={styles.removeLiquidity}>
   
-              <div>
-                <input type="number" step="any" value={liqToRemoveInput} onChange={e => setLiqToRemoveInput(e.target.value)} style={{ width:120, marginRight:8 }} />
-                <span>of {fmtAmount(lpBalance, 18)} LP tokens</span>
-              </div>
-              <div>
-                {[25,50,75,100].map(p => (
-                  <button
-                    key={p}
-                    onClick={() => {
-                      const liq = lpBalance * BigInt(p)/100n
-                      setLiqToRemoveInput((Number(liq)/10**18).toString())
-                      setPercentRemove(p)
-                    }}
-                    style={{ fontWeight: percentRemove===p ? 600 : 400 }}
-                  >
-                    {p}%
-                  </button>
-                ))}
-              </div>
+
+  <div className={styles.tokenRemove}>
+        <div className={styles.headerTokenRemove}>
+       
+          <span className={styles.textInfoHeader}>Balance LP tokens:</span>
+          <span className={styles.labelToken}>{fmtAmount(lpBalance, 18)}</span>
+        </div>
+        <input
+  className={styles.InputAddRemove}
+  type="number"
+  step="any"
+  value={liqToRemoveInput}
+  onChange={e => setLiqToRemoveInput(e.target.value)}
+/>
+
+      </div>
+        
+              <div className={styles.choicePercentRemoveContainer}>
+  {[25, 50, 75, 100].map(p => {
+    const isActive = percentRemove === p; // active si ce bouton correspond au pourcentage sélectionné
+    return (
+      <button
+        key={p}
+        onClick={() => {
+          const liq = lpBalance * BigInt(p) / 100n;
+          setLiqToRemoveInput((Number(liq) / 10**18).toFixed(6));
+
+          setPercentRemove(p);
+        }}
+        className={`${styles.choiceRemoveBtn} ${isActive ? styles.activeChoiceRemoveBtn : ''}`}
+      >
+        {p}%
+      </button>
+    )
+  })}
+</div>
+
               <button className={styles.removeBtnBottom} onClick={onRemove} disabled={!isConnected || pendingRemove}>
                 {pendingRemove ? 'Removing…' : 'Remove'}
               </button>
