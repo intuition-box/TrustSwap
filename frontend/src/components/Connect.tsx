@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Address } from 'viem'
 import { erc20Abi, formatUnits } from 'viem'
 import { TOKENS } from '../tokens/intuit'
+import AdminOnlySetter from "../components/admin/AdminOnlySetter"
+import ProtocolFeeCard from "../components/admin/ProtocolFeeCard"
 
 type UiToken = {
   symbol: string
@@ -74,6 +76,14 @@ function WalletTokens({ address }: { address: Address }) {
           </div>
         ))}
       </div>
+      {/*       
+        <AdminOnlySetter>
+          <div className="p-3 border rounded-2xl space-y-3">
+            <h3 className="font-medium">Admin</h3>
+            <ProtocolFeeCard />
+          </div>
+        </AdminOnlySetter>
+       */}
     </div>
   )
 }
