@@ -5,6 +5,8 @@ import { useNetworkFees, useTxGasEstimate, computeTxCostText } from "../hooks/us
 import { NATIVE_SYMBOL, /* NATIVE_DECIMALS if needed */ } from '../config/protocol'
 const NATIVE_SYM = NATIVE_SYMBOL || "tTRUST"
 const NATIVE_DECIMALS = 18
+import styles from "../styles/swap.module.css";
+
 
 export default function SwapGasFees({
   to, abi, functionName, args, value, enabled = true, fallbackGas = 200_000n, className,
@@ -43,14 +45,15 @@ export default function SwapGasFees({
         : "—"
 
   return (
-    <div className={className ?? "text-xs p-2 border rounded-lg space-y-1"}>
-      <div className="flex items-center justify-between">
-        <span className="opacity-70">Network gas:</span>
-        <b>{gwei} gwei</b>
+    <div className={styles.containerGaz}>
+      <div className={styles.ligneInfoLabel}>
+        <span className={styles.nameLigne}>Network gas:</span>
+        <span className={styles.motGrey}>{gwei} gwei</span>
       </div>
-      <div className="flex items-center justify-between">
-        <span className="opacity-70">Est. tx cost</span>
-        <b>{cost.text} {NATIVE_SYM}</b>
+
+      <div className={styles.ligneInfoLabel}>
+        <span className={styles.nameLigne}>Est. tx cost</span>
+        <span className={styles.motGrey}>{cost.text} {NATIVE_SYM}</span>
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { isAddress, type Address } from "viem"
 import { usePublicClient } from "wagmi"
 import { fetchErc20Meta } from "../lib/erc20"
@@ -6,13 +6,14 @@ import {
   getCustomTokens,
   addCustomToken,
   removeCustomToken,
-  // clearCustomTokens, // optional
   type UiToken
 } from "../lib/customTokens"
 import { TOKENS } from "../tokens/intuit"
+import styles from "../styles/swap.module.css"
+import tokenLogo from "../images/token.png"
+import arrow from "../images/arrow.png"
+import { createPortal } from "react-dom"
 import { WNATIVE_ADDRESS, NATIVE_SYMBOL, WRAPPED_SYMBOL, SHOW_WRAPPED_SYMBOL } from '../config/protocol'
-import styles from "../styles/swap.module.css";
-import tokenLogo from '../images/token.png'
 
 const WNATIVE = (WNATIVE_ADDRESS || "").toLowerCase()
 const NATIVE_SYM = NATIVE_SYMBOL || "tTRUST"
@@ -24,6 +25,7 @@ function labelFor(addr?: string, onchain?: string) {
   if (addr.toLowerCase() === WNATIVE) return SHOW_WRAPPED ? WRAPPED_SYM : NATIVE_SYM
   return onchain || "TKN"
 }
+
 const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "")
 
 type Props = {
@@ -40,7 +42,14 @@ export default function TokenSelector({ value, onChange, className }: Props) {
   const [addrInput, setAddrInput] = useState("")
   const [preview, setPreview] = useState<{ ok: boolean; tok?: UiToken; err?: string }>({ ok: false })
 
-  // Load + keep in sync across tabs
+  // dropdown state + portal positioning
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [portalPos, setPortalPos] = useState<{ top: number; left: number; width: number; height: number } | null>(null)
+
+  // refs
+  const originButtonRef = useRef<HTMLButtonElement | null>(null)
+
+  // Keep customs in sync
   useEffect(() => {
     const sync = () => setCustoms(getCustomTokens())
     sync()
@@ -52,7 +61,6 @@ export default function TokenSelector({ value, onChange, className }: Props) {
   }, [])
 
   const all = useMemo(() => {
-    // dedupe by address (or wrapped) — native identified by isNative
     const byKey = new Map<string, UiToken>()
     const push = (t: UiToken) => {
       const key =
@@ -65,17 +73,6 @@ export default function TokenSelector({ value, onChange, className }: Props) {
     customs.forEach(push)
     return Array.from(byKey.values())
   }, [customs])
-
-  // stable key for <select>
-  const valueKey = useMemo(() => {
-    const v = value
-    if (!v) return ""
-    return (
-      v.address?.toLowerCase() ||
-      v.wrapped?.toLowerCase() ||
-      (v.isNative ? `native:${NATIVE_SYM}` : v.symbol.toLowerCase())
-    )
-  }, [value])
 
   async function tryPreview() {
     setPreview({ ok: false })
@@ -110,59 +107,175 @@ export default function TokenSelector({ value, onChange, className }: Props) {
     removeCustomToken(addr)
     const updated = getCustomTokens()
     setCustoms(updated)
-    // If the removed token is currently selected, clear selection
     if (value?.address && value.address.toLowerCase() === addr.toLowerCase()) {
       onChange(undefined)
     }
   }
 
+  // --- helpers to open/close dropdown and compute portal position ---
+  const openDropdown = () => {
+    const btn = originButtonRef.current
+    if (btn) {
+      const rect = btn.getBoundingClientRect()
+      setPortalPos({
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+        height: rect.height
+      })
+    } else {
+      setPortalPos({ top: 100, left: 100, width: 200, height: 40 })
+    }
+    setShowDropdown(true)
+  }
+
+  const closeDropdown = () => {
+    setShowDropdown(false)
+    setPortalPos(null)
+  }
+
+  // keep portal position updated on scroll / resize while open
+  useEffect(() => {
+    if (!showDropdown) return
+    const handler = () => {
+      const btn = originButtonRef.current
+      if (btn) {
+        const rect = btn.getBoundingClientRect()
+        setPortalPos({
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+          height: rect.height
+        })
+      }
+    }
+    window.addEventListener("scroll", handler, true)
+    window.addEventListener("resize", handler)
+    return () => {
+      window.removeEventListener("scroll", handler, true)
+      window.removeEventListener("resize", handler)
+    }
+  }, [showDropdown])
+
   return (
-    <div className={styles.tokenSelector}>
-    <div className={styles.selectContainer}>
-    <img src={tokenLogo} alt="Logo" className={styles.logoToken} />
-        <select
-        className={styles.selectSwap}
-          value={valueKey}
-          onChange={(e) => {
-            const key = e.target.value
-            if (key === "__import__") {
-              setShowImport(true)
-              return
-            }
-            if (key === "__manage__") {
-              setShowManage((s) => !s)
-              return
-            }
-            const tok = all.find((t) => {
-              const k =
-                t.address?.toLowerCase() ||
-                t.wrapped?.toLowerCase() ||
-                (t.isNative ? `native:${NATIVE_SYM}` : t.symbol.toLowerCase())
-              return k === key
-            })
-            onChange(tok)
-          }}
+    <>
+      {/* Portal: overlay + floating button+dropdown rendered into document.body */}
+      {showDropdown && portalPos && createPortal(
+        <>
+          {/* overlay full-screen */}
+          <div
+            className={styles.overlay}
+            onClick={closeDropdown}
+            role="presentation"
+          />
+
+          {/* floating wrapper placed exactly where the original button is */}
+          <div
+            style={{
+              position: "fixed",
+              top: portalPos.top,
+              left: portalPos.left,
+              width: portalPos.width,
+              zIndex: 10001,
+              pointerEvents: "none" /* wrapper itself should not block events except its children */
+            }}
+          >
+            {/* interactive area (button + dropdown) */}
+            <div style={{ position: "relative", pointerEvents: "auto" }}>
+              {/* Replica of the button (interactive) */}
+              <button
+                className={styles.selectSwap}
+                onClick={() => (showDropdown ? closeDropdown() : openDropdown())}
+                aria-expanded={showDropdown}
+                style={{ width: "100%" }}
+              >
+                {value?.symbol || "Select token"}
+                <img
+                  src={arrow}
+                  alt="toggle"
+                  className={`${styles.arrowSelect} ${showDropdown ? styles.arrowOpen : ""}`}
+                />
+              </button>
+
+              {/* dropdown positioned under the button */}
+              <div
+                className={styles.dropdownMenu}
+                style={{
+                  position: "absolute",
+                  top: portalPos.height + 8,
+                  left: 0,
+                  zIndex: 10002
+                }}
+              >
+                {all.map((t) => {
+                  const key =
+                    t.address?.toLowerCase() ||
+                    t.wrapped?.toLowerCase() ||
+                    (t.isNative ? `native:${NATIVE_SYM}` : t.symbol.toLowerCase())
+                  const imported = customs.some(
+                    (c) => c.address?.toLowerCase() === t.address?.toLowerCase()
+                  )
+                  return (
+                    <div
+                      key={key}
+                      className={styles.dropdownItem}
+                      onClick={() => {
+                        onChange(t)
+                        closeDropdown()
+                      }}
+                    >
+                      <img src={tokenLogo} alt="Logo" className={styles.logoTokenDrop} />
+                      {t.symbol}
+                      {t.address ? ` (${short(t.address)})` : ""}
+                      {imported ? " • Imported" : ""}
+                    </div>
+                  )
+                })}
+                <div
+                  className={styles.dropdownItem}
+                  onClick={() => {
+                    setShowImport(true)
+                    closeDropdown()
+                  }}
+                >
+                  + Import token…
+                </div>
+                <div
+                  className={styles.dropdownItem}
+                  onClick={() => {
+                    setShowManage(true)
+                    closeDropdown()
+                  }}
+                >
+                  ⚙ Manage imported…
+                </div>
+              </div>
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+
+      {/* original select container stays in the DOM to preserve layout.
+          while dropdown is open we hide it (visibility: hidden) to avoid duplication shift */}
+      <div className={styles.selectContainer}>
+        <img src={tokenLogo} alt="Logo" className={styles.logoToken} />
+        <button
+          ref={originButtonRef}
+          className={styles.selectSwap}
+          onClick={() => (showDropdown ? closeDropdown() : openDropdown())}
+         
         >
-          {all.map((t) => {
-            const key =
-              t.address?.toLowerCase() ||
-              t.wrapped?.toLowerCase() ||
-              (t.isNative ? `native:${NATIVE_SYM}` : t.symbol.toLowerCase())
-            const imported = customs.some((c) => c.address?.toLowerCase() === t.address?.toLowerCase())
-            return (
-              <option key={key} value={key}>
-                {t.symbol}
-                {t.address ? ` (${short(t.address)})` : ""}
-                {imported ? " • Imported" : ""}
-              </option>
-            )
-          })}
-          <option value="__import__">+ Import token…</option>
-          <option value="__manage__">⚙ Manage imported…</option>
-        </select>
+          {value?.symbol || "Select token"}
+          <img
+            src={arrow}
+            alt="toggle"
+            className={`${styles.arrowSelect} ${showDropdown ? styles.arrowOpen : ""}`}
+          />
+        </button>
       </div>
 
-      {/* Inline import panel */}
+      {/* Inline import panel (unchanged) */}
       {showImport && (
         <div className="mt-2 p-2 border rounded bg-amber-50">
           <div style={{ display: "grid", gap: 6 }}>
@@ -172,9 +285,7 @@ export default function TokenSelector({ value, onChange, className }: Props) {
               value={addrInput}
               onChange={(e) => setAddrInput(e.target.value.trim())}
               onBlur={tryPreview}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") tryPreview()
-              }}
+              onKeyDown={(e) => { if (e.key === "Enter") tryPreview() }}
               className="border rounded px-2 py-1"
             />
             {preview.err && <small style={{ color: "crimson" }}>{preview.err}</small>}
@@ -190,11 +301,7 @@ export default function TokenSelector({ value, onChange, className }: Props) {
                   <button className="border rounded px-2 py-1" onClick={add}>Add</button>
                   <button
                     className="border rounded px-2 py-1"
-                    onClick={() => {
-                      setShowImport(false)
-                      setAddrInput("")
-                      setPreview({ ok: false })
-                    }}
+                    onClick={() => { setShowImport(false); setAddrInput(""); setPreview({ ok: false }) }}
                   >
                     Cancel
                   </button>
@@ -205,14 +312,13 @@ export default function TokenSelector({ value, onChange, className }: Props) {
         </div>
       )}
 
-      {/* Manage imported tokens panel */}
+      {/* Manage imported tokens panel (unchanged) */}
       {showManage && (
         <div className="mt-2 p-2 border rounded bg-white/5">
           <div className="flex items-center justify-between mb-2">
             <strong>Imported tokens</strong>
             <button className="text-sm underline" onClick={() => setShowManage(false)}>Close</button>
           </div>
-
           {customs.length === 0 ? (
             <div className="text-sm opacity-70">No imported tokens yet.</div>
           ) : (
@@ -224,7 +330,6 @@ export default function TokenSelector({ value, onChange, className }: Props) {
                     <div className="opacity-70">{t.name}</div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* Remove button */}
                     {t.address && (
                       <button
                         className="border rounded px-2 py-1 text-red-600 hover:bg-red-50"
@@ -239,18 +344,8 @@ export default function TokenSelector({ value, onChange, className }: Props) {
               ))}
             </ul>
           )}
-
-          {/* Optional nuke-all
-          <div className="mt-3">
-            <button
-              className="text-xs underline opacity-70"
-              onClick={() => { clearCustomTokens(); setCustoms(getCustomTokens()); if (value?.address && !TOKENS.find(k => k.address?.toLowerCase() === value.address?.toLowerCase())) onChange(undefined) }}
-            >
-              Clear all imported tokens
-            </button>
-          </div> */}
         </div>
       )}
-    </div>
+    </>
   )
 }
