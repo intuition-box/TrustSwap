@@ -457,6 +457,7 @@ margin: 0;
 .choicePercentRemoveContainer {
   display: flex;
   align-items: center;
+  flex-direction: column;
   gap: 5px;
   margin-right: 10px;
 }

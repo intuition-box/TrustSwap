@@ -3,6 +3,8 @@
 }
 
 .btnConnect {
+    position: relative; /* obligatoire pour z-index */
+    z-index: 10000; 
     background-color: var(--black);
     color: var(--white);
     border: 1px solid var(--black-border);
@@ -24,8 +26,8 @@
     align-items: center;
     gap: 5px;
     letter-spacing: -0.7px;
-    z-index: 3;
 }
+
 
 .btnConnect:active {
     transform: scale(0.98);
@@ -63,7 +65,7 @@
 }
 
 .dropMenu {
-    position: absolute;
+    position: fixed;
     top: 120%;
     right: 0;
     background: rgba(80, 80, 80, 0.2);
@@ -76,6 +78,7 @@
     padding: 5px;
     min-width: 300px;
     width: 100%;
+    z-index: 9999;
 }
 
 .dropMenuContainer {
@@ -92,10 +95,88 @@
       0 0 0 0.75px var(--btn-shadow-black);
     border-radius: 15px;
     padding: 10px;
+    padding-top: 15px;
+    z-index: 9999;
 }
 
 .tokenList {
     display: flex;
     flex-direction: column;
+    margin-top: 20px;
+}
+
+.walletHeader {
+    display: flex;
+    align-items: center;
+}
+
+.labelWallet {
+    background: linear-gradient(to left,rgb(128, 128, 128), #d5d5d5, grey, rgb(213, 213, 213), #7e7e7e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.tokenWallet {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 3px;
+}
+
+.tokenWalletText {
+
+}
+
+.tokenWalletBalance {
+    background: linear-gradient(to left,rgb(128, 128, 128), #d5d5d5, grey, rgb(213, 213, 213), #7e7e7e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.btnRefresh {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.refreshLogo {
+    width: 13px;
+}
+
+.balanceZero {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    margin-left: auto;
+    margin-right: 10px;
+    font-size: 12px;
+    color: var(--grey);
+    letter-spacing: -0.3px;
+}
+
+.disconnectBtn {
+    background-color: rgba(245, 24, 24, 0.124);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(5px);
+    width: 100%;
     margin-top: 10px;
+    color: var(--red);
+    border: 1px solid var(--red);
+    height: 40px;
+    font-weight: 500;
+    font-size: 16px;
+    border-radius: 10px;
+    letter-spacing: -0.7px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    justify-content: center;
+}
+
+.logoDisconnect {
+    width: 12px;
 }
