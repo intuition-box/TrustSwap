@@ -18,39 +18,36 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CI: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
-          
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9 # use the version you need
-          run_install: false
-          
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
-      - name: Install root dependencies
-        run: |
-          pnpm add -D vite @vitejs/plugin-react --ignore-scripts
-          
+
       - name: Install dependencies
-        run: |
-          cd frontend
-          pnpm install
-          
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
       - name: Build with Vite
-        run: |
-          cd frontend
-          pnpm run build
-          
+        working-directory: frontend
+        run: pnpm run build
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
