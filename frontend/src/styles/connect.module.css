@@ -1,0 +1,101 @@
+.connectContainer {
+  position: relative;
+}
+
+.btnConnect {
+    background-color: var(--black);
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    height: 50px;
+    width: 100%;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    letter-spacing: -0.7px;
+    z-index: 3;
+}
+
+.btnConnect:active {
+    transform: scale(0.98);
+}
+
+.btnConnect.connected::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0%;
+    height: 1px;
+    border-radius: 0 2px 2px 0;
+    background: var(--white);
+    z-index: 1;
+    animation: connectBtn 1s ease forwards;
+    animation-delay: 2.7s;
+}
+
+@keyframes connectBtn {
+  to {
+    width: 60%;
+  }
+}
+
+.metamaskConnectLogo {
+    width: 25px;
+}
+
+.addressWallet {
+    background: linear-gradient(to left,rgb(128, 128, 128), #d5d5d5, grey, rgb(213, 213, 213), #7e7e7e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dropMenu {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background: rgba(80, 80, 80, 0.2);
+    border-radius: 30px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(101, 101, 101, 0.3);
+    border-radius: 20px;
+    padding: 5px;
+    min-width: 300px;
+    width: 100%;
+}
+
+.dropMenuContainer {
+    background-color: var(--black);
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.tokenList {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+}
