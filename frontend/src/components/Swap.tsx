@@ -12,6 +12,8 @@ import styles from "../styles/swap.module.css";
 import swap from '../images/swap.png'
 import reverse from '../images/reverse.png'
 
+import SwapGasFees from "../components/SwapGasFees"
+
 type UiToken = {
   symbol: string
   name?: string
@@ -167,6 +169,41 @@ export default function Swap() {
     }
   }
 
+  const deadlineBN = useMemo(
+    () => BigInt(Math.floor(Date.now() / 1000) + deadlineMins * 60),
+    [deadlineMins]
+  )
+
+  // Choisir la bonne fonction + args + "value" si natif en entrée
+  const swapCall = useMemo(() => {
+    if (!address) return null
+    if (TIn.isNative) {
+      // tTRUST -> ERC20
+      return {
+        fn: "swapExactETHForTokens" as const,
+        args: [minOut, path, address, deadlineBN] as const,
+        value: rawIn,
+        fallback: 150_000n,
+      }
+    }
+    if (TOut.isNative) {
+      // ERC20 -> tTRUST
+      return {
+        fn: "swapExactTokensForETH" as const,
+        args: [rawIn, minOut, path, address, deadlineBN] as const,
+        value: 0n,
+        fallback: 150_000n,
+      }
+    }
+    // ERC20 -> ERC20
+    return {
+      fn: "swapExactTokensForTokens" as const,
+      args: [rawIn, minOut, path, address, deadlineBN] as const,
+      value: 0n,
+      fallback: 200_000n,
+    }
+  }, [address, TIn.isNative, TOut.isNative, rawIn, minOut, path, deadlineBN])
+
   const outPreview = quoteOut ? Number(formatUnits(quoteOut, TOut.decimals)).toLocaleString(undefined, { maximumFractionDigits: 6 }) : '—'
 
   return (
@@ -255,6 +292,17 @@ export default function Swap() {
           <span className={styles.percentSign}>min</span>
           </div>
         </div>
+        {swapCall && (
+          <SwapGasFees
+            to={router}
+            abi={RouterABI as any}
+            functionName={swapCall.fn}
+            args={swapCall.args as unknown as any[]}
+            value={swapCall.value}
+            enabled={Boolean(address && rawIn > 0n && path.length >= 2)}
+            fallbackGas={swapCall.fallback}
+          />
+        )}
         </div>
         {/* Approve */}
         {!TIn.isNative && needApprove && (
