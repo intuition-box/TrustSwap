@@ -1,0 +1,68 @@
+name: Deploy Dapp to GitHub Pages
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9 # use the version you need
+          run_install: false
+          
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Install root dependencies
+        run: |
+          pnpm add -D vite @vitejs/plugin-react --ignore-scripts
+          
+      - name: Install dependencies
+        run: |
+          cd frontend
+          pnpm install
+          
+      - name: Build with Vite
+        run: |
+          cd frontend
+          pnpm run build
+          
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
