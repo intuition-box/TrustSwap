@@ -6,7 +6,6 @@ import FarmAprBadge from "./FarmAprBadge"
 import styles from "../styles/farm.module.css";
 // 👉 tes helpers de format
 import { fmtLP, fmtAmount, fmtAllowance, shortAddr } from "../lib/format";
-import { useFarmApr } from "./useFarmApr";
 const WNATIVE = (import.meta.env.VITE_WTTRUST_ADDRESS || '').toLowerCase();
 const NATIVE_SYM = import.meta.env.VITE_NATIVE_SYMBOL || 'tTRUST';
 const WRAPPED_SYM = import.meta.env.VITE_WRAPPED_SYMBOL || 'WTTRUST';

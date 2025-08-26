@@ -41,9 +41,7 @@ const univ2FactoryAbi = [
   }
 ] as const
 
-/** ================
- *  Component Props
- *  ================ */
+/** ================ */
 export type FarmAprBadgeProps = {
   sr: Address            // StakingRewards
   lp: Address            // UniswapV2Pair
@@ -55,9 +53,7 @@ export type FarmAprBadgeProps = {
   showDetails?: boolean
 }
 
-/** ============================
- *  Utils
- *  ============================ */
+/** ============================ */
 const SECONDS_PER_YEAR = 31_536_000
 
 function toFloat(amount: bigint, decimals: number): number {
@@ -69,9 +65,7 @@ function fmtPct(v?: number) {
   return `${v.toFixed(2)}%`
 }
 
-/** ======================================
- *  Prix token en WNATIVE via Factory.getPair
- *  ====================================== */
+/** ====================================== */
 async function getPriceInWNative(opts: {
   client: any
   token: Address
@@ -111,9 +105,7 @@ async function getPriceInWNative(opts: {
   return wnatNorm / tokenNorm // WNATIVE per 1 token
 }
 
-/** ============================================
- *  Valorisation LP en WNATIVE (TVL_pair & LP px)
- *  ============================================ */
+/** ============================================ */
 async function getLpValuationInWNative(opts: {
   client: any
   lp: Address
@@ -130,7 +122,6 @@ async function getLpValuationInWNative(opts: {
   const { client, lp, wnative, factory } = opts
   if (!client) return null
 
-  // Étape 1 : lire token0/token1 + réserves + supply + décimales LP
   const [token0, token1, reserves, lpSupplyRaw, decLP] = (await Promise.all([
     client.readContract({ address: lp, abi: univ2PairAbi, functionName: "token0" }) as Promise<Address>,
     client.readContract({ address: lp, abi: univ2PairAbi, functionName: "token1" }) as Promise<Address>,
@@ -143,7 +134,6 @@ async function getLpValuationInWNative(opts: {
 
   const [r0, r1] = reserves
 
-  // Étape 2 : maintenant qu’on connaît token0/token1, on peut lire leurs decimals
   const [dec0, dec1] = await Promise.all([
     client.readContract({ address: token0, abi: erc20Abi, functionName: "decimals" }) as Promise<number>,
     client.readContract({ address: token1, abi: erc20Abi, functionName: "decimals" }) as Promise<number>
@@ -155,7 +145,6 @@ async function getLpValuationInWNative(opts: {
 
   if (lpSupplyNorm <= 0) return null
 
-  // Prix token0 & token1 en WNATIVE
   const [p0, p1] = await Promise.all([
     getPriceInWNative({ client, token: token0, wnative, factory }),
     getPriceInWNative({ client, token: token1, wnative, factory })
@@ -163,23 +152,13 @@ async function getLpValuationInWNative(opts: {
 
   if (p0 === undefined || p1 === undefined) return null
 
-  // TVL de la paire en WNATIVE
   const tvlPairInWNat = r0Norm * p0 + r1Norm * p1
   const lpPriceInWNative = tvlPairInWNat / lpSupplyNorm
 
-  return {
-    lpPriceInWNative,
-    lpTotalSupply: lpSupplyNorm,
-    token0,
-    token1,
-    reserves0: r0Norm,
-    reserves1: r1Norm
-  }
+  return { lpPriceInWNative, lpTotalSupply: lpSupplyNorm, token0, token1, reserves0: r0Norm, reserves1: r1Norm }
 }
 
-/** ===========================
- *  Lecture APR Farm (main fn)
- *  =========================== */
+/** =========================== */
 async function computeFarmApr(opts: {
   client: any
   sr: Address
@@ -196,7 +175,7 @@ async function computeFarmApr(opts: {
 }> {
   const { client, sr, lp, wnative, factory, rewardTokenOverride } = opts
 
-  // 1) Read SR core
+  // 1) core SR
   const [rewardRateRaw, periodFinishRaw, totalStakedRaw, rewardsTokenAddr] = (await Promise.all([
     client.readContract({ address: sr, abi: stakingRewardsAbi, functionName: "rewardRate" }) as Promise<bigint>,
     client.readContract({ address: sr, abi: stakingRewardsAbi, functionName: "periodFinish" }) as Promise<bigint>,
@@ -214,7 +193,7 @@ async function computeFarmApr(opts: {
   const periodFinish = Number(periodFinishRaw)
   const expired = now >= periodFinish
 
-  // 2) Decimals & symbol du token de rewards
+  // 2) reward token meta
   const [decRewards, rewardTokenSymbol] = (await Promise.all([
     client.readContract({ address: rewardsTokenAddr, abi: erc20Abi, functionName: "decimals" }) as Promise<number>,
     client
@@ -222,24 +201,19 @@ async function computeFarmApr(opts: {
       .catch(() => Promise.resolve<string | undefined>(undefined))
   ])) as [number, string | undefined]
 
-  // 3) Valorisation LP en WNATIVE
+  // 3) LP valuation
   const lpVal = await getLpValuationInWNative({ client, lp, wnative, factory })
   if (!lpVal) {
     return { aprPct: 0, expired, periodFinish, tvlStakedInWNative: 0, rewardTokenSymbol }
   }
 
-  // 4) Prix du token de rewards en WNATIVE
-  const pRewardInWNative = await getPriceInWNative({
-    client,
-    token: rewardsTokenAddr,
-    wnative,
-    factory
-  })
+  // 4) reward token price in WNATIVE
+  const pRewardInWNative = await getPriceInWNative({ client, token: rewardsTokenAddr, wnative, factory })
   if (pRewardInWNative === undefined) {
     return { aprPct: 0, expired, periodFinish, tvlStakedInWNative: 0, rewardTokenSymbol }
   }
 
-  // 5) TVL stakée (LP -> WNATIVE)
+  // 5) staked TVL (LP -> WNATIVE), utilisée pour APR mais plus affichée
   const decLP =
     (await client.readContract({ address: lp, abi: erc20Abi, functionName: "decimals" }).catch(() => 18)) ?? 18
   const totalStaked = toFloat(totalStakedRaw, Number(decLP))
@@ -249,7 +223,7 @@ async function computeFarmApr(opts: {
     return { aprPct: 0, expired, periodFinish, tvlStakedInWNative, rewardTokenSymbol }
   }
 
-  // 6) Flux annuel de rewards (valorisé en WNATIVE)
+  // 6) yearly rewards in WNATIVE
   const rewardRate = parseFloat(formatUnits(rewardRateRaw, decRewards)) // tokens/s
   const annualRewardsTokens = rewardRate * SECONDS_PER_YEAR
   const annualRewardsInWNative = annualRewardsTokens * pRewardInWNative
@@ -260,9 +234,7 @@ async function computeFarmApr(opts: {
   return { aprPct, expired, periodFinish, tvlStakedInWNative, rewardTokenSymbol }
 }
 
-/** ===========================
- *  UI Component
- *  =========================== */
+/** =========================== */
 export default function FarmAprBadge({
   sr,
   lp,
@@ -279,7 +251,6 @@ export default function FarmAprBadge({
   const [apr, setApr] = useState<number>(0)
   const [expired, setExpired] = useState(false)
   const [periodFinish, setPeriodFinish] = useState<number>(0)
-  const [tvlStaked, setTvlStaked] = useState<number>(0)
   const [rewardSym, setRewardSym] = useState<string | undefined>(undefined)
 
   const load = async () => {
@@ -297,7 +268,6 @@ export default function FarmAprBadge({
       setApr(res.aprPct)
       setExpired(res.expired)
       setPeriodFinish(res.periodFinish)
-      setTvlStaked(res.tvlStakedInWNative)
       setRewardSym(res.rewardTokenSymbol)
       setLoading(false)
     } catch (e: any) {
@@ -316,39 +286,24 @@ export default function FarmAprBadge({
 
   const finishStr = useMemo(() => {
     if (!periodFinish) return "—"
-    try {
-      return new Date(periodFinish * 1000).toLocaleString()
-    } catch {
-      return "—"
-    }
+    try { return new Date(periodFinish * 1000).toLocaleString() }
+    catch { return "—" }
   }, [periodFinish])
 
   return (
     <div className={className ?? "inline-flex items-center gap-2 text-sm"}>
       <span className="font-medium">APR:</span>
-      {loading ? (
-        <span>Calcul…</span>
-      ) : error ? (
-        <span title={error}>—</span>
-      ) : (
-        <span>{fmtPct(apr)}</span>
-      )}
+      {loading ? <span>Calcul…</span> : (error ? <span title={error}>—</span> : <span>{fmtPct(apr)}</span>)}
 
       <span className="mx-2">•</span>
 
       <span className="font-medium">Status:</span>
       <span>{expired ? "Expiré" : `Actif jusqu’au ${finishStr}`}</span>
 
-      {showDetails && !loading && !error && (
+      {showDetails && !loading && !error && rewardSym && (
         <>
           <span className="mx-2">•</span>
-          <span>TVL staké (en WNATIVE): {tvlStaked.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
-          {rewardSym && (
-            <>
-              <span className="mx-2">•</span>
-              <span>Reward: {rewardSym}</span>
-            </>
-          )}
+          <span>Reward: {rewardSym}</span>
         </>
       )}
     </div>
