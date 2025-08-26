@@ -182,7 +182,10 @@ export default function Swap() {
             </span>
           </span>
           <div className={styles.sellSelect}>
-            <TokenSelector value={{ ...TIn, name: TIn.name ?? TIn.symbol }} onChange={t => setTIn(t)} />
+            <TokenSelector
+              value={{ ...TIn, name: TIn.name ?? TIn.symbol }}
+              onChange={(t) => { if (!t) return; setTIn(t); }}  
+            />
             <input value={amountIn} onChange={e => setAmountIn(e.target.value)} placeholder="0.0" className={styles.InputSwap} />
           </div>
         </div>
@@ -203,7 +206,10 @@ export default function Swap() {
             </span>
           </span>
           <div className={styles.sellSelect}>
-            <TokenSelector value={{ ...TOut, name: TOut.name ?? TOut.symbol }} onChange={t => setTOut(t)} />
+            <TokenSelector
+              value={{ ...TOut, name: TOut.name ?? TOut.symbol }}
+              onChange={(t) => { if (!t) return; setTOut(t); }}  
+            />
             <div className={styles.InputSwap}>{outPreview}</div>
           </div>
         </div>
