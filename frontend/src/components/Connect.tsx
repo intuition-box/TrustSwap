@@ -1,12 +1,12 @@
 // src/components/Connect.tsx
 import { useAccount, useConnect, useDisconnect, usePublicClient } from 'wagmi'
 import { injected } from 'wagmi/connectors'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import type { Address } from 'viem'
 import { erc20Abi, formatUnits } from 'viem'
 import { TOKENS } from '../tokens/intuit'
-import AdminOnlySetter from "../components/admin/AdminOnlySetter"
-import ProtocolFeeCard from "../components/admin/ProtocolFeeCard"
+import styles from "../styles/Connect.module.css"
+import metamask from '../images/metamask.png'
 
 type UiToken = {
   symbol: string
@@ -20,10 +20,7 @@ function WalletTokens({ address }: { address: Address }) {
   const publicClient = usePublicClient()
   const [rows, setRows] = useState<Array<{symbol:string; balance:bigint; decimals:number; address?:Address}>>([])
   const [hideZero, setHideZero] = useState(true)
-  const display = useMemo(
-    () => rows.filter(r => !hideZero || r.balance > 0n),
-    [rows, hideZero]
-  )
+  const display = useMemo(() => rows.filter(r => !hideZero || r.balance > 0n), [rows, hideZero])
 
   const load = async () => {
     if (!publicClient) return
@@ -51,15 +48,14 @@ function WalletTokens({ address }: { address: Address }) {
 
   useEffect(() => {
     load()
-    const id = setInterval(load, 12000) 
+    const id = setInterval(load, 12000)
     return () => clearInterval(id)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [publicClient, address])
 
   return (
-    <div style={{marginTop: 8}}>
+    <div>
       <div style={{display:'flex', alignItems:'center', gap:8}}>
-        <strong>Mes tokens</strong>
+        <strong>My tokens</strong>
         <label style={{fontSize:12, display:'flex', alignItems:'center', gap:6}}>
           <input type="checkbox" checked={hideZero} onChange={e=>setHideZero(e.target.checked)} />
           Masquer soldes à 0
@@ -67,23 +63,15 @@ function WalletTokens({ address }: { address: Address }) {
         <button onClick={load} style={{marginLeft:'auto', fontSize:12}}>Actualiser</button>
       </div>
 
-      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginTop:6}}>
-        {display.length === 0 && <div style={{gridColumn:'1 / -1', opacity:0.7}}>Aucun token à afficher.</div>}
+      <div className={styles.tokenList}>
+      {display.length === 0 && <div>You don’t have any tokens to display.</div>}
         {display.map(({symbol, balance, decimals}) => (
-          <div key={symbol} style={{display:'flex', justifyContent:'space-between', padding:'6px 10px', border:'1px solid #eee', borderRadius:8}}>
+          <div key={symbol} className={styles.tokenWallet}>
             <span>{symbol}</span>
             <span>{Number(formatUnits(balance, decimals)).toLocaleString(undefined, { maximumFractionDigits: 6 })}</span>
           </div>
         ))}
       </div>
-      {/*       
-        <AdminOnlySetter>
-          <div className="p-3 border rounded-2xl space-y-3">
-            <h3 className="font-medium">Admin</h3>
-            <ProtocolFeeCard />
-          </div>
-        </AdminOnlySetter>
-       */}
     </div>
   )
 }
@@ -92,20 +80,59 @@ export default function Connect() {
   const { isConnected, address } = useAccount()
   const { connect, isPending } = useConnect()
   const { disconnect } = useDisconnect()
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Fermer le dropdown si clic à l’extérieur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const btnClass = isConnected
+    ? `${styles.btnConnect} ${styles.connected}`
+    : styles.btnConnect
+
+  if (!isConnected) {
+    return (
+      <button
+        onClick={() => connect({ connector: injected() })}
+        disabled={isPending}
+        className={btnClass}
+      >
+        <img src={metamask} alt="Logo"  className={styles.metamaskConnectLogo}/>
+        {isPending ? 'Connecting...' : 'Connect Wallet'}
+      </button>
+    )
+  }
 
   return (
-    <div>
-      {isConnected ? (
-        <div>
-          <p>Connected: {address}</p>
-          {address && <WalletTokens address={address} />}
+    <div className={styles.connectContainer} ref={containerRef}>
+      <button
+        onClick={() => setOpen(!open)}
+        className={btnClass}
+      >
+         <img src={metamask} alt="Logo"  className={styles.metamaskConnectLogo}/>
+        <span className={styles.addressWallet}> {address?.slice(0, 6)}...{address?.slice(-4)}</span>
+      </button>
 
-          <button onClick={() => disconnect()} style={{marginTop:12}}>Disconnect</button>
+      {open && (
+        <div className={styles.dropMenu}>
+          <div className={styles.dropMenuContainer}>
+          {address && <WalletTokens address={address} />}
+          <button
+            onClick={() => { disconnect(); setOpen(false) }}
+            style={{ marginTop: 12, width: '100%' }}
+          >
+            Disconnect
+          </button>
         </div>
-      ) : (
-        <button onClick={() => connect({ connector: injected() })} disabled={isPending}>
-          {isPending ? 'Connecting...' : 'Connect Wallet'}
-        </button>
+        </div>
       )}
     </div>
   )
