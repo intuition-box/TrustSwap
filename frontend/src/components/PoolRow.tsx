@@ -1,96 +1,116 @@
 import { useEffect, useState } from 'react'
-import { usePublicClient, useWatchContractEvent } from 'wagmi'
+import { usePublicClient, useWalletClient, useAccount, useWatchContractEvent } from 'wagmi'
 import type { Address } from 'viem'
-import { TOKENS } from '../tokens/intuit' 
+import { TOKENS } from '../tokens/intuit'
 import { fmtAmount, shortAddr } from '../lib/format'
-import AddLiquidity from "../components/AddLiquidity";
-import RemoveLiquidity from "../components/RemoveLiquidity";
+import { encodeFunctionData, parseGwei } from 'viem'
+import RouterABI from '../abis/Router02.min.json'
+import styles from "../styles/pool.module.css"
+import arrow from '../images/arrow.png'
+
 const PairABI = [
   { inputs: [], name: 'token0', outputs: [{ internalType:'address', type:'address' }], stateMutability:'view', type:'function' },
   { inputs: [], name: 'token1', outputs: [{ internalType:'address', type:'address' }], stateMutability:'view', type:'function' },
   { inputs: [], name: 'getReserves', outputs: [
-    { internalType:'uint112', name:'reserve0', type:'uint112' },
-    { internalType:'uint112', name:'reserve1', type:'uint112' },
-    { internalType:'uint32',  name:'blockTimestampLast', type:'uint32' },
-  ], stateMutability:'view', type:'function' },
-  // pour auto-update en live
+      { internalType:'uint112', name:'reserve0', type:'uint112' },
+      { internalType:'uint112', name:'reserve1', type:'uint112' },
+      { internalType:'uint32',  name:'blockTimestampLast', type:'uint32' },
+    ], stateMutability:'view', type:'function' },
   { anonymous:false, name:'Sync', type:'event', inputs:[
-    { indexed:false, internalType:'uint112', name:'reserve0', type:'uint112' },
-    { indexed:false, internalType:'uint112', name:'reserve1', type:'uint112' }
-  ] }
+      { indexed:false, internalType:'uint112', name:'reserve0', type:'uint112' },
+      { indexed:false, internalType:'uint112', name:'reserve1', type:'uint112' }
+    ] }
 ] as const
 
 const ERC20_MINI = [
-  { inputs: [], name: 'symbol',   outputs: [{ type:'string' }], stateMutability:'view', type:'function' },
-  { inputs: [], name: 'decimals', outputs: [{ type:'uint8'   }], stateMutability:'view', type:'function' },
+  { inputs: [], name: 'symbol', outputs: [{ type:'string' }], stateMutability:'view', type:'function' },
+  { inputs: [], name: 'decimals', outputs: [{ type:'uint8' }], stateMutability:'view', type:'function' },
+  { inputs: [{ internalType:'address', name:'account', type:'address' }], name: 'balanceOf', outputs:[{ type:'uint256' }], stateMutability:'view', type:'function' }
 ] as const
 
-function addrEq(a?: string, b?: string) {
-  return a?.toLowerCase() === b?.toLowerCase()
-}
+const router = import.meta.env.VITE_ROUTER_ADDRESS as Address
+const GAS_PRICE = parseGwei(import.meta.env.VITE_GAS_PRICE_GWEI ?? '0.2')
+const GAS_LIMIT_ADD = 1_200_000n
+const GAS_LIMIT_REMOVE = 1_000_000n
 
-function fromUnits(x: bigint, decimals: number) {
-  return Number(x) / Number(10n ** BigInt(decimals))
-}
+function addrEq(a?: string, b?: string) { return a?.toLowerCase() === b?.toLowerCase() }
 
 export default function PoolRow({ pair }: { pair: Address }) {
   const pc = usePublicClient()
+  const { address, isConnected } = useAccount()
+  const { data: walletClient } = useWalletClient()
+
   const [t0, setT0] = useState<Address>()
   const [t1, setT1] = useState<Address>()
-  const [sym0, setSym0] = useState<string>('…')
-  const [sym1, setSym1] = useState<string>('…')
-  const [dec0, setDec0] = useState<number>(18)
-  const [dec1, setDec1] = useState<number>(18)
+  const [sym0, setSym0] = useState('…')
+  const [sym1, setSym1] = useState('…')
+  const [dec0, setDec0] = useState(18)
+  const [dec1, setDec1] = useState(18)
   const [r0, setR0] = useState<bigint>(0n)
   const [r1, setR1] = useState<bigint>(0n)
+  const [lpBalance, setLpBalance] = useState(0n)
+  const [balance0, setBalance0] = useState(0n)
+  const [balance1, setBalance1] = useState(0n)
 
+  // Form
+  const [amountAdd0, setAmountAdd0] = useState('0')
+  const [amountAdd1, setAmountAdd1] = useState('0')
+  const [slippage, setSlippage] = useState(0.5)
+  const [deadlineMins, setDeadlineMins] = useState(10)
+  const [pendingAdd, setPendingAdd] = useState(false)
+  const [pendingRemove, setPendingRemove] = useState(false)
+  const [percentRemove, setPercentRemove] = useState(25)
+  const [liqToRemoveInput, setLiqToRemoveInput] = useState('0')
+
+  // Switch form view: Add or Remove
+  const [showAdd, setShowAdd] = useState(true)
+  // Pool expand/collapse
+  const [expanded, setExpanded] = useState(false)
+
+  // --- Load token info, reserves, wallet balances
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       if (!pc) return
-      // token0/token1
       const [a, b] = await Promise.all([
         pc.readContract({ address: pair, abi: PairABI, functionName: 'token0' }) as Promise<Address>,
         pc.readContract({ address: pair, abi: PairABI, functionName: 'token1' }) as Promise<Address>,
       ])
       if (cancelled) return
-      setT0(a); setT1(b)
+      setT0(a)
+      setT1(b)
 
-      // reserves
       const [res0, res1] = await pc.readContract({ address: pair, abi: PairABI, functionName: 'getReserves' }) as unknown as [bigint, bigint, number]
       if (cancelled) return
-      setR0(res0); setR1(res1)
+      setR0(res0)
+      setR1(res1)
 
-      // symbols/decimals avec override via TOKENS si dispo
       const m0 = TOKENS.find(x => addrEq(x.address as any, a) || addrEq(x.wrapped as any, a))
       const m1 = TOKENS.find(x => addrEq(x.address as any, b) || addrEq(x.wrapped as any, b))
 
-      if (m0?.symbol) setSym0(m0.symbol)
-      else {
-        try { setSym0(await pc.readContract({ address: a, abi: ERC20_MINI, functionName: 'symbol' }) as string) }
-        catch { setSym0('TOKEN0') }
-      }
-      if (m1?.symbol) setSym1(m1.symbol)
-      else {
-        try { setSym1(await pc.readContract({ address: b, abi: ERC20_MINI, functionName: 'symbol' }) as string) }
-        catch { setSym1('TOKEN1') }
-      }
+      try { setSym0(m0?.symbol ?? await pc.readContract({ address: a, abi: ERC20_MINI, functionName: 'symbol' }) as string) } catch { setSym0('TOKEN0') }
+      try { setSym1(m1?.symbol ?? await pc.readContract({ address: b, abi: ERC20_MINI, functionName: 'symbol' }) as string) } catch { setSym1('TOKEN1') }
+      setDec0((m0?.decimals ?? Number(await pc.readContract({ address: a, abi: ERC20_MINI, functionName: 'decimals' }))) || 18)
+      setDec1((m1?.decimals ?? Number(await pc.readContract({ address: b, abi: ERC20_MINI, functionName: 'decimals' }))) || 18)
 
-      if (typeof m0?.decimals === 'number') setDec0(m0.decimals)
-      else {
-        try { setDec0(Number(await pc.readContract({ address: a, abi: ERC20_MINI, functionName: 'decimals' })) || 18) }
-        catch { setDec0(18) }
-      }
-      if (typeof m1?.decimals === 'number') setDec1(m1.decimals)
-      else {
-        try { setDec1(Number(await pc.readContract({ address: b, abi: ERC20_MINI, functionName: 'decimals' })) || 18) }
-        catch { setDec1(18) }
+      if (address) {
+        try {
+          const [lpBal, bal0, bal1] = await Promise.all([
+            pc.readContract({ address: pair, abi: ERC20_MINI, functionName:'balanceOf', args:[address] }) as Promise<bigint>,
+            pc.readContract({ address: a, abi: ERC20_MINI, functionName:'balanceOf', args:[address] }) as Promise<bigint>,
+            pc.readContract({ address: b, abi: ERC20_MINI, functionName:'balanceOf', args:[address] }) as Promise<bigint>,
+          ])
+          if (!cancelled) {
+            setLpBalance(lpBal)
+            setBalance0(bal0)
+            setBalance1(bal1)
+          }
+        } catch {}
       }
     })()
     return () => { cancelled = true }
-  }, [pc, pair])
+  }, [pc, pair, address])
 
-  // live update des réserves
   useWatchContractEvent({
     address: pair,
     abi: PairABI,
@@ -104,21 +124,222 @@ export default function PoolRow({ pair }: { pair: Address }) {
     }
   })
 
-  const price = r0 > 0n ? (Number(r1) / Number(r0)) * (10 ** (dec0 - dec1)) : null
+  const price = r0 > 0n ? (Number(r1)/Number(r0))*(10**(dec0-dec1)) : null
+  useEffect(() => {
+    if (r0 === 0n || r1 === 0n) return
+    const a = BigInt(Math.floor(Number(amountAdd0) * 10**dec0))
+    const b = a * r1 / r0
+    const value = Number(b) / 10**dec1
+    setAmountAdd1(value.toFixed(5)) // arrondi à 5 chiffres après la virgule
+  }, [amountAdd0, r0, r1, dec0, dec1])
+  
+  const onAdd = async () => {
+    if (!walletClient || !address || !t0 || !t1) return
+    setPendingAdd(true)
+    try {
+      const a = BigInt(Math.floor(Number(amountAdd0) * 10**dec0))
+      const b = BigInt(Math.floor(Number(amountAdd1) * 10**dec1))
+      const slippageBps = BigInt(Math.floor(slippage*100))
+      const minA = a - (a*slippageBps/10_000n)
+      const minB = b - (b*slippageBps/10_000n)
+      const deadline = BigInt(Math.floor(Date.now()/1000) + deadlineMins*60)
+      const data = encodeFunctionData({
+        abi: RouterABI as any,
+        functionName: 'addLiquidity',
+        args: [t0, t1, a, b, minA, minB, address, deadline]
+      })
+      const hash = await walletClient.sendTransaction({ account: address, to: router, data, gas: GAS_LIMIT_ADD, gasPrice: GAS_PRICE })
+      await pc.waitForTransactionReceipt({ hash })
+      alert('Liquidity added ✅')
+    } catch(e:any) { console.error(e); alert('AddLiquidity failed') }
+    finally { setPendingAdd(false) }
+  }
+
+  const onRemove = async () => {
+    if (!walletClient || !address || !t0 || !t1) return
+    setPendingRemove(true)
+    try {
+      const liq = BigInt(Math.floor(Number(liqToRemoveInput) * 10**18))
+      const deadline = BigInt(Math.floor(Date.now()/1000) + deadlineMins*60)
+      const data = encodeFunctionData({
+        abi: RouterABI as any,
+        functionName: 'removeLiquidity',
+        args: [t0, t1, liq, 0n, 0n, address, deadline]
+      })
+      const hash = await walletClient.sendTransaction({ account: address, to: router, data, gas: GAS_LIMIT_REMOVE, gasPrice: GAS_PRICE })
+      await pc.waitForTransactionReceipt({ hash })
+      alert('Liquidity removed ✅')
+    } catch(e:any) { console.error(e); alert('RemoveLiquidity failed') }
+    finally { setPendingRemove(false) }
+  }
 
   return (
-    <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, padding:'8px 12px', border:'1px solid #eee', borderRadius:12}}>
-      <div>
-        <div style={{fontWeight:600}}>{sym0} / {sym1}</div>
-        <small>{shortAddr(pair)}</small>
+    <div className={`${styles.listPool} ${expanded ? styles.openPool : ''}`}>
+         
+      {/* Header cliquable pour expand/collapse */}
+      <div className={styles.pool} onClick={() => setExpanded(!expanded)} style={{ cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div className={styles.tokenPool}>
+          <span className={styles.pair}>{sym0} / {sym1}</span>
+          <span className={styles.addressPool}>{shortAddr(pair)}</span>
+        </div>
+
+        <div className={styles.reservePool}>
+          <span className={styles.labelPool}>Reserve :</span>
+          <span className={styles.reserve}>{sym0}: {fmtAmount(r0, dec0)} | {sym1}: {fmtAmount(r1, dec1)}</span>
+        </div>
+
+        <div className={styles.rightPool}>
+        <div className={styles.pricePool}>
+        <span className={styles.labelPool}>Price :</span>
+          <div className={styles.reserve}> {price ? `1 ${sym0} ≈ ${price.toFixed(6)} ${sym1}` : '—'}</div>
+        </div>
+        <div className={styles.reservePool}>
+        <span className={styles.labelPool}>LP Balance :</span>
+          <div className={styles.reserve}>{fmtAmount(lpBalance, 18)}</div>
+       </div>
+ 
+                      <img src={arrow} alt="Logo"  className={expanded ? styles.arrowOpen : styles.arrowClosed}/>
+     
       </div>
-      <div>
-        <div>Reserve {sym0}: {fmtAmount(r0, dec0, { compact: true })}</div>
-        <div>Reserve {sym1}: {fmtAmount(r1, dec1, { compact: true })}</div>
       </div>
-      <div>
-        <div>Price: {price ? `1 ${sym0} ≈ ${(price).toFixed(6)} ${sym1}` : '—'}</div>
+
+      {/* Contenu Add/Remove affiché seulement si expanded */}
+      {expanded && (
+        <div>
+                <div className={styles.traitGreen}></div>
+<div className={styles.choiceContainer}>
+  {/* Dynamic sentence based on showAdd */}
+  <span className={styles.infoAddRemove}>
+    {showAdd 
+      ? "You are adding liquidity." 
+      : "You are removing liquidity."}
+  </span>
+
+  {/* Buttons to toggle the state */}
+  <button className={styles.choiceBtn} onClick={() => setShowAdd(true)}>
+    <span className={styles.textBtn}>+ Add</span>
+  </button>
+  <button className={styles.choiceBtn} onClick={() => setShowAdd(false)}>
+    <span className={styles.textBtn}>- Remove</span>
+  </button>
+</div>
+
+{showAdd && (
+  <div className={styles.addLiquidity}>
+               <button
+      onClick={onAdd}
+      disabled={!isConnected || pendingAdd}
+      className={styles.addBtnBottom}
+    >
+      {pendingAdd ? 'Adding…' : 'Add'}
+    </button>
+    <div className={styles.tokenAddRemoveContainer}>
+      <div className={styles.tokenOne}>
+        <div className={styles.headerToken}>
+          <span className={styles.textInfoHeader}>Balance {sym0}:</span>
+          <span className={styles.labelToken}>{fmtAmount(balance0, dec0)} {sym0}</span>
+        </div>
+        <input
+          type="number"
+          step="any"
+          value={amountAdd0}
+          onChange={e => setAmountAdd0(e.target.value)}
+          className={styles.InputAddRemove}
+        />
       </div>
+      <div className={styles.tokenTwo}>
+        <div className={styles.headerToken}>
+          <span className={styles.textInfoHeader}>Balance {sym1}:</span>
+          <span className={styles.labelToken}>{fmtAmount(balance1, dec1)} {sym1}</span>
+        </div>
+        <input
+          type="number"
+          step="any"
+          value={amountAdd1}
+          onChange={e => setAmountAdd1(e.target.value)}
+          className={styles.InputAddRemove}
+        />
+      </div>
+    </div>
+
+    {/* Slippage & Deadline styled comme Swap.tsx */}
+    <div className={styles.infosContainer} style={{ marginTop: 8 }}>
+      <div className={styles.ligneInfoLabel}>
+        <span className={styles.nameLigne}>Slippage:</span>
+        <div className={styles.choicePercent}>
+          {[0.1, 0.5, 1].map(p => (
+            <button
+              key={p}
+              className={`${styles.choice} ${slippage === p ? styles.activeChoice : ''}`}
+              onClick={() => setSlippage(p)}
+            >
+              {p}%
+            </button>
+          ))}
+          <div className={styles.inputPercentWrapper}>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              value={slippage}
+              onChange={e => setSlippage(Number(e.target.value))}
+              className={styles.inputCustom}
+            />
+            <span className={styles.Sign}>%</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.ligneInfoLabel}>
+        <span className={styles.nameLigne}>Deadline:</span>
+        <div className={styles.inputPercentWrapper}>
+          <input
+            type="number"
+            min={1}
+            value={deadlineMins}
+            onChange={e => setDeadlineMins(Number(e.target.value))}
+            className={styles.inputCustom}
+          />
+          <span className={styles.percentSign}>min</span>
+        </div>
+        
+      </div>
+    </div>
+
+
+  </div>
+)}
+
+
+          {!showAdd && (
+            <div className={styles.removeLiquidity}>
+  
+              <div>
+                <input type="number" step="any" value={liqToRemoveInput} onChange={e => setLiqToRemoveInput(e.target.value)} style={{ width:120, marginRight:8 }} />
+                <span>of {fmtAmount(lpBalance, 18)} LP tokens</span>
+              </div>
+              <div>
+                {[25,50,75,100].map(p => (
+                  <button
+                    key={p}
+                    onClick={() => {
+                      const liq = lpBalance * BigInt(p)/100n
+                      setLiqToRemoveInput((Number(liq)/10**18).toString())
+                      setPercentRemove(p)
+                    }}
+                    style={{ fontWeight: percentRemove===p ? 600 : 400 }}
+                  >
+                    {p}%
+                  </button>
+                ))}
+              </div>
+              <button className={styles.removeBtnBottom} onClick={onRemove} disabled={!isConnected || pendingRemove}>
+                {pendingRemove ? 'Removing…' : 'Remove'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

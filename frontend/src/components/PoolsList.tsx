@@ -63,12 +63,9 @@ export default function PoolsList() {
   })
 
   return (
-    <div style={{maxWidth: 900}}>
-      <h3>Toutes les pools</h3>
+    <div style={{width:"100%", maxWidth: 900, marginTop:"40px"}}>
       {loading && <div>Chargement…</div>}
-      <div style={{display:'grid', gap:8}}>
         {pairs.map((p) => (<PoolRow key={p} pair={p} />))}
-      </div>
     </div>
   )
 }
