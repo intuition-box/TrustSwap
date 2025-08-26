@@ -6,24 +6,29 @@
     "compile": "hardhat compile",
     "deploy": "hardhat run scripts/00_deploy_core.ts --network intuition",
     "seed": "hardhat run scripts/01_seed_liquidity.ts --network intuition",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "fee:set": "tsx scripts/20_set_fee_to.ts",
+    "fee:unset": "tsx scripts/21_unset_fee_to.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.7",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@types/chai": "^4.3.16",
     "@types/mocha": "^10.0.6",
+    "@types/node": "^24.3.0",
     "chai": "^4.4.1",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "ethers": "^6.13.2",
     "hardhat": "^2.22.15",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.5",
     "typescript": "^5.5.4"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.2",
     "@uniswap/lib": "4.0.1-alpha",
     "@uniswap/v2-core": "^1.0.1",
-    "@uniswap/v2-periphery": "^1.1.0-beta.0"
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "viem": "^2.33.2"
   }
 }
