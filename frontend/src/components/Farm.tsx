@@ -3,10 +3,10 @@ import { useEffect, useState, useMemo } from "react";
 import { Address, erc20Abi, parseUnits, formatUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import FarmAprBadge from "./FarmAprBadge"
-
+import styles from "../styles/farm.module.css";
 // 👉 tes helpers de format
 import { fmtLP, fmtAmount, fmtAllowance, shortAddr } from "../lib/format";
-
+import { useFarmApr } from "./useFarmApr";
 const WNATIVE = (import.meta.env.VITE_WTTRUST_ADDRESS || '').toLowerCase();
 const NATIVE_SYM = import.meta.env.VITE_NATIVE_SYMBOL || 'tTRUST';
 const WRAPPED_SYM = import.meta.env.VITE_WRAPPED_SYMBOL || 'WTTRUST';
@@ -101,8 +101,10 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
 
   const poolLabel = useMemo(() => {
     const pair = sym0 && sym1 ? `${sym0}-${sym1}` : "LP";
-    return `${pair} (${shortAddr(stakingToken)})`;
+    return `${pair}`;
   }, [sym0, sym1, stakingToken]);
+
+  const addressFarm = shortAddr(stakingToken);
 
   const load = async () => {
     if (!publicClient || !address) return;
@@ -243,10 +245,16 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
   };
 
   return (
-    <div style={{ maxWidth: 620, display: 'grid', gap: 10, border: '1px solid #e5e7eb', borderRadius: 12, padding: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+    <div className={styles.farmContainer}>
+      <div className={styles.farm}>
         <div>
-          <h3 style={{ margin: 0 }}>{poolLabel}</h3>
+          <div className={styles.headerFarm}>
+            <div className={styles.titleInfoFarm}>
+              <span className={styles.titleFarm}>{poolLabel}</span>
+              <span className={styles.addressFarm}>{addressFarm}</span>
+            </div>
+            
+          </div>
           <FarmAprBadge
             sr={"0xc43172A7e92614d1fb043948ddb04f60fF29Aae9"}
             lp={"0xfEeb70B047808c0eA4510716259513C2E50F2Cd3"}
@@ -269,9 +277,9 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
           <div>Earned TSWP: <b>{fmtAmount(earned, decRW, { dp: 6 })}</b></div>
           <div>Allowance → SR: <b>{fmtAllowance(lpAllow)}</b></div>
         </div>
-      </div>
 
-      <div style={{ display: "flex", gap: 8 }}>
+
+
         <input
           value={amount}
           onChange={e => setAmount(e.target.value)}

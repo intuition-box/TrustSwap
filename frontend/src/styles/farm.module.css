@@ -1,0 +1,53 @@
+.farmContainer {
+    padding: 10px;
+    background: rgba(80, 80, 80, 0.2);
+    border-radius: 30px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(101, 101, 101, 0.3);
+    border-radius: 20px;
+    height: auto;
+    width: 95%;
+    max-width: 800px;
+    position: relative;
+    margin-top: 60px;
+}
+
+.farm {
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    background-color: #111111;
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.headerFarm {
+    display: flex;
+    align-items: center;
+}
+
+
+.titleInfoFarm {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.titleFarm {
+    background: linear-gradient(to left,rgb(128, 128, 128), #ffffff, grey, rgb(213, 213, 213), #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.addressFarm {
+    color: var(--grey);
+}

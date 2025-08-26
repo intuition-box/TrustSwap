@@ -10,6 +10,8 @@ import {
   type UiToken
 } from "../lib/customTokens"
 import { TOKENS } from "../tokens/intuit"
+import styles from "../styles/swap.module.css";
+import tokenLogo from '../images/token.png'
 
 const WNATIVE = (import.meta.env.VITE_WNATIVE_ADDRESS || "").toLowerCase()
 const NATIVE_SYM = import.meta.env.VITE_NATIVE_SYMBOL || "tTRUST"
@@ -114,9 +116,11 @@ export default function TokenSelector({ value, onChange, className }: Props) {
   }
 
   return (
-    <div className={className ?? "inline-block"}>
-      <div className="border rounded px-2 py-1 bg-white/5">
+    <div className={styles.tokenSelector}>
+    <div className={styles.selectContainer}>
+    <img src={tokenLogo} alt="Logo" className={styles.logoToken} />
         <select
+        className={styles.selectSwap}
           value={valueKey}
           onChange={(e) => {
             const key = e.target.value
