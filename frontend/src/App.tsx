@@ -18,7 +18,7 @@ import { http } from 'viem';
 // Wagmi + RainbowKit v2
 const config = getDefaultConfig({
   appName: 'Intuition DApp',
-  projectId: 'TON_PROJECT_ID_WALLETCONNECT',
+  projectId: 'b36d1d48f1d05782328e0176b92fb884',
   chains: [intuitChain],
   transports: {
     [intuitChain.id]: http(),
