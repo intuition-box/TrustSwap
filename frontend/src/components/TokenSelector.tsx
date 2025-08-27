@@ -22,7 +22,7 @@ import { WNATIVE_ADDRESS, NATIVE_SYMBOL, WRAPPED_SYMBOL, SHOW_WRAPPED_SYMBOL } f
 const WNATIVE = (WNATIVE_ADDRESS || "").toLowerCase()
 const NATIVE_SYM = NATIVE_SYMBOL || "tTRUST"
 const WRAPPED_SYM = WRAPPED_SYMBOL || "WTTRUST"
-const SHOW_WRAPPED = Boolean(SHOW_WRAPPED_SYMBOL) === true 
+const SHOW_WRAPPED = SHOW_WRAPPED_SYMBOL
 
 function labelFor(addr?: string, onchain?: string) {
   if (!addr) return onchain || "TKN"
