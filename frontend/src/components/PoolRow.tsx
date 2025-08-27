@@ -433,7 +433,7 @@ async function ensureApproval(token: Address, required: bigint) {
             </div>
          
         </div>
-         <img src={arrow} alt="toggle" className={expanded ? styles.arrowOpen : styles.arrowClosed} />
+        <img src={arrow} alt="toggle" className={expanded ? styles.arrowOpen : styles.arrowClosed} />
       </div>
 
       {/* Body */}

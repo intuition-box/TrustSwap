@@ -1,4 +1,4 @@
-.backPoolAdd {
+.backPoolAdd  {
   display: flex;
   flex-direction: column;
   padding: 10px;
@@ -104,6 +104,7 @@
   padding-right: 15px;
   flex-grow: 1;
 }
+
 
 .ligneInfoLabel {
   display: flex;
