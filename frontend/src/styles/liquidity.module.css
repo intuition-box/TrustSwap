@@ -1,0 +1,38 @@
+/* aligne les blocs du formulaire sur une seule ligne (wrap si écran étroit) */
+.inlineRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;      /* passe à la ligne si pas assez de place */
+}
+
+/* garde chaque sélecteur + input compact */
+.inlineCol {
+  display: flex;
+  gap: 6px;
+  min-width: 220px;     /* ajuste selon ton design */
+}
+
+/* infos (prix / message) en ligne, sans retour à la ligne */
+.inlineInfo {
+  white-space: nowrap;
+  font-size: 12px;
+  opacity: 0.8;
+  align-self: flex-end;
+}
+
+/* groupe Slippage / Deadline en ligne */
+.inlineControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* boutons (approve…) alignés en bas pour rester sur la ligne */
+.inlineActions {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  white-space: nowrap;
+}

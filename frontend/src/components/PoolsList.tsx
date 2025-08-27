@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { usePublicClient, useWatchContractEvent } from 'wagmi'
 import type { Address } from 'viem'
 import PoolRow from './PoolRow'
+import AddLiquidityPro from './AddLiquidity'
 
 const factory = import.meta.env.VITE_FACTORY_ADDRESS as Address
 
@@ -107,6 +108,7 @@ export default function PoolsList() {
 
   return (
     <div style={{ width:"100%", maxWidth: 900, marginTop:"40px" }}>
+      <AddLiquidityPro />
       {loading && <div>Loading…</div>}
       {pairs.map(p => (<PoolRow key={p} pair={p} />))}
       {!loading && pairs.length === 0 && <div>No pools to display</div>}

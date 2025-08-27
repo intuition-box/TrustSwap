@@ -168,7 +168,7 @@ export default function Swap() {
         if (!(rc && rc.status === 'success')) throw new Error('swapExactTokensForTokens reverted')
       }
 
-      alert('Swap réussi ✅')
+      alert('Swap done ✅')
       setAmountIn('')
       setQuoteOut(null)
       await loadState()
@@ -185,7 +185,7 @@ export default function Swap() {
     [deadlineMins]
   )
 
-  // Choisir la bonne fonction + args + "value" si natif en entrée
+  
   const swapCall = useMemo(() => {
     if (!address || path.length < 2) return null
     if (TIn.isNative) {
@@ -315,7 +315,6 @@ export default function Swap() {
           />
         )}
         </div>
-       
       </div>
 
       {/* Approve si nécessaire */}
