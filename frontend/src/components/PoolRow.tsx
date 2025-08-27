@@ -371,7 +371,7 @@ export default function PoolRow({ pair }: { pair: Address }) {
             </div>
          
         </div>
-        <img src={arrow} alt="toggle" className={expanded ? styles.arrowOpen : styles.arrowClosed} />
+         <img src={arrow} alt="toggle" className={expanded ? styles.arrowOpen : styles.arrowClosed} />
       </div>
 
       {/* Body */}
