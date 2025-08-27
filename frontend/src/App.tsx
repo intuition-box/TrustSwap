@@ -4,7 +4,7 @@ import PoolList from "./components/PoolsList";
 import Swap from "./components/Swap";
 import Farm from "./components/Farm";
 import farms from "./farms/intuition.json";
-import WalletTokens from "./components/Connect"; // uniquement affichage des tokens
+import WalletTokens from "./components/WalletTokens"; // uniquement affichage des tokens
 import "./styles/globals.css";
 import RainbowConnectButton from './components/RainbowConnectButton';
 
@@ -50,6 +50,8 @@ export default function App() {
             ))}
           </>
         );
+      case "profile":
+        return <WalletTokens address={address as `0x${string}`} />;
       default:
         return <Swap />;
     }

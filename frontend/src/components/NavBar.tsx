@@ -1,7 +1,6 @@
 import { useState } from "react";
 import styles from "../styles/navbar.module.css";
-import RainbowConnectButton from "./RainbowConnectButton"; // ✅ importer ton bouton
-import Color from "../components/Color"; // ✅ importer ton bouton
+import RainbowConnectButton from "./RainbowConnectButton"; 
 
 // Import des icônes en blanc et gris
 import swapWhite from '../images/swap-white.png'
@@ -72,7 +71,20 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
             Farms
           </button>
 
-          <Color />
+          {/* Profil */}
+          <button
+            className={styles.btnNavLeft}
+            style={{ color: active === "profile" ? "var(--white)" : "grey" }}
+            onClick={() => handleClick("profile")}
+          >
+            <img
+              src={active === "profile" ? farmWhite : farmGrey}
+              alt="Farms Icon"
+              className={styles.logoIconeNav}
+            />
+            Profile
+          </button>
+
         </div>
       </div>
       <div className={styles.navBarRight}>
