@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { Address, formatUnits, zeroAddress } from "viem"
 import { usePublicClient } from "wagmi"
+import styles from "../styles/farm.module.css";
 
 /** =========================
  *  Minimal ABIs (viem format)
@@ -291,21 +292,45 @@ export default function FarmAprBadge({
   }, [periodFinish])
 
   return (
-    <div className={className ?? "inline-flex items-center gap-2 text-sm"}>
-      <span className="font-medium">APR:</span>
-      {loading ? <span>Calcul…</span> : (error ? <span title={error}>—</span> : <span>{fmtPct(apr)}</span>)}
+    <div className={styles.infoFarm}>
+     
 
-      <span className="mx-2">•</span>
 
-      <span className="font-medium">Status:</span>
-      <span>{expired ? "Expiré" : `Actif jusqu’au ${finishStr}`}</span>
+      <span className={styles.status}>Status
+      <span className={styles.statusInfo}>
+  <div
+    className={`${styles.pointStatus} ${expired ? styles.expired : styles.active}`}
+  ></div>
+  {expired ? "Expired" : `Active until ${finishStr}`}
+</span>
 
-      {showDetails && !loading && !error && rewardSym && (
+
+      </span>
+      {showDetails && !loading && !error && (
         <>
-          <span className="mx-2">•</span>
-          <span>Reward: {rewardSym}</span>
+
+         
+          {rewardSym && (
+            <>
+   
+              <span className={styles.rewardInfo}>
+                Reward
+                <span className={styles.statusInfo}>{rewardSym}</span>
+              </span>
+            </>
+          )}
         </>
       )}
+
+<span className={styles.aprInfo}>APR:
+      {loading ? (
+        <span className={styles.statusInfo}>Calcul…</span>
+      ) : error ? (
+        <span className={styles.statusInfo}  title={error}>—</span>
+      ) : (
+        <span className={styles.statusInfo}>{fmtPct(apr)}</span>
+      )}
+      </span>
     </div>
   )
 }

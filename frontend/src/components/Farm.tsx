@@ -1,10 +1,11 @@
 // src/components/Farm.tsx
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { Address, erc20Abi, parseUnits, formatUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
-import FarmAprBadge from "./FarmAprBadge"
+import FarmAprBadge from "./FarmAprBadge";
 import styles from "../styles/farm.module.css";
-// 👉 tes helpers de format
+import tokenLogo from "../images/token.png"
+import arrow from "../images/arrow.png"
 import { fmtLP, fmtAmount, fmtAllowance, shortAddr } from "../lib/format";
 import { WNATIVE_ADDRESS, NATIVE_SYMBOL, WRAPPED_SYMBOL, SHOW_WRAPPED_SYMBOL } from '../config/protocol'
 const WNATIVE = (WNATIVE_ADDRESS || '').toLowerCase();
@@ -64,9 +65,9 @@ const PairABI = [
 ] as const;
 
 type Props = {
-  stakingRewards: Address; // 0xc43172...
-  stakingToken: Address;   // LP 0xfEeb70...
-  rewardsToken: Address;   // TSWP 0x7da120...
+  stakingRewards: Address;
+  stakingToken: Address;
+  rewardsToken: Address;
 };
 
 export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Props) {
@@ -74,7 +75,7 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
 
-  // decimals of tokens
+  // decimals
   const [decLP, setDecLP] = useState(18);
   const [decRW, setDecRW] = useState(18);
   const [dec0, setDec0] = useState(18);
@@ -88,22 +89,18 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
   const [r0, setR0] = useState<bigint>(0n);
   const [r1, setR1] = useState<bigint>(0n);
 
-  // state user
+  // user state
   const [lpBal, setLpBal] = useState<bigint>(0n);
   const [lpAllow, setLpAllow] = useState<bigint>(0n);
   const [staked, setStaked] = useState<bigint>(0n);
   const [earned, setEarned] = useState<bigint>(0n);
 
-  // ui
+  // UI
   const [amount, setAmount] = useState("0");
   const [pending, setPending] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  const poolLabel = useMemo(() => {
-    const pair = sym0 && sym1 ? `${sym0}-${sym1}` : "LP";
-    return `${pair}`;
-  }, [sym0, sym1, stakingToken]);
-
+  const poolLabel = useMemo(() => sym0 && sym1 ? `${sym0}-${sym1}` : "LP", [sym0, sym1, stakingToken]);
   const addressFarm = shortAddr(stakingToken);
 
   const load = async () => {
@@ -116,12 +113,13 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
     ]);
     setDecLP(Number(dLP ?? 18)); setDecRW(Number(dRW ?? 18));
 
-    // Pair meta (token0, token1, symbols, decimals, reserves)
+    // LP metadata
     const [token0, token1] = await Promise.all([
       publicClient.readContract({ address: stakingToken, abi: PairABI, functionName: "token0" }) as Promise<Address>,
       publicClient.readContract({ address: stakingToken, abi: PairABI, functionName: "token1" }) as Promise<Address>,
     ]);
     setT0(token0); setT1(token1);
+
     try {
       const [[s0, d0], [s1, d1], [res0, res1]] = await Promise.all([
         Promise.all([
@@ -132,20 +130,18 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
           publicClient.readContract({ address: token1, abi: erc20Abi, functionName: "symbol" }) as Promise<string>,
           publicClient.readContract({ address: token1, abi: erc20Abi, functionName: "decimals" }) as Promise<number>,
         ]),
-        publicClient
-          .readContract({ address: stakingToken, abi: PairABI, functionName: "getReserves" })
-          .then((x) => [x[0] as bigint, x[1] as bigint]),
+        publicClient.readContract({ address: stakingToken, abi: PairABI, functionName: "getReserves" })
+          .then(x => [x[0] as bigint, x[1] as bigint]),
       ]);
       setSym0(overrideNativeSymbol(token0, s0));
       setSym1(overrideNativeSymbol(token1, s1));
       setDec0(Number(d0 ?? 18)); setDec1(Number(d1 ?? 18));
       setR0(res0); setR1(res1);
     } catch {
-      // tolerant if a token does not respect ERC20 metadata
       setDec0(18); setDec1(18);
     }
 
-    // State wallet + SR
+    // user state
     const [bal, allow, st, er] = await Promise.all([
       publicClient.readContract({ address: stakingToken, abi: erc20Abi, functionName: "balanceOf", args: [address] }) as Promise<bigint>,
       publicClient.readContract({ address: stakingToken, abi: erc20Abi, functionName: "allowance", args: [address, stakingRewards] }) as Promise<bigint>,
@@ -240,64 +236,101 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
     return amt > 0n && staked >= amt;
   }, [loaded, amt, staked]);
 
-  const onMax = () => {
-    setAmount(formatUnits(lpBal, decLP));
-  };
+  const onMax = () => setAmount(formatUnits(lpBal, decLP));
+
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const toggleDropdown = () => setIsOpen(!isOpen);
+
+  // Ferme le dropdown si clic en dehors
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className={styles.farmContainer}>
-      <div className={styles.farm}>
-        <div>
-          <div className={styles.headerFarm}>
-            <div className={styles.titleInfoFarm}>
-              <span className={styles.titleFarm}>{poolLabel}</span>
-              <span className={styles.addressFarm}>{addressFarm}</span>
+      <div 
+        className={styles.farm} 
+        onClick={() => setIsOpen(!isOpen)} 
+        style={{ cursor: 'pointer' }}
+      >
+        <div className={styles.headerFarm} onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }}>
+          <div className={styles.titleInfoFarm}>
+            <span className={styles.titleFarm}>
+            <div className={styles.poolLogoFarm}>
+            <img src={tokenLogo} alt="Logo" className={styles.logoTokenFarm} />
+             <img src={tokenLogo} alt="Logo" className={styles.logoTokenFarmTwo} />
             </div>
-            
+              {poolLabel}
+            </span>
+            <span className={styles.addressFarm}>{addressFarm}</span>
           </div>
           <FarmAprBadge
-            sr={"0xc43172A7e92614d1fb043948ddb04f60fF29Aae9"}
-            lp={"0xfEeb70B047808c0eA4510716259513C2E50F2Cd3"}
-            wnative={"0x51379Cc2C942EE2AE2fF0BD67a7b475F0be39Dcf"}
-            factory={"0xd103E057242881214793d5A1A7c2A5B84731c75c"}
-            // rewardToken={"0x7da120065e104C085fAc6f800d257a6296549cF3"} // optionnel (sinon lu via SR)
-            refreshMs={12000}
-            showDetails
-          />
-          <small style={{ opacity: .8 }}>
-            Reserves:&nbsp;
-            <b>{fmtAmount(r0, dec0, { dp: 6, compact: true })} {sym0 ?? 'T0'}</b>
-            &nbsp;/&nbsp;
-            <b>{fmtAmount(r1, dec1, { dp: 6, compact: true })} {sym1 ?? 'T1'}</b>
-          </small>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div>Wallet LP: <b>{fmtLP(lpBal, { dp: 6 })}</b></div>
-          <div>Staked: <b>{fmtLP(staked, { dp: 6 })}</b></div>
-          <div>Earned TSWP: <b>{fmtAmount(earned, decRW, { dp: 6 })}</b></div>
-          <div>Allowance → SR: <b>{fmtAllowance(lpAllow)}</b></div>
-        </div>
-
-
-
-        <input
-          value={amount}
-          onChange={e => setAmount(e.target.value)}
-          placeholder="Amount LP"
-          className="border rounded px-2 py-1"
+          sr={"0xc43172A7e92614d1fb043948ddb04f60fF29Aae9"}
+          lp={"0xfEeb70B047808c0eA4510716259513C2E50F2Cd3"}
+          wnative={"0x51379Cc2C942EE2AE2fF0BD67a7b475F0be39Dcf"}
+          factory={"0xd103E057242881214793d5A1A7c2A5B84731c75c"}
+          refreshMs={12000}
+          showDetails
         />
-        <button onClick={onMax} style={{ opacity: .8 }}>Max</button>
-
-        {needsApproval ? (
-          <button onClick={approve} disabled={pending || !loaded}>Approve LP</button>
-        ) : (
-          <>
-            <button onClick={stake} disabled={pending || !loaded || !canStake}>Stake</button>
-            <button onClick={unstake} disabled={pending || !loaded || !canUnstake}>Unstake</button>
-          </>
+        </div>
+  
+      
+         <img
+            src={arrow} // ton fichier flèche
+            alt="toggle"
+            className={`${styles.arrowSelect} ${isOpen ? styles.arrowOpen : ""}`}
+         />
+  
+        {isOpen && (
+          <div className={styles.dropdownContent}>
+            <small style={{ opacity: 0.8 }}>
+              Reserves:&nbsp;
+              <b>{fmtAmount(r0, dec0, { dp: 6, compact: true })} {sym0 ?? 'T0'}</b>
+              &nbsp;/&nbsp;
+              <b>{fmtAmount(r1, dec1, { dp: 6, compact: true })} {sym1 ?? 'T1'}</b>
+            </small>
+  
+            <div style={{ textAlign: 'right', marginTop: '8px' }}>
+              <div>Wallet LP: <b>{fmtLP(lpBal, { dp: 6 })}</b></div>
+              <div>Staked: <b>{fmtLP(staked, { dp: 6 })}</b></div>
+              <div>Earned TSWP: <b>{fmtAmount(earned, decRW, { dp: 6 })}</b></div>
+              <div>Allowance → SR: <b>{fmtAllowance(lpAllow)}</b></div>
+            </div>
+  
+            <div style={{ marginTop: '8px' }}>
+              <input
+                value={amount}
+                onChange={e => setAmount(e.target.value)}
+                placeholder="Amount LP"
+                className="border rounded px-2 py-1"
+                style={{ marginRight: '4px' }}
+              />
+              <button onClick={onMax} style={{ opacity: .8, marginRight: '4px' }}>Max</button>
+            </div>
+  
+            <div style={{ marginTop: '4px' }}>
+              {needsApproval ? (
+                <button onClick={approve} disabled={pending || !loaded}>Approve LP</button>
+              ) : (
+                <>
+                  <button onClick={stake} disabled={pending || !loaded || !canStake} style={{ marginRight: '4px' }}>Stake</button>
+                  <button onClick={unstake} disabled={pending || !loaded || !canUnstake}>Unstake</button>
+                </>
+              )}
+              <button onClick={claim} disabled={pending || !loaded} style={{ marginLeft: '4px' }}>Claim</button>
+            </div>
+          </div>
         )}
-        <button onClick={claim} disabled={pending || !loaded}>Claim</button>
       </div>
     </div>
   );
+  
 }

@@ -33,7 +33,7 @@ body {
   /* Points au-dessus du dégradé */
   background-image: 
   radial-gradient(rgba(255, 255, 255, 0.107) 1px, transparent 1px),
-  linear-gradient(to top, color-mix(in srgb, var(--primary) 5%, transparent), color-mix(in srgb, var(--primary) 5%, transparent), var(--black) 40%);
+  linear-gradient(to top, color-mix(in srgb, var(--primary) 5%, transparent), color-mix(in srgb, var(--primary) 3%, transparent), var(--black) 40%);
 
   background-size: 7px 7px, 100% 100%;
   background-repeat: repeat, no-repeat;
