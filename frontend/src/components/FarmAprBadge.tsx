@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Address, formatUnits, zeroAddress } from "viem"
 import { usePublicClient } from "wagmi"
 import styles from "../styles/farm.module.css";
-
+import tokenLogo from "../images/token.png"
 /** =========================
  *  Minimal ABIs (viem format)
  *  ========================= */
@@ -315,7 +315,10 @@ export default function FarmAprBadge({
    
               <span className={styles.rewardInfo}>
                 Reward
-                <span className={styles.statusInfo}>{rewardSym}</span>
+                <span className={styles.statusInfo}>
+                              <img src={tokenLogo} alt="Logo" className={styles.logoTokenFarm} />
+                  {rewardSym}
+                </span>
               </span>
             </>
           )}
