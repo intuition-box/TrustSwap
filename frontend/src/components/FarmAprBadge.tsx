@@ -286,10 +286,14 @@ export default function FarmAprBadge({
   }, [sr, lp, wnative, factory, rewardToken, refreshMs, client?.chain?.id])
 
   const finishStr = useMemo(() => {
-    if (!periodFinish) return "—"
-    try { return new Date(periodFinish * 1000).toLocaleString() }
-    catch { return "—" }
-  }, [periodFinish])
+    if (!periodFinish) return "—";
+    try {
+      return new Date(periodFinish * 1000).toLocaleDateString(); 
+    } catch {
+      return "—";
+    }
+  }, [periodFinish]);
+  
 
   return (
     <div className={styles.infoFarm}>
@@ -301,7 +305,7 @@ export default function FarmAprBadge({
   <div
     className={`${styles.pointStatus} ${expired ? styles.expired : styles.active}`}
   ></div>
-  {expired ? "Expired" : `Active until ${finishStr}`}
+  {expired ? "Expired" : `Active ${finishStr}`}
 </span>
 
 
