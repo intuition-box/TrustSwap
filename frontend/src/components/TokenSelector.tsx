@@ -113,7 +113,7 @@ export default function TokenSelector({ value, onChange, className }: Props) {
     const updated = getCustomTokens()
     setCustoms(updated)
     if (value?.address && value.address.toLowerCase() === addr.toLowerCase()) {
-      onChange(undefined)
+      onChange(null)
     }
   }
 
