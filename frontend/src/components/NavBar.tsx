@@ -18,7 +18,7 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
     setActiveTab(tab);
   };
 
-  const indicatorLeft = active === "swap" ? "5%" : active === "pools" ? "29%" : "54%";
+  const indicatorLeft = active === "swap" ? "5%" : active === "pools" ? "29%" : active === "farms" ? "54%" : "76%";
 
   return (
     <div className={styles.navBar}>
