@@ -180,3 +180,8 @@
 .logoDisconnect {
     width: 12px;
 }
+
+.walletLogo {
+    width: 18px;
+    margin-left: 3px;
+}

@@ -1,5 +1,7 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import styles from "../styles/connect.module.css";
+import wallet from '../images/wallet.png'
+
 function RainbowConnectButton() {
   return (
     <ConnectButton.Custom>
@@ -13,6 +15,11 @@ function RainbowConnectButton() {
             }}
             className={styles.btnConnect}
           >
+             <img
+              src={wallet}
+              alt="Swap Icon"
+              className={styles.walletLogo}
+            />
             {account ? `${account.displayName}` : 'Connect Wallet'}
           </button>
         );

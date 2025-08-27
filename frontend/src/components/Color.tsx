@@ -1,41 +1,73 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from "../styles/color.module.css";
 
+type Color = {
+  name: string;
+  value: string;
+};
+
 export default function App() {
-  const colors = [
+  const colors: Color[] = [
     { name: 'Green', value: '#99ff00' },
     { name: 'Blue', value: '#00aaff' },
     { name: 'Red', value: '#ff0000' },
     { name: 'Purple', value: '#aa00ff' },
+    { name: 'Yellow', value: '#ffff00' },
   ];
 
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(colors[0]);
+  const [selectedColor, setSelectedColor] = useState<Color>(colors[0]);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
-  const chooseColor = (color) => {
+  const chooseColor = (color: Color) => {
     setSelectedColor(color);
     document.documentElement.style.setProperty('--primary', color.value);
     setIsOpen(false);
   };
 
+  // Fermer le dropdown si on clique en dehors
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div style={{ padding: '2rem' }}>
-      <div className={styles.dropdown}>
+      <div className={styles.dropdown} ref={dropdownRef}>
         <button className={styles['dropdown-btn']} onClick={toggleDropdown}>
-          {selectedColor.name}
+          <div 
+            className={styles['color-circle']} 
+            style={{ backgroundColor: selectedColor.value }}
+          />
         </button>
         {isOpen && (
           <div className={styles['dropdown-content']}>
-            {colors.map((color) => (
+            {colors.map((color: Color) => (
               <div
                 key={color.value}
                 className={styles['dropdown-item']}
-                style={{ backgroundColor: color.value, color: '#fff' }}
                 onClick={() => chooseColor(color)}
               >
-                {color.name}
+                <div
+                  className={styles['color-circle']}
+                  style={{ backgroundColor: color.value }}
+                />
+                <span className={styles['color-name']}>{color.name}</span>
               </div>
             ))}
           </div>

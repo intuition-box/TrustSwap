@@ -19,7 +19,7 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
     setActiveTab(tab);
   };
 
-  const indicatorLeft = active === "swap" ? "7%" : active === "pools" ? "37%" : "70%";
+  const indicatorLeft = active === "swap" ? "5%" : active === "pools" ? "29%" : "54%";
 
   return (
     <div className={styles.navBar}>
@@ -71,11 +71,11 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
             />
             Farms
           </button>
+
+          <Color />
         </div>
       </div>
-
       <div className={styles.navBarRight}>
-        <Color />
         <RainbowConnectButton />
       </div>
     </div>
