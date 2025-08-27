@@ -428,7 +428,7 @@
     0 0 0 0.75px var(--btn-shadow-black);
   border-radius: 15px;
   display: flex;
-  z-index: 10001;
+  z-index: 10002;
   margin-left: 10px;
   margin-bottom: 10px;
 }
@@ -453,7 +453,6 @@
     0 0.5px 0.5px var(--btn-shadow-black),
     0 0 0 0.75px var(--btn-shadow-black);
   border-radius: 15px;
-  z-index: 50;
   z-index: 10002;
   padding: 10px;
 }

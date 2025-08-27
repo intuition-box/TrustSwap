@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Connect from "./Connect";
 import styles from "../styles/navbar.module.css";
+import RainbowConnectButton from "./RainbowConnectButton"; // ✅ importer ton bouton
 
 // Import des icônes en blanc et gris
 import swapWhite from '../images/swap-white.png'
@@ -18,7 +18,6 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
     setActiveTab(tab);
   };
 
-  // Définir la position de l’indicateur en fonction de l’onglet actif
   const indicatorLeft = active === "swap" ? "7%" : active === "pools" ? "37%" : "70%";
 
   return (
@@ -30,7 +29,6 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
         style={{ "--indicator-left": indicatorLeft } as React.CSSProperties}
       >
         <div className={styles.btnMenu}>
-
           {/* Swap */}
           <button
             className={styles.btnNavLeft}
@@ -72,12 +70,12 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
             />
             Farms
           </button>
-
         </div>
       </div>
 
       <div className={styles.navBarRight}>
-        <Connect />
+        {/* Ajouter le bouton RainbowConnectButton ici */}
+        <RainbowConnectButton />
       </div>
     </div>
   );

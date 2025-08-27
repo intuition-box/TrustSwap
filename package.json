@@ -14,5 +14,10 @@
   },
   "devDependencies": {
     "rimraf": "^6.0.0"
+  },
+  "dependencies": {
+    "@rainbow-me/rainbowkit": "^2.2.8",
+    "viem": "^2.35.1",
+    "wagmi": "^2.16.5"
   }
 }

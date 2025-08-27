@@ -207,12 +207,7 @@ export default function TokenSelector({ value, onChange, className }: Props) {
               {/* dropdown positioned under the button */}
               <div
                 className={styles.dropdownMenu}
-                style={{
-                  position: "absolute",
-                  top: portalPos.height + 8,
-                  left: 0,
-                  zIndex: 10002
-                }}
+                
               >
 
 

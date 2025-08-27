@@ -1,14 +1,35 @@
 import { useState } from "react";
-import Connect from "./components/Connect";
+import Navbar from "./components/NavBar";
 import PoolList from "./components/PoolsList";
 import Swap from "./components/Swap";
 import Farm from "./components/Farm";
 import farms from "./farms/intuition.json";
-import Navbar from "./components/NavBar";
+import WalletTokens from "./components/Connect"; // uniquement affichage des tokens
 import "./styles/globals.css";
+import RainbowConnectButton from './components/RainbowConnectButton';
+
+import '@rainbow-me/rainbowkit/styles.css';
+import { RainbowKitProvider, ConnectButton, darkTheme, getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { WagmiConfig, useAccount } from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { intuitChain } from './chain/intuit';
+import { http } from 'viem';
+
+// Wagmi + RainbowKit v2
+const config = getDefaultConfig({
+  appName: 'Intuition DApp',
+  projectId: 'TON_PROJECT_ID_WALLETCONNECT',
+  chains: [intuitChain],
+  transports: {
+    [intuitChain.id]: http(),
+  },
+});
+
+const queryClient = new QueryClient();
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>("swap");
+  const { address, isConnected } = useAccount();
 
   const renderContent = () => {
     switch (activeTab) {
@@ -35,11 +56,19 @@ export default function App() {
   };
 
   return (
-    <div className="containerBody">
-      <Navbar setActiveTab={setActiveTab} />
-      <div className="contentContainer">
-        {renderContent()}
-      </div>
-    </div>
+    <WagmiConfig config={config}>
+      <QueryClientProvider client={queryClient}>
+      <RainbowKitProvider theme={darkTheme({})}>
+        
+          <div className="containerBody">
+            <Navbar setActiveTab={setActiveTab} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "10px" }}>
+              {/* ton bouton noir personnalisé */}
+            </div>
+            <div className="contentContainer">{renderContent()}</div>
+          </div>
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiConfig>
   );
 }
