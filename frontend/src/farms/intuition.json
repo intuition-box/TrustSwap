@@ -1,8 +1,8 @@
 [
   {
     "name": "WTTRUST–TSWP",
-    "stakingRewards": "0xc43172A7e92614d1fb043948ddb04f60fF29Aae9",
-    "stakingToken": "0xfEeb70B047808c0eA4510716259513C2E50F2Cd3",
+    "stakingRewards": "0xBc87545c8D9d9B9Ada20902429642A5eC65cd391",
+    "stakingToken": "0xf469C73611521974cd4e702B4578e92a42Fe65dE",
     "rewardsToken": "0x7da120065e104C085fAc6f800d257a6296549cF3",
     "decimalsLp": 18,
     "decimalsRw": 18
