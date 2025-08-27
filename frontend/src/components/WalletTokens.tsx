@@ -6,7 +6,7 @@ import { TOKENS } from '../tokens/intuit'
 import styles from "../styles/connect.module.css"
 import refresh from '../images/rafraichir.png'
 import Color from "../components/Color"; 
-
+import tokenLogo from "../images/token.png"
 
 type UiToken = {
   symbol: string
@@ -54,7 +54,8 @@ export default function WalletTokens({ address }: { address: Address }) {
   }, [publicClient, address])
 
   return (
-    <div>
+    <div className={styles.containerToken}>
+      <div className={styles.containerProfil}>
       <div className={styles.walletHeader}>
         <span className={styles.labelWallet}>My tokens</span>
         <label className={styles.balanceZero}>
@@ -70,17 +71,21 @@ export default function WalletTokens({ address }: { address: Address }) {
         {display.length === 0 && <div>You don’t have any tokens to display.</div>}
         {display.map(({symbol, balance, decimals}) => (
           <div key={symbol} className={styles.tokenWallet}>
-            <span className={styles.tokenWalletText}>{symbol}:</span>
+            <span className={styles.tokenWalletText}>
+            <img src={tokenLogo} alt="Logo" className={styles.logoTokenProfil} />
+              {symbol}:
+            </span>
             <span className={styles.tokenWalletBalance}>{Number(formatUnits(balance, decimals)).toLocaleString(undefined, { maximumFractionDigits: 6 })}</span>
           </div>
         ))}
       </div>
-      <div className={styles.walletHeader}>
-        <p className={styles.labelWallet}>Preferences</p>
-          <p>Style:</p>
+     
+      </div>
+      <div className={styles.colorContainer}>
+        <p className={styles.labelWallet}>Preferences Color</p>
             <Color />
-
       </div>
     </div>
+    
   )
 }
