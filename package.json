@@ -5,6 +5,7 @@
     "contracts",
     "frontend"
   ],
+  "license": "MIT",
   "scripts": {
     "build": "pnpm --filter ./contracts build && pnpm --filter ./frontend build",
     "dev:fe": "pnpm --filter ./frontend dev",
