@@ -1,6 +1,7 @@
 import { useState } from "react";
 import styles from "../styles/navbar.module.css";
 import RainbowConnectButton from "./RainbowConnectButton"; // ✅ importer ton bouton
+import Color from "../components/Color"; // ✅ importer ton bouton
 
 // Import des icônes en blanc et gris
 import swapWhite from '../images/swap-white.png'
@@ -74,7 +75,7 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
       </div>
 
       <div className={styles.navBarRight}>
-        {/* Ajouter le bouton RainbowConnectButton ici */}
+        <Color />
         <RainbowConnectButton />
       </div>
     </div>
