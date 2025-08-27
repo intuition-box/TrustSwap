@@ -18,7 +18,7 @@ import {
 import { TOKENS } from "../tokens/intuit"
 import { fmtAmount, shortAddr } from "../lib/format"
 import RouterABI from "../abis/Router02.min.json"
-import { ROUTER_ADDRESS, GAS_PRICE_GWEI, GAS_LIMIT as GAS_LIMIT_GLOBAL } from '../config/protocol'
+import { WNATIVE_ADDRESS, ROUTER_ADDRESS, GAS_PRICE_GWEI, GAS_LIMIT as GAS_LIMIT_GLOBAL } from '../config/protocol'
 
 import styles from "../styles/pool.module.css"
 import arrow from "../images/arrow.png"
@@ -57,6 +57,8 @@ const router = ROUTER_ADDRESS as Address
 const GAS_PRICE = parseGwei(String(GAS_PRICE_GWEI ?? "0.2"))
 const GAS_LIMIT_ADD = GAS_LIMIT_GLOBAL ?? 1_200_000n
 const GAS_LIMIT_REMOVE = 1_000_000n
+const WNATIVE = (WNATIVE_ADDRESS || '').toLowerCase()
+const isWNative = (a?: string) => (a || '').toLowerCase() === WNATIVE
 
 function addrEq(a?: string, b?: string) {
   return a?.toLowerCase() === b?.toLowerCase()
@@ -74,7 +76,7 @@ export default function PoolRow({ pair }: { pair: Address }) {
   const pc = usePublicClient()
   const { address, isConnected } = useAccount()
   const { data: walletClient } = useWalletClient()
-
+ 
   const [t0, setT0] = useState<Address>()
   const [t1, setT1] = useState<Address>()
   const [sym0, setSym0] = useState("…")
@@ -154,8 +156,8 @@ export default function PoolRow({ pair }: { pair: Address }) {
         try {
           const [lpBal, bal0, bal1, allowance] = await Promise.all([
             pc.readContract({ address: pair, abi: ERC20_MINI, functionName:"balanceOf", args:[address] }) as Promise<bigint>,
-            pc.readContract({ address: a, abi: ERC20_MINI, functionName:"balanceOf", args:[address] }) as Promise<bigint>,
-            pc.readContract({ address: b, abi: ERC20_MINI, functionName:"balanceOf", args:[address] }) as Promise<bigint>,
+            isWNative(a) ? pc.getBalance({ address }) : pc.readContract({ address: a, abi: ERC20_MINI, functionName:"balanceOf", args:[address] }) as Promise<bigint>,
+            isWNative(b) ? pc.getBalance({ address }) : pc.readContract({ address: b, abi: ERC20_MINI, functionName:"balanceOf", args:[address] }) as Promise<bigint>,
             pc.readContract({ address: pair, abi: ERC20_MINI, functionName:"allowance", args:[address, router] }) as Promise<bigint>,
           ])
           if (!cancelled) {
@@ -205,24 +207,17 @@ export default function PoolRow({ pair }: { pair: Address }) {
     }
   }, [amountAdd0, r0, r1, dec0, dec1])
 
-  async function ensureApproval(token: Address, required: bigint) {
-    if (!walletClient || !address) return;
-    if (!pc) return;
+async function ensureApproval(token: Address, required: bigint) {
+  if (!walletClient || !address || !pc) return
+  // si c'est le wrapped natif ET qu'on va utiliser addLiquidityETH, on ne fait pas d'approve ici
+  if (isWNative(token)) return
+  const curr = await pc.readContract({ address: token, abi: ERC20_MINI, functionName: "allowance", args: [address, router] }) as bigint
+  if (curr >= required) return
+  const data = encodeFunctionData({ abi: ERC20_MINI as any, functionName: "approve", args: [router, maxUint256] })
+  const hash = await walletClient.sendTransaction({ account: address, to: token, data, gasPrice: GAS_PRICE })
+  await pc.waitForTransactionReceipt({ hash })
+}
 
-    const curr = await pc.readContract({
-      address: token, abi: ERC20_MINI, functionName: "allowance", args: [address, router],
-    }) as bigint
-    if (curr >= required) return
-    const data = encodeFunctionData({
-      abi: ERC20_MINI as any,
-      functionName: "approve",
-      args: [router, maxUint256],
-    })
-    const hash = await walletClient.sendTransaction({
-      account: address, to: token, data, gasPrice: GAS_PRICE,
-    })
-    await pc.waitForTransactionReceipt({ hash })
-  }
 
   async function ensureLpApproval(required: bigint) {
     if (!walletClient || !address) return;
@@ -244,68 +239,135 @@ export default function PoolRow({ pair }: { pair: Address }) {
   }
 
   const onAdd = async () => {
-    if (!walletClient || !address || !t0 || !t1) return;
-    if (!pc) return;
-
+    if (!walletClient || !address || !t0 || !t1 || !pc) return
     setPendingAdd(true)
     try {
       const a = parseUnits(amountAdd0 || "0", dec0)
       const b = parseUnits(amountAdd1 || "0", dec1)
-      // approvals for token0 & token1
-      await ensureApproval(t0, a)
-      await ensureApproval(t1, b)
-
-      const slippageBps = BigInt(Math.floor(slippage * 100)) // e.g., 0.5% => 50 bps
+      const slippageBps = BigInt(Math.floor(slippage * 100))
       const minA = a - (a * slippageBps / 10_000n)
       const minB = b - (b * slippageBps / 10_000n)
       const deadline = BigInt(Math.floor(Date.now() / 1000) + deadlineMins * 60)
 
-      const data = encodeFunctionData({
-        abi: RouterABI as any,
-        functionName: "addLiquidity",
-        args: [t0, t1, a, b, minA, minB, address, deadline],
-      })
-      const hash = await walletClient.sendTransaction({
-        account: address, to: router, data, gas: GAS_LIMIT_ADD, gasPrice: GAS_PRICE,
-      })
-      await pc.waitForTransactionReceipt({ hash })
+      const t0IsWN = isWNative(t0)
+      const t1IsWN = isWNative(t1)
+
+      if (t0IsWN && t1IsWN) throw new Error("Deux côtés natifs non supportés")
+
+      if (t0IsWN) {
+        await ensureApproval(t1, b)
+        await pc.simulateContract({
+          account: address, address: router, abi: RouterABI as any,
+          functionName: "addLiquidityETH",
+          args: [t1, b, minB, minA, address, deadline],
+          value: a,
+        })
+        const data = encodeFunctionData({
+          abi: RouterABI as any,
+          functionName: "addLiquidityETH",
+          args: [t1, b, minB, minA, address, deadline],
+        })
+        const hash = await walletClient.sendTransaction({ account: address, to: router, data, gas: GAS_LIMIT_ADD, gasPrice: GAS_PRICE, value: a })
+        await pc.waitForTransactionReceipt({ hash })
+      } else if (t1IsWN) {
+        await ensureApproval(t0, a)
+        await pc.simulateContract({
+          account: address, address: router, abi: RouterABI as any,
+          functionName: "addLiquidityETH",
+          args: [t0, a, minA, minB, address, deadline],
+          value: b,
+        })
+        const data = encodeFunctionData({
+          abi: RouterABI as any,
+          functionName: "addLiquidityETH",
+          args: [t0, a, minA, minB, address, deadline],
+        })
+        const hash = await walletClient.sendTransaction({ account: address, to: router, data, gas: GAS_LIMIT_ADD, gasPrice: GAS_PRICE, value: b })
+        await pc.waitForTransactionReceipt({ hash })
+      } else {
+        // ERC20 ↔ ERC20
+        await ensureApproval(t0, a)
+        await ensureApproval(t1, b)
+        await pc.simulateContract({
+          account: address, address: router, abi: RouterABI as any,
+          functionName: "addLiquidity",
+          args: [t0, t1, a, b, minA, minB, address, deadline],
+        })
+        const data = encodeFunctionData({
+          abi: RouterABI as any,
+          functionName: "addLiquidity",
+          args: [t0, t1, a, b, minA, minB, address, deadline],
+        })
+        const hash = await walletClient.sendTransaction({ account: address, to: router, data, gas: GAS_LIMIT_ADD, gasPrice: GAS_PRICE })
+        await pc.waitForTransactionReceipt({ hash })
+      }
+
       alert("Liquidity added ✅")
-    } catch (e: any) {
+    } catch (e:any) {
       console.error(e)
-      alert("AddLiquidity failed")
+      alert(e?.shortMessage || e?.message || "AddLiquidity failed")
     } finally {
       setPendingAdd(false)
     }
   }
 
-  const onRemove = async () => {
-    if (!walletClient || !address || !t0 || !t1) return;
-    if (!pc) return;
 
+  const onRemove = async () => {
+    if (!walletClient || !address || !t0 || !t1 || !pc) return;
     setPendingRemove(true)
     try {
       const liq = parseUnits(liqToRemoveInput || "0", lpDecimals)
-      // LP approval if needed
       await ensureLpApproval(liq)
 
       const deadline = BigInt(Math.floor(Date.now() / 1000) + deadlineMins * 60)
-      const data = encodeFunctionData({
-        abi: RouterABI as any,
-        functionName: "removeLiquidity",
-        args: [t0, t1, liq, 0n, 0n, address, deadline], // min amounts = 0 (you can add slippage handling later)
-      })
-      const hash = await walletClient.sendTransaction({
-        account: address, to: router, data, gas: GAS_LIMIT_REMOVE, gasPrice: GAS_PRICE,
-      })
-      await pc.waitForTransactionReceipt({ hash })
+      const t0IsWN = isWNative(t0)
+      const t1IsWN = isWNative(t1)
+
+      if (t0IsWN && t1IsWN) throw new Error("Deux côtés natifs non supportés")
+
+      if (t0IsWN !== t1IsWN) {
+        const token = t0IsWN ? t1! : t0!
+        await pc.simulateContract({
+          account: address, address: router, abi: RouterABI as any,
+          functionName: "removeLiquidityETH",
+          args: [token, liq, 0n, 0n, address, deadline],
+        })
+        const data = encodeFunctionData({
+          abi: RouterABI as any,
+          functionName: "removeLiquidityETH",
+          args: [token, liq, 0n, 0n, address, deadline],
+        })
+        const hash = await walletClient.sendTransaction({
+          account: address, to: router, data, gas: GAS_LIMIT_REMOVE, gasPrice: GAS_PRICE,
+        })
+        await pc.waitForTransactionReceipt({ hash })
+      } else {
+        // ERC20-ERC20
+        await pc.simulateContract({
+          account: address, address: router, abi: RouterABI as any,
+          functionName: "removeLiquidity",
+          args: [t0, t1, liq, 0n, 0n, address, deadline],
+        })
+        const data = encodeFunctionData({
+          abi: RouterABI as any,
+          functionName: "removeLiquidity",
+          args: [t0, t1, liq, 0n, 0n, address, deadline],
+        })
+        const hash = await walletClient.sendTransaction({
+          account: address, to: router, data, gas: GAS_LIMIT_REMOVE, gasPrice: GAS_PRICE,
+        })
+        await pc.waitForTransactionReceipt({ hash })
+      }
+
       alert("Liquidity removed ✅")
-    } catch (e: any) {
+    } catch (e:any) {
       console.error(e)
-      alert("RemoveLiquidity failed")
+      alert(e?.shortMessage || e?.message || "RemoveLiquidity failed")
     } finally {
       setPendingRemove(false)
     }
   }
+
 
   // Remove preview
   const removePreview = useMemo(() => {
@@ -361,6 +423,7 @@ export default function PoolRow({ pair }: { pair: Address }) {
             <div className={styles.reserve}>
               {price ? `1 ${sym0} ≈ ${price.toFixed(6)} ${sym1}` : "—"}
             </div>
+     
           </div>
             <div className={styles.reservePool}>
               <span className={styles.labelPool}>LP Balance :</span>
@@ -368,8 +431,9 @@ export default function PoolRow({ pair }: { pair: Address }) {
                 {fmtAmount(lpBalance, lpDecimals)} <span className={styles.sharePct}> / {sharePct}</span>
               </div>
             </div>
-          <img src={arrow} alt="toggle" className={expanded ? styles.arrowOpen : styles.arrowClosed} />
+         
         </div>
+         <img src={arrow} alt="toggle" className={expanded ? styles.arrowOpen : styles.arrowClosed} />
       </div>
 
       {/* Body */}
