@@ -360,7 +360,15 @@ export default function AddLiquidityPro() {
 
   return (
     <div className={styles.pool}>
-      <button onClick={() => setIsOpen(true)}>Add Liquidity</button>
+      <div className={styles.addMsg}>
+        <div className={styles.msg}>
+        <span className={styles.info}>
+          
+          Can’t find your pool? Create it yourself and start providing liquidity!
+          </span>
+        <button className={styles.addLiquidityBtn} onClick={() => setIsOpen(true)}>Add Liquidity</button>
+      </div>
+      </div>
 
       {isOpen && (
         <div className={styles.modalOverlay} onClick={() => setIsOpen(false)}>
