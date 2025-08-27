@@ -22,7 +22,7 @@ import { WNATIVE_ADDRESS, NATIVE_SYMBOL, WRAPPED_SYMBOL, SHOW_WRAPPED_SYMBOL } f
 const WNATIVE = (WNATIVE_ADDRESS || "").toLowerCase()
 const NATIVE_SYM = NATIVE_SYMBOL || "tTRUST"
 const WRAPPED_SYM = WRAPPED_SYMBOL || "WTTRUST"
-const SHOW_WRAPPED = Boolean(SHOW_WRAPPED_SYMBOL) === true || (SHOW_WRAPPED_SYMBOL === 'true')
+const SHOW_WRAPPED = Boolean(SHOW_WRAPPED_SYMBOL) === true 
 
 function labelFor(addr?: string, onchain?: string) {
   if (!addr) return onchain || "TKN"
@@ -30,11 +30,12 @@ function labelFor(addr?: string, onchain?: string) {
   return onchain || "TKN"
 }
 
+
 const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "")
 
 type Props = {
   value?: UiToken
-  onChange: (t: UiToken | undefined) => void
+  onChange: (t: UiToken | null) => void
   className?: string
 }
 
