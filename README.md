@@ -1,5 +1,5 @@
 
-# Intuition AMM (Uniswap V2 fork)
+# TrustSwap (Uniswap V2 fork)
 
 Uniswap V2–style DEX with **native tTRUST** + **wrapped WTTRUST**, Router V2, StakingRewards, and a Vite + React + wagmi + viem frontend.
 
