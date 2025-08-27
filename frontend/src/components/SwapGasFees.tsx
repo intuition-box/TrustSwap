@@ -2,9 +2,9 @@ import React, { useMemo } from "react"
 import type { Address, Abi } from "viem"
 import { useAccount } from "wagmi"
 import { useNetworkFees, useTxGasEstimate, computeTxCostText } from "../hooks/useSwapGas"
-
-const NATIVE_SYM = import.meta.env.VITE_NATIVE_SYMBOL || "tTRUST"
-const NATIVE_DECIMALS = Number(import.meta.env.VITE_NATIVE_DECIMALS || 18)
+import { NATIVE_SYMBOL, /* NATIVE_DECIMALS if needed */ } from '../config/protocol'
+const NATIVE_SYM = NATIVE_SYMBOL || "tTRUST"
+const NATIVE_DECIMALS = 18
 
 export default function SwapGasFees({
   to, abi, functionName, args, value, enabled = true, fallbackGas = 200_000n, className,

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { usePublicClient, useWalletClient, useAccount } from "wagmi"
-
+import { FACTORY_ADDRESS, PROTOCOL_TREASURY } from "../../config/protocol"
 const factoryAbi = [
   { type: "function", name: "feeTo",        stateMutability: "view",       inputs: [], outputs: [{ type: "address" }] },
   { type: "function", name: "feeToSetter",  stateMutability: "view",       inputs: [], outputs: [{ type: "address" }] },
@@ -10,8 +10,8 @@ const factoryAbi = [
 const ZERO = "0x0000000000000000000000000000000000000000"
 
 export default function ProtocolFeeCard({
-  factory = import.meta.env.VITE_FACTORY_ADDRESS as `0x${string}`,
-  treasury = import.meta.env.VITE_PROTOCOL_TREASURY as `0x${string}`
+  factory = FACTORY_ADDRESS as `0x${string}`,
+  treasury = PROTOCOL_TREASURY as `0x${string}`
 }) {
   const pub = usePublicClient()
   const { data: wallet } = useWalletClient()

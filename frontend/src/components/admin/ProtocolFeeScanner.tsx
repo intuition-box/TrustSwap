@@ -1,6 +1,7 @@
 // src/components/admin/ProtocolFeeScanner.tsx
 import React, { useCallback, useMemo, useState } from "react"
 import { usePublicClient } from "wagmi"
+import { FACTORY_ADDRESS, PROTOCOL_TREASURY } from '../../config/protocol'
 
 const factoryAbi = [
   { type:"function", name:"allPairsLength", stateMutability:"view", inputs:[], outputs:[{type:"uint256"}]},
@@ -111,8 +112,8 @@ async function fetchPairRow(pub: any, i: number, factory: `0x${string}`, treasur
 }
 
 export default function ProtocolFeeScanner({
-  factory = import.meta.env.VITE_FACTORY_ADDRESS as `0x${string}`,
-  treasury = import.meta.env.VITE_PROTOCOL_TREASURY as `0x${string}`,
+  factory = FACTORY_ADDRESS as `0x${string}`,
+  treasury = PROTOCOL_TREASURY as `0x${string}`,
   limit = 100,
   concurrency = 8
 }: {

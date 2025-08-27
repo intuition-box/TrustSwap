@@ -1,4 +1,5 @@
 import type { Address } from 'viem'
+import { WNATIVE_ADDRESS, TSWP_ADDRESS } from '../config/protocol'
 
 
 export type Currency = {
@@ -20,21 +21,21 @@ export const TOKENS: Currency[] = [
     name: 'Intuition Native',
     decimals: 18,
     isNative: true,
-    wrapped: import.meta.env.VITE_WNATIVE_ADDRESS as Address,
+  wrapped: WNATIVE_ADDRESS as Address,
     logoURI: ''
   },
   {
     symbol: 'WTTRUST',
     name: 'Wrapped tTRUST',
     decimals: 18,
-    address: import.meta.env.VITE_WNATIVE_ADDRESS as Address,
+  address: WNATIVE_ADDRESS as Address,
     logoURI: ''
   },
   {
     symbol: 'TSWP',
     name: 'TrustSwap Token',
     decimals: 18,
-    address: import.meta.env.VITE_TSWP_ADDRESS as Address,
+  address: TSWP_ADDRESS as Address,
     logoURI: ''
   },
 

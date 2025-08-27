@@ -17,6 +17,7 @@ import {
 import TokenSelector from './TokenSelector'
 import { TOKENS } from '../tokens/intuit'
 import { fmtAmount, fmtLP, fmtAllowance, fmtPct, shortAddr } from '../lib/format'
+import { ROUTER_ADDRESS, FACTORY_ADDRESS, GAS_PRICE_GWEI, GAS_LIMIT as GAS_LIMIT_GLOBAL } from '../config/protocol'
 
 type UiToken = {
   symbol: string
@@ -28,13 +29,13 @@ type UiToken = {
 }
 const erc20Addr = (t: UiToken): Address => (t.isNative ? (t.wrapped as Address) : (t.address as Address))
 
-// ENV
-const router = import.meta.env.VITE_ROUTER_ADDRESS as Address
-const factory = import.meta.env.VITE_FACTORY_ADDRESS as Address
+// ENV (from protocol config)
+const router = ROUTER_ADDRESS as Address
+const factory = FACTORY_ADDRESS as Address
 
 // Gas caps (comme ton AddLiquidity)
-const GAS_PRICE = parseGwei(import.meta.env.VITE_GAS_PRICE_GWEI ?? '0.2')
-const GAS_LIMIT_REMOVE = BigInt(import.meta.env.VITE_GAS_LIMIT_REMOVE ?? '1000000')
+const GAS_PRICE = parseGwei(String(GAS_PRICE_GWEI ?? 0.2))
+const GAS_LIMIT_REMOVE = GAS_LIMIT_GLOBAL ?? 1000000n
 const MAX_UINT = (2n ** 256n) - 1n
 
 // --- ABIs ---

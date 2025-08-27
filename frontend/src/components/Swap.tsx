@@ -6,6 +6,7 @@ import { erc20Abi, encodeFunctionData, parseUnits, formatUnits, parseGwei } from
 
 import TokenSelector from './TokenSelector'
 import { TOKENS } from '../tokens/intuit'
+import { ROUTER_ADDRESS, GAS_PRICE_GWEI, GAS_LIMIT as GAS_LIMIT_GLOBAL } from '../config/protocol'
 import RouterABI from '../abis/Router02.min.json' 
 
 import styles from "../styles/swap.module.css";
@@ -25,10 +26,10 @@ type UiToken = {
 
 const erc20Addr = (t: UiToken): Address => (t.isNative ? (t.wrapped as Address) : (t.address as Address))
 
-// ENV
-const router = import.meta.env.VITE_ROUTER_ADDRESS as Address
-const GAS_PRICE = parseGwei(import.meta.env.VITE_GAS_PRICE_GWEI ?? '0.2')
-const GAS_LIMIT_SWAP = BigInt(import.meta.env.VITE_GAS_LIMIT_SWAP ?? '900000')
+// ENV (from protocol config)
+const router = ROUTER_ADDRESS as Address
+const GAS_PRICE = parseGwei(String(GAS_PRICE_GWEI ?? 0.2))
+const GAS_LIMIT_SWAP = GAS_LIMIT_GLOBAL ?? BigInt(900000)
 const MAX_UINT = (2n ** 256n) - 1n
 
 export default function Swap() {

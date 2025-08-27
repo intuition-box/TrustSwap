@@ -1,6 +1,7 @@
 // src/hooks/useIsFeeToSetter.ts
 import { useEffect, useMemo, useState } from "react"
 import { useAccount, usePublicClient } from "wagmi"
+import { FACTORY_ADDRESS } from '../config/protocol'
 
 const abi = [
   { type: "function", name: "feeToSetter", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
@@ -10,7 +11,7 @@ const ZERO = "0x0000000000000000000000000000000000000000"
 const norm = (a?: string) => (a || "").toLowerCase()
 
 export function useIsFeeToSetter(factory?: `0x${string}`) {
-  const FACTORY = (factory || import.meta.env.VITE_FACTORY_ADDRESS) as `0x${string}`
+  const FACTORY = (factory || FACTORY_ADDRESS) as `0x${string}`
   const pub = usePublicClient()
   const { address } = useAccount()
 

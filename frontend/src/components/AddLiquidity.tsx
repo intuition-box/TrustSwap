@@ -6,6 +6,7 @@ import RouterABI from '../abis/Router02.min.json'
 
 import TokenSelector from './TokenSelector'
 import { TOKENS } from '../tokens/intuit'
+import { ROUTER_ADDRESS, FACTORY_ADDRESS, GAS_PRICE_GWEI, GAS_LIMIT as GLOBAL_GAS_LIMIT, GAS_LIMIT_CREATE_PAIR as GLOBAL_GAS_LIMIT_CREATE_PAIR } from '../config/protocol'
 import styles from "../styles/liquidity.module.css"
 
 type UiToken = {
@@ -22,12 +23,13 @@ const addrOf = (t?: UiToken | null): Address | undefined =>
   t ? (t.isNative ? (t.wrapped as Address) : (t.address as Address)) : undefined
 const decOf = (t?: UiToken | null): number => t?.decimals ?? 18
 
-// ENV
-const router = import.meta.env.VITE_ROUTER_ADDRESS as Address
-const factory = import.meta.env.VITE_FACTORY_ADDRESS as Address
-const GAS_PRICE = parseGwei(import.meta.env.VITE_GAS_PRICE_GWEI ?? '0.2')
-const GAS_LIMIT_ADD = BigInt(import.meta.env.VITE_GAS_LIMIT ?? '1200000')
-const GAS_LIMIT_CREATE_PAIR = BigInt(import.meta.env.VITE_GAS_LIMIT_CREATE_PAIR ?? '3000000')
+// ENV (from protocol config)
+const router = ROUTER_ADDRESS as Address
+const factory = FACTORY_ADDRESS as Address
+const GAS_PRICE = parseGwei(String(GAS_PRICE_GWEI ?? 0.2))
+const GAS_LIMIT_ADD = GLOBAL_GAS_LIMIT ?? 1200000n
+// keep specific create pair constant
+const GAS_LIMIT_CREATE_PAIR = GLOBAL_GAS_LIMIT_CREATE_PAIR ?? 3000000n
 const MAX_UINT = (2n ** 256n) - 1n
 
 const FactoryABI = [

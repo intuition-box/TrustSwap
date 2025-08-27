@@ -4,8 +4,9 @@ import { usePublicClient, useWatchContractEvent } from 'wagmi'
 import type { Address } from 'viem'
 import PoolRow from './PoolRow'
 import AddLiquidityPro from './AddLiquidity'
+import { FACTORY_ADDRESS, HIDE_TOKENS, SHOW_ONLY_TOKENS } from '../config/protocol'
 
-const factory = import.meta.env.VITE_FACTORY_ADDRESS as Address
+const factory = FACTORY_ADDRESS as Address
 
 const FactoryABI = [
   { inputs: [], name: 'allPairsLength', outputs: [{ type:'uint256' }], stateMutability:'view', type:'function' },
@@ -31,11 +32,8 @@ const PairABI = [
 
 type PairMeta = { pair: Address; token0: Address; token1: Address; r0: bigint; r1: bigint }
 
-const HIDE = (import.meta.env.VITE_HIDE_TOKENS || '')
-  .toLowerCase().split(',').map(s => s.trim()).filter(Boolean)
-
-const ONLY = (import.meta.env.VITE_SHOW_ONLY_TOKENS || '')
-  .toLowerCase().split(',').map(s => s.trim()).filter(Boolean)
+const HIDE = (HIDE_TOKENS || []).map(s => s.toLowerCase())
+const ONLY = (SHOW_ONLY_TOKENS || '').toLowerCase().split(',').map(s => s.trim()).filter(Boolean)
 
 function shouldShowPair(meta: PairMeta) {
   const t0 = meta.token0.toLowerCase()

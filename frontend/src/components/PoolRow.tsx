@@ -18,6 +18,7 @@ import {
 import { TOKENS } from "../tokens/intuit"
 import { fmtAmount, shortAddr } from "../lib/format"
 import RouterABI from "../abis/Router02.min.json"
+import { ROUTER_ADDRESS, GAS_PRICE_GWEI, GAS_LIMIT as GAS_LIMIT_GLOBAL } from '../config/protocol'
 
 import styles from "../styles/pool.module.css"
 import arrow from "../images/arrow.png"
@@ -52,9 +53,9 @@ const ERC20_MINI = [
   { inputs: [{ name: "spender", type: "address" }, { name: "amount", type: "uint256" }], name: "approve", outputs: [{ type: "bool" }], stateMutability: "nonpayable", type: "function" },
 ] as const
 
-const router = import.meta.env.VITE_ROUTER_ADDRESS as Address
-const GAS_PRICE = parseGwei(import.meta.env.VITE_GAS_PRICE_GWEI ?? "0.2")
-const GAS_LIMIT_ADD = 1_200_000n
+const router = ROUTER_ADDRESS as Address
+const GAS_PRICE = parseGwei(String(GAS_PRICE_GWEI ?? "0.2"))
+const GAS_LIMIT_ADD = GAS_LIMIT_GLOBAL ?? 1_200_000n
 const GAS_LIMIT_REMOVE = 1_000_000n
 
 function addrEq(a?: string, b?: string) {

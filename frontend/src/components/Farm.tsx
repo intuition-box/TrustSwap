@@ -6,10 +6,11 @@ import FarmAprBadge from "./FarmAprBadge"
 import styles from "../styles/farm.module.css";
 // 👉 tes helpers de format
 import { fmtLP, fmtAmount, fmtAllowance, shortAddr } from "../lib/format";
-const WNATIVE = (import.meta.env.VITE_WTTRUST_ADDRESS || '').toLowerCase();
-const NATIVE_SYM = import.meta.env.VITE_NATIVE_SYMBOL || 'tTRUST';
-const WRAPPED_SYM = import.meta.env.VITE_WRAPPED_SYMBOL || 'WTTRUST';
-const SHOW_WRAPPED = (import.meta.env.VITE_SHOW_WRAPPED_SYMBOL || 'false') === 'true';
+import { WNATIVE_ADDRESS, NATIVE_SYMBOL, WRAPPED_SYMBOL, SHOW_WRAPPED_SYMBOL } from '../config/protocol'
+const WNATIVE = (WNATIVE_ADDRESS || '').toLowerCase();
+const NATIVE_SYM = NATIVE_SYMBOL || 'tTRUST';
+const WRAPPED_SYM = WRAPPED_SYMBOL || 'WTTRUST';
+const SHOW_WRAPPED = Boolean(SHOW_WRAPPED_SYMBOL) === true
 
 function overrideNativeSymbol(addr?: string, onchain?: string) {
   if (!addr) return onchain || 'TKN';
