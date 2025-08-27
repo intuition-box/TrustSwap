@@ -418,3 +418,25 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+
+
+@media (max-width: 768px) {
+
+  .headerFarm {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 3px;
+}
+
+.infoFarm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  margin-right: 0px;
+  width: 100%;
+  margin-top: 10px;
+  justify-content: space-around;
+}
+}

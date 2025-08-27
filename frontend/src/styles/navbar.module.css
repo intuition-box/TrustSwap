@@ -7,6 +7,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 1;
 }
 
 .navBarMiddle {
@@ -91,6 +92,7 @@
   margin-left: 10px;
   margin-right: 10px;
   position: fixed;
+  z-index: 1;
   left: 20px;
 }
 
@@ -125,5 +127,14 @@
 
   .navBarRight {
     right: 0px;
+  }
+
+  .titleNav {
+    position: initial;
+    margin-right: auto;
+  }
+
+  .navBarRight {
+    margin-right: 10px;
   }
 }

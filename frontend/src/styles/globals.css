@@ -66,3 +66,13 @@ h2 {
   flex-direction: column;
   flex-grow: 1;
 }
+@media (max-width: 768px) {
+
+.containerBody {
+  height: 100vh;
+  padding-bottom: 200px;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+}

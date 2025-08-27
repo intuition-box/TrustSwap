@@ -516,3 +516,38 @@ margin: 0;
   margin-right: auto;
   margin-top: 10px;
 }
+
+@media (max-width: 768px) {
+  .rightPool, .reservePool {
+    display: none;
+  }
+
+  .tokenAddRemoveContainer {
+    flex-direction: column;
+  }
+
+  .tokenOne, .tokenTwo {
+    width: 100%;
+    border-radius: 15px;
+  }
+
+  .removeLiquidity {
+    flex-direction: column;
+    height: auto;
+    padding-bottom: 10px;
+  }
+
+  .tokenRemove  {
+  width: 100%;
+  margin-bottom: 10px;
+  }
+
+  .InputAddRemove {
+    width: 90%;
+  }
+
+  .inputPercentWrapper {
+    width: 60px;
+  }
+  
+}

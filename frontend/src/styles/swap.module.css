@@ -585,7 +585,7 @@
 
 @media (max-width: 768px) {
   .containerLcdAffiche  {
-    margin-top: 20px;
+    margin-top: 0px;
     width: 90%;
   }
 
@@ -611,4 +611,13 @@
     outline: none;
     cursor: pointer;
   }
+
+  .InputSwap {
+    font-size: 26px;
+  }
+
+.selectContainer {
+  margin-bottom: 0px;
+}
+
 }

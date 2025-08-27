@@ -1,4 +1,4 @@
-.backPoolAdd{
+.backPoolAdd {
   display: flex;
   flex-direction: column;
   padding: 10px;
@@ -104,6 +104,7 @@
   padding-right: 15px;
   flex-grow: 1;
 }
+
 .ligneInfoLabel {
   display: flex;
   flex-direction: column;
@@ -360,4 +361,60 @@
   padding-right: 10px;
   font-size: 16px;
   cursor: pointer;
+}
+
+
+@media (max-width: 768px) {
+  .inputCreatePool {
+    border: transparent;
+
+    font-size: 18px;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    text-align: right;
+    margin-left: auto;
+    padding-right: 15px;
+    flex-grow: 0;
+    width: 100%;
+    margin-top: auto;
+  }
+
+  .inputContainerAdd {
+    display: flex;
+    padding-bottom: 10px;
+  }
+
+  .onFlip {
+    position: absolute;
+    top: 180px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--black);
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    color: var(--white);
+    height: 40px;
+    width: 40px;
+    font-size: 15px;
+    border-radius: 99vw;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .swapContainer {
+    min-height: 0px;
+    padding-bottom: 30px;
+  }
 }

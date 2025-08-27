@@ -361,6 +361,7 @@ export default function PoolRow({ pair }: { pair: Address }) {
             <div className={styles.reserve}>
               {price ? `1 ${sym0} ≈ ${price.toFixed(6)} ${sym1}` : "—"}
             </div>
+     
           </div>
             <div className={styles.reservePool}>
               <span className={styles.labelPool}>LP Balance :</span>
@@ -368,8 +369,9 @@ export default function PoolRow({ pair }: { pair: Address }) {
                 {fmtAmount(lpBalance, lpDecimals)} <span className={styles.sharePct}> / {sharePct}</span>
               </div>
             </div>
-          <img src={arrow} alt="toggle" className={expanded ? styles.arrowOpen : styles.arrowClosed} />
+         
         </div>
+        <img src={arrow} alt="toggle" className={expanded ? styles.arrowOpen : styles.arrowClosed} />
       </div>
 
       {/* Body */}
