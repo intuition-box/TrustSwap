@@ -9,9 +9,11 @@ import poolWhite from '../images/pool-white.png'
 import poolGrey from '../images/pool-grey.png'
 import farmWhite from '../images/farm-white.png'
 import farmGrey from '../images/farm-grey.png'
+import userWhite from '../images/user-white.png'
+import userGrey from '../images/user-grey.png'
 
 const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
-  const [active, setActive] = useState("swap"); // Swap actif par défaut
+  const [active, setActive] = useState("swap"); 
 
   const handleClick = (tab: string) => {
     setActive(tab);
@@ -78,7 +80,7 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
             onClick={() => handleClick("profile")}
           >
             <img
-              src={active === "profile" ? farmWhite : farmGrey}
+              src={active === "profile" ? userWhite : userGrey}
               alt="Farms Icon"
               className={styles.logoIconeNav}
             />
