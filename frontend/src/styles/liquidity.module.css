@@ -1,38 +1,92 @@
-/* aligne les blocs du formulaire sur une seule ligne (wrap si écran étroit) */
-.inlineRow {
+.pool {
   display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  flex-wrap: wrap;      /* passe à la ligne si pas assez de place */
+  flex-direction: column;
+  padding: 10px;
+  background: rgba(80, 80, 80, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(101, 101, 101, 0.3);
+  border-radius: 20px;
+  width: 95%;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 80px;
 }
 
-/* garde chaque sélecteur + input compact */
-.inlineCol {
-  display: flex;
-  gap: 6px;
-  min-width: 220px;     /* ajuste selon ton design */
+.pool::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0%;
+  height: 1px;
+  border-radius: 2px 2px 0 0;
+  background: var(--white);
+  box-shadow: 0 0 60px 6px var(--white);
+  z-index: 1;
+  animation: poolOpen 1s ease forwards;
 }
 
-/* infos (prix / message) en ligne, sans retour à la ligne */
-.inlineInfo {
-  white-space: nowrap;
-  font-size: 12px;
-  opacity: 0.8;
-  align-self: flex-end;
+@keyframes poolOpen {
+  to {
+    width: 77%;
+    box-shadow: 0 0 100px 10px var(--white);
+  }
 }
 
-/* groupe Slippage / Deadline en ligne */
-.inlineControls {
+
+.swapContainer {
+  color: var(--white);
+  border: 1px solid var(--black-border);
+  box-shadow: 
+    inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+    inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+    inset 0 -0.75px 0.5px var(--btn-shadow-black),
+    0 4px 4px -1px var(--btn-shadow-black),
+    0 2px 3px -1px var(--btn-shadow-black),
+    0 0.5px 0.5px var(--btn-shadow-black),
+    0 0 0 0.75px var(--btn-shadow-black);
+  background-color: #111111;
+  border-radius: 15px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  white-space: nowrap;
+  flex-direction: column;
 }
 
-/* boutons (approve…) alignés en bas pour rester sur la ligne */
-.inlineActions {
+.containerInput {
   display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  white-space: nowrap;
+  align-items: center;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.inlineCol {
+  display: flex;
+  align-content: center;
+  padding-top: 10px;
+  background-color: #1a1a1a;
+  border: 1px solid var(--border);
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
+  width: 50%;
+}
+
+.inlineColRight {
+  display: flex;
+  align-content: center;
+  padding-top: 10px;
+  background-color: #1a1a1a;
+  border: 1px solid var(--border);
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
+  width: 50%;
+}
+
+.inputCreatePool {
+  background-color: transparent;
+  border: transparent;
 }

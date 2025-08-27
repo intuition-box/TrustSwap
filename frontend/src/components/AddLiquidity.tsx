@@ -251,8 +251,8 @@ export default function AddLiquidityPro() {
 
   return (
     <div className={styles.pool}>
-      <div className={`${styles.swapContainer} ${styles.inlineRow}`}>
-
+      <div className={styles.swapContainer}>
+        <div className={styles.containerInput}>
         <div className={styles.inlineCol}>
           <TokenSelector
             value={TA ?? undefined}
@@ -261,11 +261,11 @@ export default function AddLiquidityPro() {
           <input
             value={amountA}
             onChange={e => { setAmountA(e.target.value); setLockedB(false) }}
-            className="border rounded px-2 py-1"
+            className={styles.inputCreatePool}
           />
         </div>
-
-        <div className={styles.inlineCol}>
+     
+        <div className={styles.inlineColRight}>
           <TokenSelector
             value={TB ?? undefined}
             onChange={(t) => { setTB(t ?? null); setLockedB(true) }}
@@ -273,8 +273,10 @@ export default function AddLiquidityPro() {
           <input
             value={amountB}
             onChange={e => { setAmountB(e.target.value); setLockedB(true) }}
-            className="border rounded px-2 py-1"
+            className={styles.inputCreatePool}
           />
+        </div>
+
         </div>
 
         {reserves ? (
@@ -304,6 +306,8 @@ export default function AddLiquidityPro() {
               placeholder="0.5"
             />
             <span>%</span>
+
+            
           </div>
 
           <span style={{marginLeft:12}}>Deadline:</span>
@@ -319,6 +323,7 @@ export default function AddLiquidityPro() {
             <span>min</span>
           </div>
         </div>
+      
 
         {/* Approvals en ligne */}
         <div className={styles.inlineActions}>
@@ -333,12 +338,13 @@ export default function AddLiquidityPro() {
             </button>
           )}
         </div>
-
-      </div>
-
-      <button className={styles.btnSwap} onClick={onSupply} disabled={!canSupply || pending}>
+        <button className={styles.btnSwap} onClick={onSupply} disabled={!canSupply || pending}>
         {pending ? 'Supplying…' : 'Supply'}
       </button>
+      </div>
+
+
+     
       <div className={styles.traitSwap}></div>
     </div>
   )
