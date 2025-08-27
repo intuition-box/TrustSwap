@@ -254,7 +254,10 @@ export default function AddLiquidityPro() {
       <div className={`${styles.swapContainer} ${styles.inlineRow}`}>
 
         <div className={styles.inlineCol}>
-          <TokenSelector value={TA ?? undefined} onChange={(t) => { setTA(t); setLockedB(false) }} />
+          <TokenSelector
+            value={TA ?? undefined}
+            onChange={(t) => { setTA(t ?? null); setLockedB(false) }}
+          />
           <input
             value={amountA}
             onChange={e => { setAmountA(e.target.value); setLockedB(false) }}
@@ -263,7 +266,10 @@ export default function AddLiquidityPro() {
         </div>
 
         <div className={styles.inlineCol}>
-          <TokenSelector value={TB ?? undefined} onChange={(t) => { setTB(t); setLockedB(true) }} />
+          <TokenSelector
+            value={TB ?? undefined}
+            onChange={(t) => { setTB(t ?? null); setLockedB(true) }}
+          />
           <input
             value={amountB}
             onChange={e => { setAmountB(e.target.value); setLockedB(true) }}
