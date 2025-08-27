@@ -366,7 +366,7 @@ export default function AddLiquidityPro() {
           
           Can’t find your pool? Create it yourself and start providing liquidity!
           </span>
-        <button className={styles.addLiquidityBtn} onClick={() => setIsOpen(true)}>Add Liquidity</button>
+        <button className={styles.addLiquidityBtn} onClick={() => setIsOpen(true)}>Create Pool</button>
       </div>
       </div>
 
