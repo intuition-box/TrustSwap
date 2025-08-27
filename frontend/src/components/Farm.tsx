@@ -256,9 +256,28 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
 
   return (
     <div className={styles.farmContainer}>
+      <div className={styles.claimContainer}>
+        <div className={styles.containerPending}>
+        <span className={styles.labelFarm}>Earned TSWP:</span>
+       <span className={styles.pendingReward}>
+  {earned === 0n ? "0.000000" : fmtAmount(earned, decRW, { dp: 6 })}
+</span>
+
+</div>
+<button
+  className={`${styles.btnClaimFarm} ${earned === 0n ? styles.btnDisabled : ""}`}
+  onClick={claim}
+  disabled={pending || !loaded || earned === 0n} // désactive si rien à claim
+  style={{ marginLeft: '4px', cursor: earned === 0n ? 'not-allowed' : 'pointer' }}
+>
+  Claim
+</button>
+
+            </div>
+          
+
       <div 
         className={styles.farm} 
-        onClick={() => setIsOpen(!isOpen)} 
         style={{ cursor: 'pointer' }}
       >
         <div className={styles.headerFarm} onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }}>
@@ -291,45 +310,76 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
   
         {isOpen && (
           <div className={styles.dropdownContent}>
-            <small style={{ opacity: 0.8 }}>
-              Reserves:&nbsp;
-              <b>{fmtAmount(r0, dec0, { dp: 6, compact: true })} {sym0 ?? 'T0'}</b>
-              &nbsp;/&nbsp;
-              <b>{fmtAmount(r1, dec1, { dp: 6, compact: true })} {sym1 ?? 'T1'}</b>
-            </small>
+            
   
-            <div style={{ textAlign: 'right', marginTop: '8px' }}>
-              <div>Wallet LP: <b>{fmtLP(lpBal, { dp: 6 })}</b></div>
-              <div>Staked: <b>{fmtLP(staked, { dp: 6 })}</b></div>
-              <div>Earned TSWP: <b>{fmtAmount(earned, decRW, { dp: 6 })}</b></div>
-              <div>Allowance → SR: <b>{fmtAllowance(lpAllow)}</b></div>
+            <div className={styles.containerDataFarm}>
+            <div className={styles.ligneInfoFarm}>
+    <span className={styles.labelFarm}>Wallet LP:</span>
+    <span className={styles.dataFarm}>{fmtLP(lpBal, { dp: 6 })}</span>
+  </div>
+
+  <div className={styles.ligneInfoFarm}>
+    <span className={styles.labelFarm}>Staked:</span>
+    <span className={styles.dataFarm}>{fmtLP(staked, { dp: 6 })}</span>
+  </div>
+
+
+
+  <div className={styles.ligneInfoFarm}>
+    <span className={styles.labelFarm}>Allowance → SR:</span>
+    <span className={styles.dataFarm}>{fmtAllowance(lpAllow)}</span>
+  </div>
+
+  <div className={styles.ligneInfoFarm}>
+  <span className={styles.labelFarm}> Reserves:&nbsp;</span>
+  <span className={styles.dataFarm}>
+    
+    {fmtAmount(r0, dec0, { dp: 6, compact: true })} 
+    <img src={tokenLogo} alt="Logo" className={styles.logoTokenInfo} />
+    {sym0 ?? 'T0'}
+              &nbsp;/&nbsp;
+           {fmtAmount(r1, dec1, { dp: 6, compact: true })} 
+           <img src={tokenLogo} alt="Logo" className={styles.logoTokenInfo} />
+           {sym1 ?? 'T1'}</span>
+            </div>
             </div>
   
-            <div style={{ marginTop: '8px' }}>
+            <div className={styles.inputFarmContainer}>
+              <div className={styles.headerFarmInput}>
+              <span className={styles.labelFarm}>Wallet LP:</span>
+              <span className={styles.dataFarm}>{fmtLP(lpBal, { dp: 6 })}</span>
+              <button className={styles.maxInputFarm} onClick={onMax}>Max</button>
+              </div>
               <input
                 value={amount}
                 onChange={e => setAmount(e.target.value)}
-                placeholder="Amount LP"
-                className="border rounded px-2 py-1"
+                placeholder="0.00000"
+                className={styles.inputFarm}
                 style={{ marginRight: '4px' }}
               />
-              <button onClick={onMax} style={{ opacity: .8, marginRight: '4px' }}>Max</button>
+              
             </div>
+           
+          
   
-            <div style={{ marginTop: '4px' }}>
+            <div className={styles.containerActionFarm}>
               {needsApproval ? (
-                <button onClick={approve} disabled={pending || !loaded}>Approve LP</button>
+                <button className={styles.btnStake} onClick={approve} disabled={pending || !loaded}><span className={styles.motGrey}>Approve LP</span></button>
               ) : (
                 <>
-                  <button onClick={stake} disabled={pending || !loaded || !canStake} style={{ marginRight: '4px' }}>Stake</button>
-                  <button onClick={unstake} disabled={pending || !loaded || !canUnstake}>Unstake</button>
+                  <button className={styles.btnStake} onClick={stake} disabled={pending || !loaded || !canStake}><span className={styles.motGrey}>Stake</span></button>
+                  <button className={styles.btnUnstake} onClick={unstake} disabled={pending || !loaded || !canUnstake}><span className={styles.primaryGrey}>Unstake</span></button>
                 </>
               )}
-              <button onClick={claim} disabled={pending || !loaded} style={{ marginLeft: '4px' }}>Claim</button>
+
+
             </div>
+     
           </div>
         )}
+       <div className={`${styles.traitFarm} ${earned === 0n ? styles.traitFarmRed : ""}`}></div>
       </div>
+      
     </div>
   );
   
