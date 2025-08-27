@@ -245,107 +245,131 @@ export default function AddLiquidityPro() {
       setPending(false)
     }
   }
+  const [isOpen, setIsOpen] = useState(false)
 
   const priceAB = reserves && reserves.rA>0n ? Number(reserves.rB)/Number(reserves.rA) : null
   const priceBA = reserves && reserves.rB>0n ? Number(reserves.rA)/Number(reserves.rB) : null
 
   return (
     <div className={styles.pool}>
-      <div className={styles.swapContainer}>
-        <div className={styles.containerInput}>
-        <div className={styles.inlineCol}>
-          <TokenSelector
-            value={TA ?? undefined}
-            onChange={(t) => { setTA(t ?? null); setLockedB(false) }}
-          />
-          <input
-            value={amountA}
-            onChange={e => { setAmountA(e.target.value); setLockedB(false) }}
-            className={styles.inputCreatePool}
-          />
-        </div>
-     
-        <div className={styles.inlineColRight}>
-          <TokenSelector
-            value={TB ?? undefined}
-            onChange={(t) => { setTB(t ?? null); setLockedB(true) }}
-          />
-          <input
-            value={amountB}
-            onChange={e => { setAmountB(e.target.value); setLockedB(true) }}
-            className={styles.inputCreatePool}
-          />
-        </div>
-
-        </div>
-
-        {reserves ? (
-          <div className={styles.inlineInfo}>
-            <small>
-              Pool price: 1 {TA?.symbol} ≈ {priceAB?.toFixed(6) ?? '—'} {TB?.symbol} | 1 {TB?.symbol} ≈ {priceBA?.toFixed(6) ?? '—'} {TA?.symbol}
-            </small>
-          </div>
-        ) : (
-          <div className={styles.inlineInfo}>
-            <small>The pair doesn’t exist yet — first supply will create it.</small>
-          </div>
-        )}
-
-        {/* Slippage / Deadline */}
-        <div style={{display:'flex', alignItems:'center', gap:12, flexWrap:'wrap'}}>
-          <span>Slippage:</span>
-          <div style={{display:'flex', alignItems:'center', gap:6}}>
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.1"
-              min="0"
-              value={slippage}
-              onChange={e => setSlippage(Math.max(0, Number(e.target.value || 0)))}
-              style={{ width: 90 }}
-              placeholder="0.5"
-            />
-            <span>%</span>
-
-            
-          </div>
-
-          <span style={{marginLeft:12}}>Deadline:</span>
-          <div style={{display:'flex', alignItems:'center', gap:6}}>
-            <input
-              type="number"
-              min={1}
-              value={deadlineMins}
-              onChange={e => setDeadlineMins(Math.max(1, Number(e.target.value || 1)))}
-              style={{ width: 90 }}
-              placeholder="10"
-            />
-            <span>min</span>
-          </div>
-        </div>
-      
-
-        {/* Approvals en ligne */}
-        <div className={styles.inlineActions}>
-          {!TA?.isNative && needApproveA && (
-            <button onClick={() => onApprove(TA, TA!.symbol)} disabled={pending}>
-              Approve {TA?.symbol}
+      {/* Bouton d’ouverture */}
+      <button onClick={() => setIsOpen(true)}>Add Liquidity</button>
+  
+      {/* Overlay + Popup */}
+      {isOpen && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setIsOpen(false)} // clic extérieur ferme
+        >
+          <div
+            className={styles.backPoolAdd}
+            onClick={(e) => e.stopPropagation()} // bloque la propagation du clic intérieur
+          >
+            <button
+              className={styles.closeBtn}
+              onClick={() => setIsOpen(false)}
+            >
+              ✕
             </button>
-          )}
-          {!TB?.isNative && needApproveB && (
-            <button onClick={() => onApprove(TB, TB!.symbol)} disabled={pending}>
-              Approve {TB?.symbol}
-            </button>
-          )}
+
+
+
+            <div className={styles.swapContainer}>
+
+            <span className={styles.titleAdd}>Add Liquidity</span> 
+              <div className={styles.containerInput}>
+                <div className={styles.inlineCol}>
+                  <TokenSelector
+                    value={TA ?? undefined}
+                    onChange={(t) => { setTA(t ?? null); setLockedB(false) }}
+                  />
+                  <input
+                    value={amountA}
+                    onChange={e => { setAmountA(e.target.value); setLockedB(false) }}
+                    className={styles.inputCreatePool}
+                  />
+                </div>
+  
+                <div className={styles.inlineColRight}>
+                  <TokenSelector
+                    value={TB ?? undefined}
+                    onChange={(t) => { setTB(t ?? null); setLockedB(true) }}
+                  />
+                  <input
+                    value={amountB}
+                    onChange={e => { setAmountB(e.target.value); setLockedB(true) }}
+                    className={styles.inputCreatePool}
+                  />
+                </div>
+              </div>
+  
+              {reserves ? (
+                <div className={styles.inlineInfo}>
+                  <small>
+                    Pool price: 1 {TA?.symbol} ≈ {priceAB?.toFixed(6) ?? '—'} {TB?.symbol} | 1 {TB?.symbol} ≈ {priceBA?.toFixed(6) ?? '—'} {TA?.symbol}
+                  </small>
+                </div>
+              ) : (
+                <div className={styles.inlineInfo}>
+                  <small>The pair doesn’t exist yet — first supply will create it.</small>
+                </div>
+              )}
+  
+              {/* Slippage / Deadline */}
+              <div className={styles.ligneInfoLabel}>
+                <span className={styles.nameLigne}>Slippage:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.1"
+                    min="0"
+                    value={slippage}
+                    onChange={e => setSlippage(Math.max(0, Number(e.target.value || 0)))}
+                    style={{ width: 90 }}
+                    placeholder="0.5"
+                  />
+                  <span>%</span>
+                </div>
+  
+                <span style={{ marginLeft: 12 }}>Deadline:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <input
+                    type="number"
+                    min={1}
+                    value={deadlineMins}
+                    onChange={e => setDeadlineMins(Math.max(1, Number(e.target.value || 1)))}
+                    style={{ width: 90 }}
+                    placeholder="10"
+                  />
+                  <span>min</span>
+                </div>
+              </div>
+  
+              {/* Approvals */}
+              <div className={styles.inlineActions}>
+                {!TA?.isNative && needApproveA && (
+                  <button onClick={() => onApprove(TA, TA!.symbol)} disabled={pending}>
+                    Approve {TA?.symbol}
+                  </button>
+                )}
+                {!TB?.isNative && needApproveB && (
+                  <button onClick={() => onApprove(TB, TB!.symbol)} disabled={pending}>
+                    Approve {TB?.symbol}
+                  </button>
+                )}
+              </div>
+  
+              <button className={styles.btnSwap} onClick={onSupply} disabled={!canSupply || pending}>
+                {pending ? 'Supplying…' : 'Supply'}
+              </button>
+            </div>
+  
+            <div className={styles.traitSwap}></div>
+          </div>
         </div>
-        <button className={styles.btnSwap} onClick={onSupply} disabled={!canSupply || pending}>
-        {pending ? 'Supplying…' : 'Supply'}
-      </button>
-      </div>
-
-
-     
-      <div className={styles.traitSwap}></div>
+      )}
     </div>
   )
+  
 }
