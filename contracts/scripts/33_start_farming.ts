@@ -1,70 +1,128 @@
 // scripts/33_start_farming.ts
 import { ethers } from "hardhat";
 
-const ERC20_ABI = [
-  { name:"decimals", type:"function", stateMutability:"view", inputs:[], outputs:[{type:"uint8"}] },
-  { name:"balanceOf", type:"function", stateMutability:"view", inputs:[{type:"address"}], outputs:[{type:"uint256"}] },
-  { name:"transfer", type:"function", stateMutability:"nonpayable", inputs:[{type:"address"},{type:"uint256"}], outputs:[{type:"bool"}] },
+const ERC20 = [
+  { inputs: [{name:"spender",type:"address"},{name:"amount",type:"uint256"}], name:"approve", outputs:[{type:"bool"}], stateMutability:"nonpayable", type:"function" },
+  { inputs: [{name:"to",type:"address"},{name:"amount",type:"uint256"}], name:"transfer", outputs:[{type:"bool"}], stateMutability:"nonpayable", type:"function" },
+  { inputs: [{name:"owner",type:"address"},{name:"spender",type:"address"}], name:"allowance", outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
+  { inputs: [{name:"account",type:"address"}], name:"balanceOf", outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
 ] as const;
+
+const SR_ABI = [
+  { inputs: [], name:"rewardsDistribution", outputs:[{type:"address"}], stateMutability:"view", type:"function" },
+  { inputs: [], name:"rewardsToken",       outputs:[{type:"address"}], stateMutability:"view", type:"function" },
+  { inputs: [], name:"stakingToken",       outputs:[{type:"address"}], stateMutability:"view", type:"function" },
+  { inputs: [], name:"periodFinish",       outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
+  { inputs: [], name:"rewardsDuration",    outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
+  { inputs: [], name:"rewardRate",         outputs:[{type:"uint256"}], stateMutability:"view", type:"function" },
+  { inputs: [{name:"_rewardsDuration",type:"uint256"}], name:"setRewardsDuration", outputs:[], stateMutability:"nonpayable", type:"function" },
+  { inputs: [{name:"reward",type:"uint256"}], name:"notifyRewardAmount", outputs:[], stateMutability:"nonpayable", type:"function" },
+] as const;
+
+function bn(x: string | number) { return BigInt(x as any); }
 
 async function main() {
   const [signer] = await ethers.getSigners();
 
-  const SR        = process.env.SR!;                 // adresse du StakingRewards
-  const REWARD    = process.env.REWARD_TOKEN!;       // token de reward (ex: TSWP)
-  const AMOUNT    = process.env.AMOUNT!;             // en unités "humaines" (ex: "10000")
-  const DURATION  = process.env.DURATION!;           // en secondes (ex: "864000" pour 10 jours)
-  if (!SR || !REWARD || !AMOUNT || !DURATION) {
-    throw new Error("Env manquantes: SR, REWARD_TOKEN, AMOUNT, DURATION");
+  const SR_ADDR         = process.env.SR!;                // StakingRewards
+  const REWARD_TOKEN    = process.env.REWARD_TOKEN!;      // TSWP
+  const AMOUNT_HUMAN    = process.env.AMOUNT || "0";      // ex: "1000"
+  const DURATION_SEC    = process.env.DURATION || "";     // ex: "864000" (10 jours)
+
+  if (!SR_ADDR || !REWARD_TOKEN || !AMOUNT_HUMAN) {
+    throw new Error("Env manquantes: SR, REWARD_TOKEN, AMOUNT, (DURATION optionnel)");
   }
+
+  const amount = ethers.parseUnits(AMOUNT_HUMAN, 18);
+  const sr     = new ethers.Contract(SR_ADDR, SR_ABI, signer);
+  const token  = new ethers.Contract(REWARD_TOKEN, ERC20, signer);
 
   console.log("Signer         :", signer.address);
-  console.log("SR             :", SR);
-  console.log("REWARD_TOKEN   :", REWARD);
-  console.log("AMOUNT (human) :", AMOUNT);
-  console.log("DURATION (s)   :", DURATION);
+  console.log("SR             :", SR_ADDR);
+  console.log("REWARD_TOKEN   :", REWARD_TOKEN);
+  console.log("AMOUNT (human) :", AMOUNT_HUMAN);
+  if (DURATION_SEC) console.log("DURATION (s)   :", DURATION_SEC);
 
-  const sr  = await ethers.getContractAt("StakingRewards", SR, signer);
-  const rw  = new ethers.Contract(REWARD, ERC20_ABI, signer);
+  // --- Lecture d’état
+  const [dist, rwToken, stToken, pFinish, rDur, rRate] = await Promise.all([
+    sr.rewardsDistribution().catch(()=>ethers.ZeroAddress),
+    sr.rewardsToken().catch(()=>ethers.ZeroAddress),
+    sr.stakingToken().catch(()=>ethers.ZeroAddress),
+    sr.periodFinish().catch(()=>0n),
+    sr.rewardsDuration().catch(()=>0n),
+    sr.rewardRate().catch(()=>0n),
+  ]);
 
-  // 1) Décimales & parsing du montant
-  const dec: number = Number(await rw.decimals());
-  const amtWei = ethers.parseUnits(AMOUNT, dec);
+  console.log("rewardsDistribution :", dist);
+  console.log("rewardsToken        :", rwToken);
+  console.log("stakingToken        :", stToken);
+  console.log("periodFinish        :", pFinish.toString());
+  console.log("rewardsDuration     :", rDur.toString());
+  console.log("rewardRate          :", rRate.toString());
 
-  // 2) (Optionnel mais recommandé) régler la durée
-  //    setRewardsDuration *doit* être appelé quand la période précédente est terminée.
-  console.log("→ setRewardsDuration …");
-  try {
-    const txDur = await (sr as any).setRewardsDuration(BigInt(DURATION));
-    await txDur.wait();
-    console.log("rewardsDuration =", DURATION, "seconds");
-  } catch (e:any) {
-    console.warn("setRewardsDuration a échoué (période en cours ?). On continue quand même.");
+  if (dist.toLowerCase() !== signer.address.toLowerCase()) {
+    throw new Error(`Le caller n'est pas rewardsDistribution. Requis: ${dist}`);
+  }
+  if (rwToken.toLowerCase() !== REWARD_TOKEN.toLowerCase()) {
+    throw new Error(`REWARD_TOKEN ne correspond pas à SR.rewardsToken()`);
   }
 
-  // 3) Transférer les tokens de reward vers le SR
-  const balBefore: bigint = await rw.balanceOf(SR);
-  console.log("SR reward balance (before):", balBefore.toString());
+  // --- Durée (si fournie). NB: beaucoup d’implémentations refusent setRewardsDuration si la période n’est pas terminée.
+  if (DURATION_SEC) {
+    try {
+      console.log("→ setRewardsDuration …");
+      const tx = await sr.setRewardsDuration(bn(DURATION_SEC));
+      await tx.wait();
+      console.log("OK setRewardsDuration");
+    } catch (e:any) {
+      console.warn("setRewardsDuration a échoué (période en cours ?). On continue quand même.");
+    }
+  }
 
-  console.log(`→ transfer(${SR}, ${amtWei.toString()}) …`);
-  const txTr = await rw.transfer(SR, amtWei);
-  await txTr.wait();
+  // --- Afficher allowance & soldes pour diagnostiquer
+  const [allowance, balSigner, balSR] = await Promise.all([
+    token.allowance(signer.address, SR_ADDR),
+    token.balanceOf(signer.address),
+    token.balanceOf(SR_ADDR),
+  ]);
+  console.log("allowance(signer→SR):", allowance.toString());
+  console.log("signer reward bal    :", balSigner.toString());
+  console.log("SR reward bal (avant):", balSR.toString());
 
-  const balAfter: bigint = await rw.balanceOf(SR);
-  console.log("SR reward balance (after): ", balAfter.toString());
+  // --- Tentative 1: modèle PULL (approve + notifyRewardAmount)
+  try {
+    if (allowance < amount) {
+      const txA = await token.approve(SR_ADDR, amount);
+      await txA.wait();
+      console.log("approve OK");
+    }
+    console.log("→ notifyRewardAmount (mode PULL) …");
+    const txN = await sr.notifyRewardAmount(amount);
+    await txN.wait();
+    const balSR2 = await token.balanceOf(SR_ADDR);
+    console.log("SR reward bal (après notify):", balSR2.toString());
+    console.log("✅ Farming démarré (pull).");
+    return;
+  } catch (e:any) {
+    console.warn("notify (pull) a revert. On essaie le mode PUSH…");
+  }
 
-  // 4) Notifier le montant pour démarrer la période
-  console.log("→ notifyRewardAmount …");
-  const txN = await (sr as any).notifyRewardAmount(amtWei);
-  const rcN = await txN.wait();
-  console.log("notify tx        :", rcN?.hash);
+  // --- Tentative 2: modèle PUSH (transfer → notify)
+  // (Certaines implémentations exigent que les fonds soient présents AVANT d’appeler notify.)
+  if (balSigner < amount) throw new Error("Solde reward insufisant chez le distributeur.");
+  console.log(`→ transfer(SR, ${amount.toString()}) …`);
+  const txT = await token.transfer(SR_ADDR, amount);
+  await txT.wait();
+  const balSR3 = await token.balanceOf(SR_ADDR);
+  console.log("SR reward bal (après transfer):", balSR3.toString());
 
-  // 5) Lecture de l’état (rewardRate / periodFinish)
-  const rewardRate: bigint = await (sr as any).rewardRate();
-  const periodFinish: bigint = await (sr as any).periodFinish();
-  console.log("rewardRate       :", rewardRate.toString(), "token/s");
-  console.log("periodFinish     :", periodFinish.toString(), " (unix)");
-  console.log("periodFinish (≈) :", new Date(Number(periodFinish) * 1000).toLocaleString());
+  console.log("→ notifyRewardAmount (mode PUSH) …");
+  const txN2 = await sr.notifyRewardAmount(amount);
+  await txN2.wait();
+  console.log("✅ Farming démarré (push).");
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

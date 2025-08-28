@@ -7,7 +7,7 @@ import styles from "../styles/farm.module.css";
 import tokenLogo from "../images/token.png"
 import arrow from "../images/arrow.png"
 import { fmtLP, fmtAmount, fmtAllowance, shortAddr } from "../lib/format";
-import { WNATIVE_ADDRESS, NATIVE_SYMBOL, WRAPPED_SYMBOL, SHOW_WRAPPED_SYMBOL } from '../config/protocol'
+import { WNATIVE_ADDRESS, NATIVE_SYMBOL, WRAPPED_SYMBOL, SHOW_WRAPPED_SYMBOL, FACTORY_ADDRESS } from '../config/protocol'
 const WNATIVE = (WNATIVE_ADDRESS || '').toLowerCase();
 const NATIVE_SYM = NATIVE_SYMBOL || 'tTRUST';
 const WRAPPED_SYM = WRAPPED_SYMBOL || 'WTTRUST';
@@ -271,7 +271,7 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
   style={{ marginLeft: '4px', cursor: earned === 0n ? 'not-allowed' : 'pointer' }}
 >
   Claim
-</button>
+</button> 
 
             </div>
           
@@ -285,20 +285,20 @@ export default function Farm({ stakingRewards, stakingToken, rewardsToken }: Pro
             <span className={styles.titleFarm}>
             <div className={styles.poolLogoFarm}>
             <img src={tokenLogo} alt="Logo" className={styles.logoTokenFarm} />
-             <img src={tokenLogo} alt="Logo" className={styles.logoTokenFarmTwo} />
+            <img src={tokenLogo} alt="Logo" className={styles.logoTokenFarmTwo} />
             </div>
               {poolLabel}
             </span>
             <span className={styles.addressFarm}>{addressFarm}</span>
           </div>
           <FarmAprBadge
-          sr={"0xc43172A7e92614d1fb043948ddb04f60fF29Aae9"}
-          lp={"0xfEeb70B047808c0eA4510716259513C2E50F2Cd3"}
-          wnative={"0x51379Cc2C942EE2AE2fF0BD67a7b475F0be39Dcf"}
-          factory={"0xd103E057242881214793d5A1A7c2A5B84731c75c"}
-          refreshMs={12000}
-          showDetails
-        />
+            sr={stakingRewards}
+            lp={stakingToken}
+            wnative={WNATIVE_ADDRESS as `0x${string}`}
+            factory={FACTORY_ADDRESS as `0x${string}`}
+            refreshMs={12000}
+            showDetails
+          />
         </div>
   
       

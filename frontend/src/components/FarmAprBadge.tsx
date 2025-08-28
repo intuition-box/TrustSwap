@@ -190,9 +190,12 @@ async function computeFarmApr(opts: {
         }) as Promise<Address>)
   ])) as [bigint, bigint, bigint, Address]
 
-  const now = Math.floor(Date.now() / 1000)
+  const latest = await client.getBlock() 
+  const now = Number(latest.timestamp)   
   const periodFinish = Number(periodFinishRaw)
-  const expired = now >= periodFinish
+  const rewardRateIsZero = rewardRateRaw === 0n
+  const expired = now >= periodFinish || rewardRateIsZero
+
 
   // 2) reward token meta
   const [decRewards, rewardTokenSymbol] = (await Promise.all([
