@@ -1,6 +1,5 @@
-import { useState } from "react";
 import styles from "../styles/navbar.module.css";
-import RainbowConnectButton from "./RainbowConnectButton"; 
+import RainbowConnectButton from "./RainbowConnectButton";
 
 // Import des icônes en blanc et gris
 import swapWhite from '../images/swap-white.png'
@@ -12,15 +11,21 @@ import farmGrey from '../images/farm-grey.png'
 import userWhite from '../images/user-white.png'
 import userGrey from '../images/user-grey.png'
 
-const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
-  const [active, setActive] = useState("swap"); 
+type NavbarProps = {
+  activeTab: string
+  setActiveTab: (tab: string) => void
+}
 
+const Navbar = ({ activeTab, setActiveTab }: NavbarProps) => {
   const handleClick = (tab: string) => {
-    setActive(tab);
-    setActiveTab(tab);
+    setActiveTab(tab) // c’est App qui gère le state + hash/localStorage
   };
 
-  const indicatorLeft = active === "swap" ? "5%" : active === "pools" ? "29%" : active === "farms" ? "54%" : "76%";
+  const indicatorLeft =
+    activeTab === "swap" ? "5%" :
+    activeTab === "pools" ? "29%" :
+    activeTab === "farms" ? "54%" :
+    "76%";
 
   return (
     <div className={styles.navBar}>
@@ -34,11 +39,11 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
           {/* Swap */}
           <button
             className={styles.btnNavLeft}
-            style={{ color: active === "swap" ? "var(--white)" : "grey" }}
+            style={{ color: activeTab === "swap" ? "var(--white)" : "grey" }}
             onClick={() => handleClick("swap")}
           >
             <img
-              src={active === "swap" ? swapWhite : swapGrey}
+              src={activeTab === "swap" ? swapWhite : swapGrey}
               alt="Swap Icon"
               className={styles.logoIconeNav}
             />
@@ -48,11 +53,11 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
           {/* Pools */}
           <button
             className={styles.btnNavLeft}
-            style={{ color: active === "pools" ? "var(--white)" : "grey" }}
+            style={{ color: activeTab === "pools" ? "var(--white)" : "grey" }}
             onClick={() => handleClick("pools")}
           >
             <img
-              src={active === "pools" ? poolWhite : poolGrey}
+              src={activeTab === "pools" ? poolWhite : poolGrey}
               alt="Pools Icon"
               className={styles.logoIconeNav}
             />
@@ -62,33 +67,33 @@ const Navbar = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
           {/* Farms */}
           <button
             className={styles.btnNavLeft}
-            style={{ color: active === "farms" ? "var(--white)" : "grey" }}
+            style={{ color: activeTab === "farms" ? "var(--white)" : "grey" }}
             onClick={() => handleClick("farms")}
           >
             <img
-              src={active === "farms" ? farmWhite : farmGrey}
+              src={activeTab === "farms" ? farmWhite : farmGrey}
               alt="Farms Icon"
               className={styles.logoIconeNav}
             />
             Farms
           </button>
 
-          {/* Profil */}
+          {/* Profile */}
           <button
             className={styles.btnNavLeft}
-            style={{ color: active === "profile" ? "var(--white)" : "grey" }}
+            style={{ color: activeTab === "profile" ? "var(--white)" : "grey" }}
             onClick={() => handleClick("profile")}
           >
             <img
-              src={active === "profile" ? userWhite : userGrey}
-              alt="Farms Icon"
+              src={activeTab === "profile" ? userWhite : userGrey}
+              alt="Profile Icon"
               className={styles.logoIconeNav}
             />
             Profile
           </button>
-
         </div>
       </div>
+
       <div className={styles.navBarRight}>
         <RainbowConnectButton />
       </div>

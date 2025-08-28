@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Navbar from "./components/NavBar";
 import PoolList from "./components/PoolsList";
 import Swap from "./components/Swap";
@@ -6,14 +6,29 @@ import Farm from "./components/Farm";
 import farms from "./farms/intuition.json";
 import WalletTokens from "./components/WalletTokens"; // uniquement affichage des tokens
 import "./styles/globals.css";
-import RainbowConnectButton from './components/RainbowConnectButton';
 
 import '@rainbow-me/rainbowkit/styles.css';
-import { RainbowKitProvider, ConnectButton, darkTheme, getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { WagmiConfig, useAccount } from 'wagmi';
+import { RainbowKitProvider, darkTheme, getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { WagmiProvider, useAccount } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { intuitChain } from './chain/intuit';
 import { http } from 'viem';
+
+type TabKey = "swap" | "pools" | "farms" | "profile";
+
+function getInitialTab(): TabKey {
+  if (typeof window !== "undefined") {
+    const fromHash = (window.location.hash || "").replace(/^#/, "") as TabKey;
+    if (fromHash === "swap" || fromHash === "pools" || fromHash === "farms" || fromHash === "profile") {
+      return fromHash;
+    }
+    const fromLS = localStorage.getItem("lastTab") as TabKey | null;
+    if (fromLS === "swap" || fromLS === "pools" || fromLS === "farms" || fromLS === "profile") {
+      return fromLS;
+    }
+  }
+  return "swap";
+}
 
 // Wagmi + RainbowKit v2
 const config = getDefaultConfig({
@@ -28,8 +43,31 @@ const config = getDefaultConfig({
 const queryClient = new QueryClient();
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<string>("swap");
-  const { address, isConnected } = useAccount();
+  const [activeTab, setActiveTab] = useState<TabKey>(getInitialTab());
+  const { address } = useAccount();
+
+    // met à jour l’URL + localStorage quand l’onglet change
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash !== `#${activeTab}`) {
+      window.location.hash = `#${activeTab}`;
+    }
+    localStorage.setItem("lastTab", activeTab);
+  }, [activeTab]);
+
+  // gère back/forward du navigateur
+  useEffect(() => {
+    const onHashChange = () => {
+      const h = (window.location.hash || "").replace(/^#/, "") as TabKey;
+      if (h && h !== activeTab) {
+        setActiveTab(h);
+      }
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, [activeTab]);
+
+  const navigate: (tab: string) => void = (tab) => setActiveTab(tab as TabKey);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -58,19 +96,16 @@ export default function App() {
   };
 
   return (
-    <WagmiConfig config={config}>
+    <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-      <RainbowKitProvider theme={darkTheme({})}>
-        
+        <RainbowKitProvider theme={darkTheme({})}>
           <div className="containerBody">
-            <Navbar setActiveTab={setActiveTab} />
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "10px" }}>
-              {/* ton bouton noir personnalisé */}
-            </div>
+            <Navbar setActiveTab={navigate} activeTab={activeTab} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "10px" }} />
             <div className="contentContainer">{renderContent()}</div>
           </div>
         </RainbowKitProvider>
       </QueryClientProvider>
-    </WagmiConfig>
+    </WagmiProvider>
   );
 }
