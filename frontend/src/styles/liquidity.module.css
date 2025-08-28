@@ -102,7 +102,7 @@
   text-align: right;
   margin-left: auto;
   padding-right: 15px;
-  flex-grow: 1;
+  width: 100%;
 }
 
 
