@@ -5,7 +5,8 @@ async function main() {
   const SR = process.env.SR!;
   const [me] = await ethers.getSigners();
   const sr = await ethers.getContractAt("StakingRewards", SR);
-
+  
+  console.log("owner =", await sr.owner());
   console.log("stakingToken:", await sr.stakingToken());
   console.log("rewardsToken:", await sr.rewardsToken());
   console.log("rewardsDuration:", (await sr.rewardsDuration()).toString());

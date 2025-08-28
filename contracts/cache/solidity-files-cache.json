@@ -1231,8 +1231,8 @@
       ]
     },
     "/home/james_dev/PROJET/HACKATON-INTUITION/intuition-uniswapv2-fork/contracts/contracts/StakingRewardsFactory.sol": {
-      "lastModificationDate": 1756043573260,
-      "contentHash": "7101aba720fd2769c7c94f277d5b6d64",
+      "lastModificationDate": 1756409208671,
+      "contentHash": "cddde1fee44fc4c9d5cea23103768973",
       "sourceName": "contracts/StakingRewardsFactory.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1266,7 +1266,7 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "StakingRewardsFactory"
+        "StakingRewardsFactoryV2"
       ]
     },
     "/home/james_dev/PROJET/HACKATON-INTUITION/intuition-uniswapv2-fork/node_modules/.pnpm/@openzeppelin+contracts@5.4.0/node_modules/@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol": {
