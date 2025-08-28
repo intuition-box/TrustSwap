@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+:root {
+  --white: #FFFFFF;
+  --border-color: rgba(181, 181, 181, 0.7);
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --shadow-color-strong: rgba(0, 0, 0, 0.12);
+  --border: rgb(47, 47, 47);
+  --black-grey: rgb(29, 29, 29);
+  --grey: rgb(121, 121, 121);
+  --secondary: #5D6BF8;
+  --secondary-border: #4552E5;
+  --btn-shadow-secondary: rgba(93, 107, 248, 0.4);
+  --black: #111111;
+  --dark: #000000;
+  --black-border: #000000;
+  --btn-shadow-black: rgba(0, 0, 0, 0.4);
+  --primary: #99ff00;
+  --red: #ff0000;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  color: var(--dark);
+  background-color: var(--black);
+
+  /* Points au-dessus du dégradé */
+  background-image: 
+  radial-gradient(rgba(255, 255, 255, 0.107) 1px, transparent 1px),
+  linear-gradient(to top, color-mix(in srgb, var(--primary) 5%, transparent), color-mix(in srgb, var(--primary) 3%, transparent), var(--black) 40%);
+
+  background-size: 7px 7px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+}
+
+
+
+input:focus, select:focus {
+  outline: none;
+}
+
+h2 {
+  color: var(--textColor);
+}
+
+.containerBody {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.contentContainer {
+  height: auto;
+  width: 95%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  flex-grow: 1;
+}
+@media (max-width: 768px) {
+
+.containerBody {
+  height: 100vh;
+  padding-bottom: 200px;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+}

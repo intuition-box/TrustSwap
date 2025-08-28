@@ -1,0 +1,233 @@
+.connectContainer {
+  position: relative;
+}
+
+.btnConnect {
+    position: relative; /* obligatoire pour z-index */
+    z-index: 10000; 
+    background-color: var(--black);
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    height: 50px;
+    width: 100%;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    letter-spacing: -0.7px;
+}
+
+
+.btnConnect:active {
+    transform: scale(0.98);
+}
+
+.btnConnect.connected::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0%;
+    height: 1px;
+    border-radius: 0 2px 2px 0;
+    background: var(--white);
+    z-index: 1;
+    animation: connectBtn 1s ease forwards;
+    animation-delay: 2.7s;
+}
+
+@keyframes connectBtn {
+  to {
+    width: 60%;
+  }
+}
+
+.metamaskConnectLogo {
+    width: 25px;
+}
+
+.addressWallet {
+    background: linear-gradient(to left,rgb(128, 128, 128), #d5d5d5, grey, rgb(213, 213, 213), #7e7e7e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dropMenu {
+    position: fixed;
+    top: 120%;
+    right: 0;
+    background: rgba(80, 80, 80, 0.2);
+    border-radius: 30px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(101, 101, 101, 0.3);
+    border-radius: 20px;
+    padding: 5px;
+    min-width: 300px;
+    width: 100%;
+    z-index: 9999;
+}
+
+.dropMenuContainer {
+    background-color: var(--black);
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    border-radius: 15px;
+    padding: 10px;
+    padding-top: 15px;
+    z-index: 9999;
+}
+
+.tokenList {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.walletHeader {
+    display: flex;
+    align-items: center;
+}
+
+.labelWallet {
+    background: linear-gradient(to left,rgb(128, 128, 128), #d5d5d5, grey, rgb(213, 213, 213), #7e7e7e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.tokenWallet {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 3px;
+}
+
+.tokenWalletText {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 5px;
+    font-size: 15px;
+}
+
+.tokenWalletBalance {
+    background: linear-gradient(to left,rgb(128, 128, 128), #d5d5d5, grey, rgb(213, 213, 213), #7e7e7e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.btnRefresh {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.refreshLogo {
+    width: 13px;
+}
+
+.balanceZero {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    margin-left: auto;
+    margin-right: 10px;
+    font-size: 12px;
+    color: var(--grey);
+    letter-spacing: -0.3px;
+}
+
+.disconnectBtn {
+    background-color: rgba(245, 24, 24, 0.124);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(5px);
+    width: 100%;
+    margin-top: 10px;
+    color: var(--red);
+    border: 1px solid var(--red);
+    height: 40px;
+    font-weight: 500;
+    font-size: 16px;
+    border-radius: 10px;
+    letter-spacing: -0.7px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    justify-content: center;
+}
+
+.logoDisconnect {
+    width: 12px;
+}
+
+.walletLogo {
+    width: 18px;
+    margin-left: 3px;
+}
+
+.containerToken {
+    padding: 5px;
+    background: rgba(80, 80, 80, 0.2);
+    border-radius: 30px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(101, 101, 101, 0.3);
+    border-radius: 20px;
+    width: 95%;
+    max-width: 600px;
+}
+
+.containerProfil {
+    background-color: var(--black);
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+border-radius: 10px;
+padding: 10px;
+}
+
+.logoTokenProfil {
+    width: 20px;
+}
+
+.colorContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 98%;
+    margin-right: auto;
+    margin-left: auto;
+}

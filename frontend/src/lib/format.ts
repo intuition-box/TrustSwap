@@ -5,7 +5,7 @@ export const MAX_UINT = (2n ** 256n) - 1n
 type FmtOpts = { dp?: number; compact?: boolean }
 
 export function fmtAmount(bi: bigint, decimals = 18, opts: FmtOpts = {}) {
-  const { dp = 6, compact = false } = opts
+  const { dp = 2, compact = false } = opts
   const n = Number(formatUnits(bi, decimals))
   const base: Intl.NumberFormatOptions = { maximumFractionDigits: dp }
   const opt = compact ? { ...base, notation: 'compact' as const } : base

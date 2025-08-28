@@ -1,0 +1,442 @@
+.farmContainer {
+    padding: 10px;
+    background: rgba(80, 80, 80, 0.2);
+    border-radius: 30px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(101, 101, 101, 0.3);
+    border-radius: 20px;
+    height: auto;
+    width: 95%;
+    max-width: 600px;
+    position: relative;
+    margin-top: 30px;
+    padding-bottom: 80px;
+}
+
+
+
+.farm {
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    background-color: #111111;
+    border-radius: 15px;
+    padding: 12px;
+}
+
+.headerFarm {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+
+.titleInfoFarm {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.titleFarm {
+    background: linear-gradient(to left,rgb(128, 128, 128), #ffffff, grey, rgb(213, 213, 213), #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+}
+
+.addressFarm {
+    color: var(--grey);
+}
+
+/* src/styles/farm.module.css */
+
+/* Bouton dropdown */
+.dropdownBtn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+  }
+  
+  .dropdownBtn:hover {
+    background-color: #e0e0e0;
+  }
+  
+  /* Contenu du dropdown */
+  .dropdownContent {
+
+    position: relative;
+    z-index: 10;
+  
+    /* Animation */
+    opacity: 0;
+    transform: translateY(-5px);
+    animation: dropdownFade 0.2s forwards;
+  }
+  
+  @keyframes dropdownFade {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+
+.arrowSelect {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+  position: fixed;
+  right: 25px;
+  top: 35px;
+}
+
+.arrowOpen {
+  transform: rotate(180deg); /* tourne quand le dropdown est ouvert */
+}
+
+.infoFarm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    margin-right: 40px;
+    justify-content: space-around;
+}
+
+.status, .rewardInfo, .aprInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: grey;
+    font-size: 14px;
+
+    gap: 3px;
+    text-align: center;
+}
+
+.statusInfo {
+    font-size: 16px;
+    background: linear-gradient(to left,rgb(128, 128, 128), #ffffff, grey, rgb(213, 213, 213), #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.pointStatus.active {
+    background-color: greenyellow;
+    border: 1px solid green;
+    box-shadow: 0px 0px 10px green;
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+  }
+  
+  .pointStatus.expired {
+    background-color: rgb(237, 146, 146);
+    border: 1px solid red;
+    box-shadow: 0px 0px 10px red;
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+  }
+  
+  .poolLogoFarm {
+    display: flex;
+    align-items: center;
+  }
+
+  .logoTokenFarm {
+    width: 20px;
+  }
+
+  .logoTokenFarmTwo {
+    width: 20px;
+    margin-left: -7px;
+    margin-right: 3px;
+    border-radius: 50%;
+    box-shadow: 0px 0px 3px black;
+  }
+
+  .ligneInfoFarm {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 5px;
+    padding-top: 5px;
+  }
+
+  .labelFarm {
+    color: var(--grey);
+    font-size: 13px;
+  }
+
+  .dataFarm {
+    background: linear-gradient(to left,rgb(128, 128, 128), #ffffff, grey, rgb(213, 213, 213), #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+  }
+
+  .logoTokenInfo {
+    width: 13px;
+    margin-left: 3px;
+    margin-right: 2px;
+  }
+
+  .containerDataFarm {
+    margin-top: 10px;
+  }
+
+  .inputFarmContainer {
+    width: 98%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    height: 80px;
+    background-color: #1a1a1a;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .inputFarm {
+    width: 100%;
+    font-size: 38px;
+    border: none;
+    background-color: transparent;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    text-align: center;
+    padding-right: 15px;
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    background: linear-gradient(to left,rgb(128, 128, 128), #ffffff, grey, rgb(213, 213, 213), #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    padding-top: 10px;
+  }
+
+  .headerFarmInput {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    padding-right: 10px;
+    width: 98%;
+    margin-left: auto;
+    margin-right: auto;
+    gap: 4px;
+  }
+
+  .maxInputFarm {
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #242424;
+    color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .maxInputFarm:active {
+    transform: scale(0.98);
+  }
+
+  .claimContainer {
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+    width: 96%;
+    margin-left: auto;
+    margin-right: auto;
+    color: var(--white);
+    border-radius: 20px;
+    z-index: 1000;
+    padding-bottom: 10px;
+  }
+
+  .btnClaimFarm {
+    color: var(--white);
+  background-color: var(--black);
+  border: 1px solid var(--black-border);
+  box-shadow: 
+    inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+    inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+    inset 0 -0.75px 0.5px var(--btn-shadow-black),
+    0 4px 4px -1px var(--btn-shadow-black),
+    0 2px 3px -1px var(--btn-shadow-black),
+    0 0.5px 0.5px var(--btn-shadow-black),
+    0 0 0 0.75px var(--btn-shadow-black);
+  border-radius: 15px;
+  z-index: 10;
+  position: relative;
+  margin-top: 10px;
+  height: 45px;
+  width: 100px;
+  font-size: 16px;
+  font-weight: 500;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  justify-content: center;
+  cursor: pointer;
+  }
+
+
+  .traitFarm::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 20px;
+    width: 0%;
+    height: 1px;
+    border-radius: 2px 2px 0 0;
+    background: var(--primary);
+    box-shadow: 0 0 60px 6px var(--primary);
+    z-index: 1;
+    animation: poolOpen 1s ease forwards;
+  }
+  
+  .traitFarmRed::after {
+    background: red;
+    box-shadow: 0 0 60px 6px red;
+  }
+  
+  .traitFarmRed::after {
+    animation: poolOpen 1s ease forwards;
+  }
+  
+
+  @keyframes poolOpen {
+    to {
+      width: 20%;
+
+    }
+  }
+
+  .containerPending {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+    margin-top: 5px;
+  }
+
+  .pendingReward {
+    background: linear-gradient(to left,rgb(128, 128, 128), #ffffff, grey, rgb(213, 213, 213), #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 25px;
+    margin-top: 5px;
+  }
+
+  .btnDisabled {
+    color: grey;
+    cursor: not-allowed;
+    pointer-events: none; 
+  }
+  
+  .containerActionFarm {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    gap: 5px;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .btnStake {
+    background-color: var(--black);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    height: 45px;
+    border-radius: 10px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .btnUnstake {
+    height: 45px;
+    font-size: 18px;
+    border: none;
+    background-color: transparent;
+    color: var(--primary);
+    cursor: pointer;
+    border-radius: 10px;
+  }
+
+  .btnUnstake:hover {
+    background-color: rgb(30, 30, 30);
+  }
+
+  .motGrey {
+    background: linear-gradient(to left,rgb(128, 128, 128), #ffffff, grey, rgb(213, 213, 213), #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .primaryGrey {
+    background: linear-gradient(to left,rgb(128, 128, 128), grey, rgb(213, 213, 213), #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+
+@media (max-width: 768px) {
+
+  .headerFarm {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 3px;
+}
+
+.infoFarm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  margin-right: 0px;
+  width: 100%;
+  margin-top: 10px;
+  justify-content: space-around;
+}
+}

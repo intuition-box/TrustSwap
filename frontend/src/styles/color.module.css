@@ -1,0 +1,78 @@
+.dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .dropdown-btn {
+    padding: 0.5rem;
+    background-color: var(--black);
+    color: var(--white);
+    border: 1px solid var(--border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    cursor: pointer;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .dropdown-content {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    min-width: 120px;
+    padding: 7px;
+    background-color: var(--black);
+    color: var(--white);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+    z-index: 100000;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .dropdown-item {
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* espace entre le rond et le nom */
+    transition: opacity 0.2s;
+    border: 1px solid transparent;
+  }
+  
+  .dropdown-item:hover {
+    background-color: var(--btn-shadow-black);
+    border-radius: 10px;
+    border-color: var(--border);
+  }
+  
+  .color-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  
+  .color-name {
+    font-size: 15px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(to left,rgb(128, 128, 128), #d5d5d5, grey, rgb(213, 213, 213), #7e7e7e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  

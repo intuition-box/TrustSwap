@@ -1,10 +1,24 @@
 {
-  "name": "intuition-uniswapv2-fork",
+  "name": "intuition-uniswapv2-fork-workspace",
   "private": true,
-  "packageManager": "pnpm@9.9.0",
-  "workspaces": ["contracts", "frontend"],
+  "workspaces": [
+    "contracts",
+    "frontend"
+  ],
+  "license": "MIT",
   "scripts": {
-    "build": "pnpm -C contracts compile && pnpm -C frontend build",
-    "dev": "pnpm -C frontend dev"
+    "build": "pnpm --filter ./contracts build && pnpm --filter ./frontend build",
+    "dev:fe": "pnpm --filter ./frontend dev",
+    "dev:hh": "pnpm --filter ./contracts hardhat",
+    "test": "pnpm --filter ./contracts test",
+    "clean": "rimraf node_modules contracts/node_modules frontend/node_modules && rimraf contracts/cache contracts/artifacts"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.0"
+  },
+  "dependencies": {
+    "@rainbow-me/rainbowkit": "^2.2.8",
+    "viem": "^2.35.1",
+    "wagmi": "^2.16.5"
   }
 }
