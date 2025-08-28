@@ -91,8 +91,8 @@ export default function AddLiquidityPro() {
   const [TB, setTB] = useState<UiToken | null>(DEFAULT_B ?? null)
 
   // form state
-  const [amountA, setAmountA] = useState('1')
-  const [amountB, setAmountB] = useState('1')
+  const [amountA, setAmountA] = useState('')
+  const [amountB, setAmountB] = useState('')
   const [lockedB, setLockedB] = useState(false)
   const [slippage, setSlippage] = useState(0.5)
   const [deadlineMins, setDeadlineMins] = useState(10)
@@ -172,14 +172,57 @@ export default function AddLiquidityPro() {
     loadState()
   }, [address, publicClient, TA, TB, Aaddr, Baddr])
 
-  useEffect(() => {
-    if (!reserves || !TA || !TB || lockedB) return
-    const a = toUnits(amountA || '0', Adec)
-    if (a === 0n) return
-    if (reserves.rA === 0n || reserves.rB === 0n) return
-    const b = (a * reserves.rB) / reserves.rA
-    setAmountB(fromUnits(b, Bdec).toFixed(5))
-  }, [amountA, Adec, Bdec, reserves?.rA, reserves?.rB, lockedB, TA, TB])
+// nouvel état pour savoir quel champ est actif
+const [inputActive, setInputActive] = useState<'A' | 'B' | null>(null)
+
+const formatInput = (num: number, decimals = 5) => {
+  if (num === 0) return '0.00000'
+  
+  const fixed = num.toFixed(decimals)
+  if (Number(fixed) !== 0) return fixed
+
+  // trop petit → notation 0.xxxxxeY
+  const exponent = Math.floor(Math.log10(Math.abs(num)))
+  let mantissa = Math.abs(num) / 10 ** exponent
+
+  // ramène mantisse < 1
+  while (mantissa >= 1) {
+    mantissa /= 10
+  }
+
+  return `${num < 0 ? '-' : ''}${mantissa.toFixed(decimals)}e${exponent}`
+}
+
+
+
+// recalculer B uniquement si A est actif ET non vide
+useEffect(() => {
+  if (!reserves || !TA || !TB) return
+  if (inputActive !== 'A') return
+  if (!amountA) {
+    setAmountB('')
+    return
+  }
+  const a = toUnits(amountA, Adec)
+  if (a === 0n || reserves.rA === 0n || reserves.rB === 0n) return
+  const b = (a * reserves.rB) / reserves.rA
+  setAmountB(formatInput(fromUnits(b, Bdec)))
+}, [amountA, Adec, Bdec, reserves?.rA, reserves?.rB, inputActive])
+
+// recalculer A uniquement si B est actif ET non vide
+useEffect(() => {
+  if (!reserves || !TA || !TB) return
+  if (inputActive !== 'B') return
+  if (!amountB) {
+    setAmountA('')
+    return
+  }
+  const b = toUnits(amountB, Bdec)
+  if (b === 0n || reserves.rA === 0n || reserves.rB === 0n) return
+  const a = (b * reserves.rA) / reserves.rB
+  setAmountA(formatInput(fromUnits(a, Adec)))
+}, [amountB, Adec, Bdec, reserves?.rA, reserves?.rB, inputActive])
+
 
   const needApproveA = useMemo(() => {
     if (!TA || TA.isNative) return false
@@ -203,12 +246,21 @@ export default function AddLiquidityPro() {
     Number(amountB) > 0
 
     const onSwapTokens = () => {
-      setTA(TB);
-      setTB(TA);
-      setAmountA('0'); // réinitialise l'input A
-      setAmountB('0'); // réinitialise l'input B
-      setLockedB(false); // ou true selon ton comportement souhaité
+      if (!TA || !TB) return;
+    
+      // swap tokens et amounts en même temps
+      setTA(prev => TB);
+      setTB(prev => TA);
+    
+      setAmountA(prev => amountB);
+      setAmountB(prev => amountA);
+    
+      setInputActive(prev => (prev === 'A' ? 'B' : prev === 'B' ? 'A' : null));
+    
+      setLockedB(false);
     };
+    
+    
     
 
   const onApprove = async (t: UiToken | null, label: string) => {
@@ -392,9 +444,17 @@ export default function AddLiquidityPro() {
                         {fromUnits(balA, Adec).toFixed(4)} {TA?.symbol}
                       </span>
                     </small>
-                    <button className={styles.maxBtn} onClick={() => setAmountA(fromUnits(balA, Adec).toFixed(5))}>
-                      Max
-                    </button>
+                    <button
+  className={styles.maxBtn}
+  onClick={() => {
+    setAmountA(fromUnits(balA, Adec).toFixed(5));
+    setInputActive('A'); // <-- activer l'input A
+    setLockedB(false);   // pour que B se recalcul
+  }}
+>
+  Max
+</button>
+
                   </div>
                   <div className={styles.inputContainerAdd}>
                   <TokenSelector
@@ -406,20 +466,22 @@ export default function AddLiquidityPro() {
     setAmountB('0') // reset amountB
   }}
 />
-                    <input
-                      value={amountA}
-                      onChange={e => {
-                        let val = e.target.value
-                        if (!/^\d*\.?\d*$/.test(val)) return
-                        if (val.includes('.')) {
-                          const [intPart, decPart] = val.split('.')
-                          val = intPart + '.' + decPart.slice(0, 5)
-                        }
-                        setAmountA(val)
-                        setLockedB(false)
-                      }}
-                      className={styles.inputCreatePool}
-                    />
+<input
+  value={amountA}
+  onChange={e => {
+    let val = e.target.value
+    if (!/^\d*\.?\d*$/.test(val)) return
+    if (val.includes('.')) {
+      const [intPart, decPart] = val.split('.')
+      val = intPart + '.' + decPart.slice(0, 5)
+    }
+    setAmountA(val)
+    setInputActive('A') // <-- champ A actif
+    setLockedB(false)
+  }}
+       className={styles.inputCreatePool}
+                      placeholder="0.00000"
+/>
                   </div>
                 </div>
 
@@ -431,6 +493,16 @@ export default function AddLiquidityPro() {
                         {fromUnits(balB, Bdec).toFixed(4)} {TB?.symbol}
                       </span>
                     </small>
+                    <button
+  className={styles.maxBtn}
+  onClick={() => {
+    setAmountB(fromUnits(balB, Bdec).toFixed(5));
+    setInputActive('B'); // <-- activer l'input B
+    setLockedB(true);    // B contrôle → ne pas toucher A
+  }}
+>
+  Max
+</button>
                   </div>
                   <div className={styles.inputContainerAdd}>
                   <TokenSelector
@@ -442,12 +514,24 @@ export default function AddLiquidityPro() {
     setAmountB('0') // reset amountB
   }}
 />
-                    <input
-                      value={amountB}
-                      onChange={e => { setAmountB(e.target.value); setLockedB(true) }}
-                      className={styles.inputCreatePool}
+
+<input
+  value={amountB}
+  onChange={e => {
+    let val = e.target.value
+    if (!/^\d*\.?\d*$/.test(val)) return
+    if (val.includes('.')) {
+      const [intPart, decPart] = val.split('.')
+      val = intPart + '.' + decPart.slice(0, 5)
+    }
+    setAmountB(val)
+    setInputActive('B') // <-- champ B actif
+    setLockedB(true)
+  }}
+       className={styles.inputCreatePool}
                       placeholder="0.00000"
-                    />
+/>
+                  
                   </div>
                 </div>
               </div>
@@ -462,11 +546,7 @@ export default function AddLiquidityPro() {
 
               )}
 
-<div className={styles.swapButtonContainer}>
-    <button className={styles.onFlip} onClick={onSwapTokens}>
-       <img src={reverse} alt="Logo" className={styles.logoReverse} />
-    </button>
-  </div>
+
 
               <div className={styles.ligneInfoLabel}>
               <div className={styles.ligneLabel}>
