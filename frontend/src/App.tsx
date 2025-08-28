@@ -9,7 +9,7 @@ import "./styles/globals.css";
 
 import '@rainbow-me/rainbowkit/styles.css';
 import { RainbowKitProvider, darkTheme, getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { WagmiConfig, useAccount } from 'wagmi';
+import { WagmiProvider, useAccount } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { intuitChain } from './chain/intuit';
 import { http } from 'viem';
@@ -67,8 +67,7 @@ export default function App() {
     return () => window.removeEventListener("hashchange", onHashChange);
   }, [activeTab]);
 
-  // passe une fonction de navigation au Navbar pour qu’il mette aussi le hash
-  const navigate = (tab: TabKey) => setActiveTab(tab);
+  const navigate: (tab: string) => void = (tab) => setActiveTab(tab as TabKey);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -97,7 +96,7 @@ export default function App() {
   };
 
   return (
-    <WagmiConfig config={config}>
+    <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={darkTheme({})}>
           <div className="containerBody">
@@ -107,6 +106,6 @@ export default function App() {
           </div>
         </RainbowKitProvider>
       </QueryClientProvider>
-    </WagmiConfig>
+    </WagmiProvider>
   );
 }
