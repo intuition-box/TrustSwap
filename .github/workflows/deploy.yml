@@ -2,9 +2,9 @@ name: Deploy Dapp to GitHub Pages
 
 on:
   push:
-    branches: [ Dev ]
+    branches: [ main ]
   pull_request:
-    branches: [ Dev ]
+    branches: [ main ]
 
 permissions:
   contents: read
