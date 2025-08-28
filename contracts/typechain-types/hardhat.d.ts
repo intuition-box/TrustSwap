@@ -146,6 +146,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.StakingRewardsFactory__factory>;
     getContractFactory(
+      name: "StakingRewardsFactoryV2",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.StakingRewardsFactoryV2__factory>;
+    getContractFactory(
       name: "TestToken",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestToken__factory>;
@@ -157,10 +161,6 @@ declare module "hardhat/types/runtime" {
       name: "UniswapV2Router02",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniswapV2Router02__factory>;
-    getContractFactory(
-      name: "WETH9",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.WETH9__factory>;
     getContractFactory(
       name: "WTTRUST",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -332,6 +332,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.StakingRewardsFactory>;
     getContractAt(
+      name: "StakingRewardsFactoryV2",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.StakingRewardsFactoryV2>;
+    getContractAt(
       name: "TestToken",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -346,11 +351,6 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.UniswapV2Router02>;
-    getContractAt(
-      name: "WETH9",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.WETH9>;
     getContractAt(
       name: "WTTRUST",
       address: string | ethers.Addressable,
@@ -490,6 +490,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.StakingRewardsFactory>;
     deployContract(
+      name: "StakingRewardsFactoryV2",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.StakingRewardsFactoryV2>;
+    deployContract(
       name: "TestToken",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TestToken>;
@@ -501,10 +505,6 @@ declare module "hardhat/types/runtime" {
       name: "UniswapV2Router02",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.UniswapV2Router02>;
-    deployContract(
-      name: "WETH9",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.WETH9>;
     deployContract(
       name: "WTTRUST",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -676,6 +676,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.StakingRewardsFactory>;
     deployContract(
+      name: "StakingRewardsFactoryV2",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.StakingRewardsFactoryV2>;
+    deployContract(
       name: "TestToken",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -690,11 +695,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.UniswapV2Router02>;
-    deployContract(
-      name: "WETH9",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.WETH9>;
     deployContract(
       name: "WTTRUST",
       args: any[],
