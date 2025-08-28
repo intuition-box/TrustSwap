@@ -107,7 +107,7 @@ export default function PoolsList() {
   return (
     <div style={{ width:"100%", maxWidth: 900, marginTop:"40px" }}>
       <AddLiquidityPro />
-      {loading && <div>Loading…</div>}
+      {loading && <div style={{color: "white"}}>Loading…</div>}
       {pairs.map(p => (<PoolRow key={p} pair={p} />))}
       {!loading && pairs.length === 0 && <div>No pools to display</div>}
     </div>

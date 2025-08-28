@@ -47,7 +47,7 @@ export default function App() {
   }, []);
 
   return (
-    <div style={{ padding: '2rem' }}>
+    <div>
       <div className={styles.dropdown} ref={dropdownRef}>
         <button className={styles['dropdown-btn']} onClick={toggleDropdown}>
           <div 

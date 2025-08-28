@@ -272,24 +272,28 @@ export default function TokenSelector({ value, onChange, className }: Props) {
                   )
                   return (
                     <div
-                      key={key}
-                      className={styles.dropdownItem}
-                      onClick={() => {
-                        onChange(t)
-                        closeDropdown()
-                      }}
-                    >
-                      <img src={tokenLogo} alt="Logo" className={styles.logoTokenDrop} />
-                      {t.symbol}
-                      {t.address ? ` (${short(t.address)})` : ""}
-                      {imported ? " • Imported" : ""}
-                    </div>
+                    key={key}
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      onChange(t)
+                      closeDropdown()
+                    }}
+                  >
+                    <img src={tokenLogo} alt="Logo" className={styles.logoTokenDrop} />
+                    {t.symbol}
+                    {t.address ? ` (${short(t.address)})` : ""}
+                  
+                    {imported && (
+                      <span className={styles.importedTag}>Imported</span>
+                    )}
+                  </div>
+                  
                   )
                 })}
     
 
                 <div
-                  className={styles.dropdownItem}
+                  className={styles.dropdownItemManage}
                   onClick={() => {
                     setShowManage(true)
                     closeDropdown()

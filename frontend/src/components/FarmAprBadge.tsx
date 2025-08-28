@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Address, formatUnits, zeroAddress } from "viem"
 import { usePublicClient } from "wagmi"
 import styles from "../styles/farm.module.css";
-
+import tokenLogo from "../images/token.png"
 /** =========================
  *  Minimal ABIs (viem format)
  *  ========================= */
@@ -190,9 +190,12 @@ async function computeFarmApr(opts: {
         }) as Promise<Address>)
   ])) as [bigint, bigint, bigint, Address]
 
-  const now = Math.floor(Date.now() / 1000)
+  const latest = await client.getBlock() 
+  const now = Number(latest.timestamp)   
   const periodFinish = Number(periodFinishRaw)
-  const expired = now >= periodFinish
+  const rewardRateIsZero = rewardRateRaw === 0n
+  const expired = now >= periodFinish || rewardRateIsZero
+
 
   // 2) reward token meta
   const [decRewards, rewardTokenSymbol] = (await Promise.all([
@@ -286,10 +289,14 @@ export default function FarmAprBadge({
   }, [sr, lp, wnative, factory, rewardToken, refreshMs, client?.chain?.id])
 
   const finishStr = useMemo(() => {
-    if (!periodFinish) return "—"
-    try { return new Date(periodFinish * 1000).toLocaleString() }
-    catch { return "—" }
-  }, [periodFinish])
+    if (!periodFinish) return "—";
+    try {
+      return new Date(periodFinish * 1000).toLocaleDateString(); 
+    } catch {
+      return "—";
+    }
+  }, [periodFinish]);
+  
 
   return (
     <div className={styles.infoFarm}>
@@ -301,7 +308,7 @@ export default function FarmAprBadge({
   <div
     className={`${styles.pointStatus} ${expired ? styles.expired : styles.active}`}
   ></div>
-  {expired ? "Expired" : `Active until ${finishStr}`}
+  {expired ? "Expired" : `Active ${finishStr}`}
 </span>
 
 
@@ -315,7 +322,10 @@ export default function FarmAprBadge({
    
               <span className={styles.rewardInfo}>
                 Reward
-                <span className={styles.statusInfo}>{rewardSym}</span>
+                <span className={styles.statusInfo}>
+                              <img src={tokenLogo} alt="Logo" className={styles.logoTokenFarm} />
+                  {rewardSym}
+                </span>
               </span>
             </>
           )}

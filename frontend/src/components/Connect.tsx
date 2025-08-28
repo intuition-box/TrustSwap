@@ -8,7 +8,6 @@ import metamask from '../images/metamask.png'
 import disconnectLogo from '../images/disconnect.png'
 
 
-
 export default function Connect() {
   const { isConnected, address } = useAccount()
   const { connect, isPending } = useConnect()
@@ -90,7 +89,7 @@ if (!isConnected) {
             }}
           >
             <div className={styles.dropMenuContainer}>
-              {address && <WalletTokens address={address} />}
+              {address}
               <button
                 onClick={() => { disconnect(); setOpen(false) }}
                 className={styles.disconnectBtn}
