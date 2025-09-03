@@ -12,7 +12,7 @@ export default function ApproveAndSwap({
         cursor: (!connected || disabled) ? "not-allowed" : "pointer",
       }}
     >
-      {!connected ? "Connect wallet" : "Approve & Swap"}
+      {!connected ? "Connect wallet" : "Swap"}
     </button>
   );
 }
