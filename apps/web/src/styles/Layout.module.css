@@ -70,6 +70,13 @@
     z-index: 1;
 }
 
+.line {
+    height: 60%;
+    width: 0.1vh;
+    background-color: var(--line-bg);
+    margin-left: 1vh;
+}
+
 .linkBaseComing {
     position: relative;
     z-index: 10;
@@ -103,6 +110,10 @@
     opacity: 0.7;
 }
 
+.comingSoonLabel::after {
+    content: " Soon";
+}
+
 .point {
     background-color: var(--orange);
     box-shadow: 
@@ -112,4 +123,23 @@
     width: 0.7vh;
     border-radius: 50%;
     margin-right: 0.4vh;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        top: auto;
+        bottom: 2vh;
+    }
+
+    .comingMsg {
+        margin-top: 0.4vh;
+    }
+    
+    .comingSoonLabel::after {
+        content: "";
+    }
+
+    .line {
+        margin-left: 0.6vh;
+    }
 }
