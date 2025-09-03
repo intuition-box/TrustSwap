@@ -1,0 +1,13 @@
+{
+  "name": "@trustswap/tokenlists",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "build": "tsx src/build.ts",
+    "sign": "node src/sign.js || echo 'todo: offline sign'"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.5"
+  }
+}

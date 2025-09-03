@@ -2,10 +2,11 @@
   "name": "trustswap",
   "private": true,
   "scripts": {
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
     "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
     "test": "turbo run test",
+    "dev": "turbo run dev --parallel",
     "dev:web": "pnpm -C apps/web dev",
     "dev:indexer": "pnpm -C apps/indexer dev",
     "deploy:contracts": "pnpm -C packages/contracts deploy",
@@ -14,8 +15,10 @@
     "tokenlist:sign": "pnpm -C packages/tokenlists sign"
   },
   "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "turbo": "^2.1.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.9.2"
   },
   "packageManager": "pnpm@9.12.3",
   "dependencies": {
