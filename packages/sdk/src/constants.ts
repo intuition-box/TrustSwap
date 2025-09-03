@@ -1,0 +1,1 @@
+export const INIT_CODE_PAIR_HASH = "0x5a2dc30108940dd053e5fe06fe4deb55d420828f787d508920ac29e08aed3ad9";

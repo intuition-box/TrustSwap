@@ -14,6 +14,7 @@ const config: HardhatUserConfig = {
     ]
 
   },
+  paths: { sources: "contracts", artifacts: "artifacts", cache: "cache" },
   networks: {
     // ⚠️ remplis .env avant d'utiliser ce réseau
     intuition: {

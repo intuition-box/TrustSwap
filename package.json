@@ -17,5 +17,10 @@
     "turbo": "^2.1.0",
     "typescript": "^5.5.0"
   },
-  "packageManager": "pnpm@9.12.3"
+  "packageManager": "pnpm@9.12.3",
+  "dependencies": {
+    "@uniswap/lib": "2.0.1",
+    "@uniswap/v2-core": "1.0.1",
+    "@uniswap/v2-periphery": "1.1.0-beta.0"
+  }
 }
