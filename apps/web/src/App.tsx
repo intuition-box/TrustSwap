@@ -3,6 +3,7 @@ import Layout from "./components/Layout";
 import SwapPage from "./pages/SwapPage";
 import PoolsPage from "./pages/PoolsPage";
 import NotFound from "./pages/NotFound";
+import './styles/App.css';
 
 export default function App() {
   return (
