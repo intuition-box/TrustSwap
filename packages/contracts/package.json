@@ -1,0 +1,35 @@
+{
+	"name": "@trustswap/contracts",
+	"private": true,
+	"scripts": {
+		"build": "hardhat compile",
+		"test": "hardhat test",
+		"deploy": "ts-node deploy/00_deploy_core.ts",
+		"export": "ts-node scripts/export-addresses.ts",
+		"calc-hash": "ts-node scripts/calc-init-hash.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@nomicfoundation/hardhat-ethers": "3.1.0",
+		"@nomicfoundation/hardhat-network-helpers": "1.1.0",
+		"@nomicfoundation/hardhat-toolbox": "^6.1.0",
+		"@nomicfoundation/hardhat-verify": "2.1.1",
+		"@openzeppelin/contracts": "^5.4.0",
+		"@typechain/hardhat": "9.1.0",
+		"@types/node": "^24.3.0",
+		"dotenv": "^17.2.1",
+		"hardhat": "^2.26.2",
+		"hardhat-gas-reporter": "2.3.0",
+		"solidity-coverage": "0.8.16",
+		"ts-node": "^10.9.2",
+		"typechain": "^8.3.2",
+		"typescript": "^5.5.0"
+	},
+	"dependencies": {
+		"@uniswap/lib": "4.0.1-alpha",
+		"@uniswap/v2-core": "^1.0.1",
+		"@uniswap/v2-periphery": "1.1.0-beta.0",
+		"ethers": "^6.15.0",
+		"viem": "^2.37.1"
+	}
+}

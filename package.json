@@ -1,0 +1,21 @@
+{
+  "name": "trustswap",
+  "private": true,
+  "scripts": {
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "dev:web": "pnpm -C apps/web dev",
+    "dev:indexer": "pnpm -C apps/indexer dev",
+    "deploy:contracts": "pnpm -C packages/contracts deploy",
+    "export:contracts": "pnpm -C packages/contracts export",
+    "tokenlist:build": "pnpm -C packages/tokenlists build",
+    "tokenlist:sign": "pnpm -C packages/tokenlists sign"
+  },
+  "devDependencies": {
+    "turbo": "^2.1.0",
+    "typescript": "^5.5.0"
+  },
+  "packageManager": "pnpm@9.12.3"
+}
