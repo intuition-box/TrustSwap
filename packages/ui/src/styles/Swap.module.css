@@ -1,0 +1,80 @@
+.containerSwap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.haloImg {
+    position: fixed;
+    width: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    animation: moveDiag 5s ease-in-out infinite alternate;
+}
+
+@keyframes moveDiag {
+    0% {
+        transform: translate(-55%, -55%) rotate(-10deg);
+    }
+    100% {
+        transform: translate(-45%, -45%) rotate(10deg);
+    }
+}
+
+.swapCard {
+    background-color: var(--bg-dark);
+    border: 0.1vh solid var(--border-grey);
+    border-radius: 3vh;
+    height: 65vh;
+    width: 55vh;
+    z-index: 2;
+    position: relative;
+}
+
+.swapCard::before {
+    content: "";
+    position: absolute;
+    top: -0.05vh;
+    right: 50%;
+    transform: translateX(-50%);
+    height: 0.05vh;
+    width: 30%;
+    background: linear-gradient(90deg, var(--border-grey), var(--border-shadow-anim), var(--border-grey));
+    box-shadow: 0 -2vh 6vh 2vh var(--shadow-grey);
+    z-index: 10;
+    animation: slideTop 5s ease-in-out infinite alternate;
+}
+
+@keyframes slideTop {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(0%);
+    }
+}
+
+.swapCard::after {
+    content: "";
+    position: absolute;
+    bottom: -0.05vh;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 0.05vh;
+    width: 30%;
+    background: linear-gradient(90deg, var(--border-grey), var(--border-shadow-anim), var(--border-grey));
+    z-index: 10;
+    animation: slideBottom 5s ease-in-out infinite alternate;
+}
+
+@keyframes slideBottom {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(0%);
+    }
+}

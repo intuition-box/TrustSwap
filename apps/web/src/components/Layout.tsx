@@ -21,7 +21,6 @@ export default function Layout() {
         <div>
             <header>
                 <div>
-                    <div>TrustSwap</div>
                     <nav className={styles.navbar}>
                         <div
                             className={styles.activeBg}
