@@ -1,4 +1,4 @@
-import INTUITION_424242 from "./intuition-testnet.json" assert { type: "json" };
+import INTUITION_13579 from "./intuition-testnet.json" assert { type: "json" };
 
 export type HexAddr = `0x${string}`;
 
@@ -13,10 +13,10 @@ export interface Addresses {
 }
 
 const BOOK: Record<number, Addresses> = {
-  424242: INTUITION_424242 as Addresses
+  13579: INTUITION_13579 as Addresses
 };
 
-export function getAddresses(chainId: number = 424242): Addresses {
+export function getAddresses(chainId: number = 13579): Addresses {
   const entry = BOOK[chainId];
   if (!entry) {
     throw new Error(`No addresses for chainId=${chainId}`);
@@ -25,4 +25,4 @@ export function getAddresses(chainId: number = 424242): Addresses {
 }
 
 // Raccourci par défaut
-export const addresses = getAddresses(424242);
+export const addresses = getAddresses(13579);
