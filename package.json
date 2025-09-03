@@ -15,6 +15,7 @@
     "tokenlist:sign": "pnpm -C packages/tokenlists sign"
   },
   "devDependencies": {
+    "@types/node": "^24.3.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "turbo": "^2.1.0",

@@ -1,42 +1,64 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import styles from "../styles/Layout.module.css";
 
 export default function Layout() {
-  const linkBase =
-    "px-4 py-2 rounded-xl transition font-medium";
-  const linkActive =
-    "bg-white/10";
-  const linkIdle =
-    "hover:bg-white/5";
+    const location = useLocation();
+    const [bgStyle, setBgStyle] = useState({ width: 0, left: 0 });
+    const swapRef = useRef<HTMLAnchorElement>(null);
+    const poolsRef = useRef<HTMLAnchorElement>(null);
 
-  return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-slate-900/70 backdrop-blur">
-        <div className="mx-auto max-w-5xl flex items-center justify-between px-4 h-14">
-          <div className="text-lg font-semibold">TrustSwap</div>
-          <nav className="flex gap-2">
-            <NavLink
-              to="/swap"
-              className={({ isActive }) =>
-                `${linkBase} ${isActive ? linkActive : linkIdle}`
-              }
-            >
-              Swap
-            </NavLink>
-            <NavLink
-              to="/pools"
-              className={({ isActive }) =>
-                `${linkBase} ${isActive ? linkActive : linkIdle}`
-              }
-            >
-              Pools
-            </NavLink>
-          </nav>
+    useEffect(() => {
+        const activeEl = location.pathname === "/swap" ? swapRef.current : poolsRef.current;
+        if (activeEl) {
+            const rect = activeEl.getBoundingClientRect();
+            const navRect = activeEl.parentElement!.getBoundingClientRect();
+            setBgStyle({ width: rect.width, left: rect.left - navRect.left });
+        }
+    }, [location]);
+
+    return (
+        <div>
+            <header>
+                <div>
+                    <div>TrustSwap</div>
+                    <nav className={styles.navbar}>
+                        <div
+                            className={styles.activeBg}
+                            style={{ width: bgStyle.width, left: bgStyle.left }}
+                        />
+                        <NavLink
+                            to="/swap"
+                            ref={swapRef}
+                            className={({ isActive }) =>
+                                `${styles.linkBase} ${isActive ? styles.linkTextActive : ""}`
+                            }
+                        >
+                            Swap
+                        </NavLink>
+                        <NavLink
+                            to="/pools"
+                            ref={poolsRef}
+                            className={({ isActive }) =>
+                                `${styles.linkBase} ${isActive ? styles.linkTextActive : ""}`
+                            }
+                        >
+                            Pools
+                        </NavLink>
+                        <div className={styles.line}></div>
+                        <div className={styles.linkBaseComing}>
+                            Governance
+                            <div className={styles.comingMsg}>
+                                <div className={styles.point}></div>
+                                <span className={styles.comingSoonLabel}>Coming</span>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </header>
+            <main>
+                <Outlet />
+            </main>
         </div>
-      </header>
-
-      <main className="mx-auto max-w-5xl px-4 py-6">
-        <Outlet />
-      </main>
-    </div>
-  );
+    );
 }
