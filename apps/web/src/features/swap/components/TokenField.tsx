@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import type { Address } from "viem";
 import TokenSelector from "./TokenSelector";
 import AmountInput from "./AmountInput";
@@ -20,6 +21,24 @@ function shortAddr(addr?: string) {
   return addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : "";
 }
 
+async function copyToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // fallback (context non sécurisé, vieux navigateurs)
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  }
+}
+
 export default function TokenField({
   label,
   token,
@@ -31,8 +50,13 @@ export default function TokenField({
 }: TokenFieldProps) {
   const { user } = usePrivy();
   const { wallets } = useWallets();
+  const [copied, setCopied] = useState(false);
 
-  const primary = wallets.find(w => w.walletClientType === 'privy') ?? wallets[0];
+  const primary = useMemo(
+    () => wallets.find(w => w.walletClientType === 'privy') ?? wallets[0],
+    [wallets]
+  );
+  
   const addr =
     primary?.address ??
     user?.wallet?.address ??
@@ -42,6 +66,22 @@ export default function TokenField({
     typeof showWalletOn === 'function'
       ? showWalletOn(label)
       : showWalletOn.map(s => s.toLowerCase()).includes(label.toLowerCase());
+
+  const onCopy = async () => {
+    if (!addr) return;
+    const ok = await copyToClipboard(addr);
+    if (ok) {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 600);
+    }
+  };
+
+  const onKeyCopy: React.KeyboardEventHandler<HTMLSpanElement> = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onCopy();
+    }
+  };
 
   return (
     <div>
@@ -55,7 +95,17 @@ export default function TokenField({
               alt="wallet"
               className={styles.walletIcone}
             />
-            <span>{shortAddr(addr)}</span>
+            <span
+              role="button"
+              tabIndex={0}
+              title={copied ? "Copied!" : "Click to copy"}
+              aria-label={copied ? "Address copied" : "Copy address"}
+              onClick={onCopy}
+              onKeyDown={onKeyCopy}
+              className={styles.walletAddress}
+            >
+              {copied ? "Copied!" : shortAddr(addr)}
+            </span>
           </span>
         )}
       </div>
