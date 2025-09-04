@@ -8,7 +8,7 @@ export default function PrivyConnect() {
   if (!ready) return null;
 
   if (!authenticated) {
-    return <button onClick={login}>Connect</button>;
+    return <button onClick={login}>Connect Wallet</button>;
   }
 
   const primary =
@@ -22,7 +22,7 @@ export default function PrivyConnect() {
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
       <span>{addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : 'Signed in'}</span>
-      <button onClick={logout}>Logout</button>
+      <button onClick={logout}>Disconnect</button>
     </div>
   );
 }
