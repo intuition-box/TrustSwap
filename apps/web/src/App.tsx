@@ -9,7 +9,6 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        {/* redirige la racine vers /swap */}
         <Route path="/" element={<Navigate to="/swap" replace />} />
         <Route path="/swap" element={<SwapPage />} />
         <Route path="/pools" element={<PoolsPage />} />
