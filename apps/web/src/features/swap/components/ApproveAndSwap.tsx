@@ -1,3 +1,5 @@
+import styles from "@ui/styles/Swap.module.css";
+
 export default function ApproveAndSwap({
   connected, disabled, onClick
 }: { connected: boolean; disabled: boolean; onClick: () => Promise<void> }) {
@@ -5,14 +7,9 @@ export default function ApproveAndSwap({
     <button
       disabled={!connected || disabled}
       onClick={onClick}
-      style={{
-        width: "100%", borderRadius: 12, padding: "12px 16px",
-        fontWeight: 700, color: "white",
-        background: (!connected || disabled) ? "#666" : "#4f46e5",
-        cursor: (!connected || disabled) ? "not-allowed" : "pointer",
-      }}
+      className={styles.swapBtn}
     >
-      {!connected ? "Connect wallet" : "Swap"}
+      <span className={styles.textBtnSwap}>{!connected ? "Connect wallet" : "Swap"}</span>
     </button>
   );
 }

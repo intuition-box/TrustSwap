@@ -171,3 +171,26 @@
     width: 100%;
     margin-top: 10%;
 }
+
+.swapBtn {
+    background-color: var(--bg-btn);
+    border: 1px solid var(--border-btn);
+    box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
+    color: var(--text-color);
+    height: 6vh;
+    width: 100%;
+    border-radius: 2.5vh;
+}
+
+.textBtnSwap {
+    font-size: 2vh;
+    font-weight: 500;
+    letter-spacing: -0.09vh;
+    background: linear-gradient(to top, var(--text-color), var(--swap-text-color) 80%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  
+    background-clip: text;
+    color: transparent;
+  }
+  

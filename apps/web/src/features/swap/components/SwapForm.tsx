@@ -25,7 +25,7 @@ export default function SwapForm() {
   const pc = usePublicClient();
 
   const defaults = useMemo(() => getDefaultPair(), []);
-  const [tokenIn, setTokenIn]   = useState<Address>(defaults.tokenIn.address);
+  const [tokenIn, setTokenIn] = useState<Address>(defaults.tokenIn.address);
   const [tokenOut, setTokenOut] = useState<Address>(defaults.tokenOut.address);
   const [amountIn, setAmountIn] = useState<string>("1");
   const [amountOut, setAmountOut] = useState<string>("");
@@ -47,12 +47,19 @@ export default function SwapForm() {
     let alive = true;
     (async () => {
       try {
-        if (!amountIn || Number(amountIn) <= 0) { setAmountOut(""); return; }
+        if (!amountIn || Number(amountIn) <= 0) {
+          setAmountOut("");
+          return;
+        }
         const q = await quote(tokenIn, tokenOut, amountIn);
         if (alive) setAmountOut(q);
-      } catch { if (alive) setAmountOut(""); }
+      } catch {
+        if (alive) setAmountOut("");
+      }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [tokenIn, tokenOut, amountIn]); // eslint-disable-line
 
   // Pair data (token0/token1/reserves)
@@ -62,7 +69,9 @@ export default function SwapForm() {
       const pd = await fetchPair(tokenIn, tokenOut);
       if (alive) setPairData(pd);
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [tokenIn, tokenOut]); // eslint-disable-line
 
   // Estimation network fee (change avec montant, slippage, tokens)
@@ -70,19 +79,22 @@ export default function SwapForm() {
     let alive = true;
     (async () => {
       try {
-        if (!address || !amountIn || Number(amountIn) <= 0) { setNetworkFeeText(null); return; }
+        if (!address || !amountIn || Number(amountIn) <= 0) {
+          setNetworkFeeText(null);
+          return;
+        }
         // pré-calc amtIn et minOut via getAmountsOut (même que pour le swap)
         const tIn = getTokenByAddress(tokenIn);
         const amtIn = parseUnits(amountIn || "0", tIn.decimals);
-        const amounts = await pc.readContract({
+        const amounts = (await pc.readContract({
           address: addresses.UniswapV2Router02 as Address,
           abi: abi.UniswapV2Router02,
           functionName: "getAmountsOut",
           args: [amtIn, [tokenIn, tokenOut]],
-        }) as bigint[];
+        })) as bigint[];
         const out = amounts[amounts.length - 1] ?? 0n;
-        const minOut = out - (out * BigInt(slippageBps) / 10_000n);
-        const deadline = BigInt(Math.floor(Date.now()/1000) + 60 * 20);
+        const minOut = out - (out * BigInt(slippageBps)) / 10_000n;
+        const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 20);
 
         const fee = await estimateNetworkFee({
           account: address,
@@ -99,7 +111,9 @@ export default function SwapForm() {
         if (alive) setNetworkFeeText(null);
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [address, tokenIn, tokenOut, amountIn, slippageBps]); // eslint-disable-line
 
   // Détails
@@ -124,16 +138,16 @@ export default function SwapForm() {
     }
 
     // 2) MinOut
-    const amounts = await pc.readContract({
+    const amounts = (await pc.readContract({
       address: addresses.UniswapV2Router02 as Address,
       abi: abi.UniswapV2Router02,
       functionName: "getAmountsOut",
       args: [amtIn, [tokenIn, tokenOut]],
-    }) as bigint[];
+    })) as bigint[];
 
     const out = amounts[amounts.length - 1] ?? 0n;
-    const minOut = out - (out * BigInt(slippageBps) / 10_000n);
-    const deadline = Math.floor(Date.now()/1000) + 60 * 20;
+    const minOut = out - (out * BigInt(slippageBps)) / 10_000n;
+    const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
 
     // 3) Swap
     await doSwap(address, tokenIn, tokenOut, amountIn, minOut, deadline);
@@ -145,32 +159,39 @@ export default function SwapForm() {
         <TokenField
           label="From"
           token={tokenIn}
-          onTokenChange={(a) => { setTokenIn(a); }}
+          onTokenChange={(a) => setTokenIn(a)}
           amount={amountIn}
           onAmountChange={setAmountIn}
           readOnly={false}
         />
 
-        <DetailsDisclosure
-          slippageBps={slippageBps}
-          onChangeSlippage={setSlippageBps}
-          priceText={priceText}
-          priceImpactPct={priceImpact}
-          networkFeeText={networkFeeText}
+        {/* Rendu conditionnel */}
+        {amountIn && Number(amountIn) > 0 && (
+          <>
+            <DetailsDisclosure
+              slippageBps={slippageBps}
+              onChangeSlippage={setSlippageBps}
+              priceText={priceText}
+              priceImpactPct={priceImpact}
+              networkFeeText={networkFeeText}
+            />
+          </>
+        )}
+
+        <FlipButton
+          onClick={() => {
+            setTokenIn(tokenOut);
+            setTokenOut(tokenIn);
+            setAmountOut(""); // re-quote après flip
+          }}
         />
-        
-        <FlipButton onClick={() => {
-          setTokenIn(tokenOut);
-          setTokenOut(tokenIn);
-          setAmountOut(""); // re-quote après flip
-        }} />
       </div>
 
       <div className={styles.inputSwapContainer}>
         <TokenField
           label="To"
           token={tokenOut}
-          onTokenChange={(a) => { setTokenOut(a); }}
+          onTokenChange={(a) => setTokenOut(a)}
           amount={amountOut}
           readOnly
         />
@@ -178,11 +199,15 @@ export default function SwapForm() {
 
       <Summary tokenIn={tokenIn} tokenOut={tokenOut} amountIn={amountIn} amountOut={amountOut} />
 
-      <ApproveAndSwap
-        connected={Boolean(address)}
-        disabled={!amountIn || Number(amountIn) <= 0}
-        onClick={onApproveAndSwap}
-      />
+      {amountIn && Number(amountIn) > 0 && (
+        <>
+          <ApproveAndSwap
+            connected={Boolean(address)}
+            disabled={!amountIn || Number(amountIn) <= 0}
+            onClick={onApproveAndSwap}
+          />
+        </>
+      )}
     </div>
   );
 }
