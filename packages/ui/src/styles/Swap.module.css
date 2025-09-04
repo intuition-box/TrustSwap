@@ -114,6 +114,11 @@
     gap: 0.7vh;
 }
 
+.walletAddress {
+    cursor: pointer;      
+    user-select: none; 
+}
+
 .walletIcone {
     width: 1.3vh;
 }
