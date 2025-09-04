@@ -19,7 +19,6 @@ function makeViemChain() {
       default: { http: INTUITION.rpcUrls.default.http },
       public: { http: INTUITION.rpcUrls.default.http },
     },
-    // facultatif if you are explorer
     blockExplorers: INTUITION['blockExplorers']
       ? INTUITION['blockExplorers']
       : undefined,
