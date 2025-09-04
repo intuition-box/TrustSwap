@@ -17,7 +17,7 @@ export default function TokenField(props: {
       <div className={styles.headerInput}>
         <span>{props.label}</span>
         <span className={styles.wallet}>
-        <img src={walletIcone} alt="description" className={styles.walletIcone} />
+        <img src={walletIcone} alt="wallet Icone" className={styles.walletIcone} />
           0x02938...3894a
         </span>
       </div>

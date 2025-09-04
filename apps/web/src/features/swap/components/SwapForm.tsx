@@ -158,12 +158,14 @@ export default function SwapForm() {
           priceImpactPct={priceImpact}
           networkFeeText={networkFeeText}
         />
+        
+        <FlipButton onClick={() => {
+          setTokenIn(tokenOut);
+          setTokenOut(tokenIn);
+          setAmountOut(""); // re-quote après flip
+        }} />
       </div>
-      <FlipButton onClick={() => {
-        setTokenIn(tokenOut);
-        setTokenOut(tokenIn);
-        setAmountOut(""); // re-quote après flip
-      }} />
+
       <div className={styles.inputSwapContainer}>
         <TokenField
           label="To"
