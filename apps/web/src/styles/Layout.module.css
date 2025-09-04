@@ -27,7 +27,7 @@
     background: linear-gradient(90deg, var(--border-grey), var(--border-shadow-anim), var(--border-grey));
     box-shadow: 0 -2vh 6vh 2vh var(--shadow-grey);
     z-index: 10;
-    animation: slideAfter 5s ease-in-out infinite alternate;
+    animation: slideAfter 7s ease-in-out infinite alternate;
 }
 
 @keyframes slideAfter {

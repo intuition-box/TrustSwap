@@ -9,22 +9,29 @@
     position: fixed;
     top: 50%;
     left: 50%;
-    height: 10%;
-    width: 10%;
+    height: 50%;
+    width: 50%;
     border-radius: 50%;
-    box-shadow: 0 0 30vh 4vh var(--secondary-color);
+    background: radial-gradient(circle, var(--secondary-color) 0%, rgba(116, 232, 255, 0.1) 50%, transparent 100%);
     transform: translate(-50%, -50%);
+    filter: blur(120px);
     animation: moveHalo 7s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
   }
   
   @keyframes moveHalo {
     0% {
-      transform: translate(-60%, -70%) rotate(0deg);
+      transform: translate(-60%, -60%) rotate(0deg);
+    }
+    50% {
+      transform: translate(-50%, -50%) rotate(10deg);
     }
     100% {
-      transform: translate(-40%, -30%) rotate(100deg);
+      transform: translate(-40%, -40%) rotate(20deg);
     }
   }
+  
   
 
 .swapCard {
@@ -37,6 +44,7 @@
     z-index: 2;
     padding: 0.7vh;
     position: relative;
+    overflow: hidden;
 }
 
 .swapCard::before {
@@ -94,9 +102,7 @@
     font-weight: 500;
     letter-spacing: -0.08vh;
     font-size: 1.6vh;
-    position: relative;
     margin-bottom: 1vh;
-    padding-bottom: 1vh;
 }
 
 .headerInput {
@@ -145,22 +151,21 @@
     background-color: var(--bg-btn);
     border: 1px solid var(--border-btn);
     box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
-    position: absolute;
-    left: 50%;
-    bottom: -2.5vh;
-    transform: translateX(-50%);
+    margin-left: auto;
+    margin-right: auto;
     height: 5vh;
     width: 5vh;
-    z-index: 4;
     cursor: pointer;
     border-radius: 1vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 1000;
+    transform: translateY(50%);
 }
 
 .flipBtn:active {
-    transform: translateX(-50%) scale(0.96);
+    transform: translateY(50%) scale(0.96);
 }
 
 .flipBtn:hover {
