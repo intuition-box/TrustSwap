@@ -27,7 +27,7 @@ export default function SwapForm() {
   const defaults = useMemo(() => getDefaultPair(), []);
   const [tokenIn, setTokenIn] = useState<Address>(defaults.tokenIn.address);
   const [tokenOut, setTokenOut] = useState<Address>(defaults.tokenOut.address);
-  const [amountIn, setAmountIn] = useState<string>("1");
+  const [amountIn, setAmountIn] = useState<string>("");
   const [amountOut, setAmountOut] = useState<string>("");
 
   const [slippageBps, setSlippageBps] = useState<number>(50); // 0.50%

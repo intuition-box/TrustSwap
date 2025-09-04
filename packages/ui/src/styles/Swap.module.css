@@ -44,7 +44,6 @@
     z-index: 2;
     padding: 0.7vh;
     position: relative;
-    overflow: hidden;
 }
 
 .swapCard::before {
@@ -146,6 +145,12 @@
     font-weight: 500;
     letter-spacing: -0.3vh;
 }
+
+.inputSwap::placeholder {
+    color: var(--placeholder);
+    opacity: 1;
+}
+  
 
 .flipBtn {
     background-color: var(--bg-btn);
