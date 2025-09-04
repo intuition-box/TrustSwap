@@ -197,10 +197,11 @@ export default function SwapForm() {
         />
       </div>
 
-      <Summary tokenIn={tokenIn} tokenOut={tokenOut} amountIn={amountIn} amountOut={amountOut} />
-
+     
       {amountIn && Number(amountIn) > 0 && (
         <>
+         <Summary tokenIn={tokenIn} tokenOut={tokenOut} amountIn={amountIn} amountOut={amountOut} />
+
           <ApproveAndSwap
             connected={Boolean(address)}
             disabled={!amountIn || Number(amountIn) <= 0}
