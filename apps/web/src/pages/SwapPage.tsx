@@ -1,12 +1,13 @@
 import styles from "@ui/styles/Swap.module.css";
-import haloImg from "../assets/halo.png";
+import SwapFeature from "../features/swap";
 
 export default function SwapPage() {
   return (
     <section className={styles.containerSwap}>
-      <img src={haloImg} alt="halo" className={styles.haloImg} />
-      <div className={styles.swapCard}>
-      </div>
+     <div className={styles.halo}></div>
+     <div className={styles.swapCard}>
+      <SwapFeature />
+     </div>
     </section>
   );
 }
