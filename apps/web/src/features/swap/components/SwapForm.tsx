@@ -187,7 +187,7 @@ export default function SwapForm() {
         />
       </div>
 
-      <div className={styles.inputSwapContainer}>
+      <div className={styles.inputSwapContainerTo}>
         <TokenField
           label="To"
           token={tokenOut}

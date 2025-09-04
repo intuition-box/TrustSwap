@@ -1,10 +1,9 @@
 export default function SlippagePopover({
   valueBps, onChangeBps,
 }: { valueBps: number; onChangeBps: (v: number) => void }) {
-  // simple select (0.1%, 0.5%, 1%) + custom via input
+
   return (
     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-      <span style={{ opacity: 0.8, fontSize: 12 }}>Slippage</span>
       <select
         value={valueBps}
         onChange={(e) => onChangeBps(parseInt(e.target.value, 10))}

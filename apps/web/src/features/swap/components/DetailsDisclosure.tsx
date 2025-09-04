@@ -1,5 +1,6 @@
 import { useState } from "react";
 import SlippagePopover from "./SlippagePopover";
+import styles from "@ui/styles/DetailsDisclosure.module.css";
 
 export default function DetailsDisclosure({
   slippageBps, onChangeSlippage,
@@ -22,19 +23,20 @@ export default function DetailsDisclosure({
       </button>
 
       {open && (
-        <div>
-          <div>
-            <span>Slippage</span>
+        <div className={styles.detailsContainer}>
+          <div className={styles.lineDetails}></div>
+          <div className={styles.labelDetailsSwapSlippage}>
+            <span>Slippage:</span>
             <SlippagePopover valueBps={slippageBps} onChangeBps={onChangeSlippage} />
           </div>
 
-          <div>
-            <span>Price</span>
+          <div className={styles.labelDetailsSwap}>
+            <span>Price:</span>
             <strong>{priceText ?? "—"}</strong>
           </div>
 
-          <div>
-            <span>Price impact</span>
+          <div className={styles.labelDetailsSwap}>
+            <span>Price impact:</span>
             <strong
               style={{ color: typeof priceImpactPct === "number" && priceImpactPct > 1 ? "#ef4444" : "inherit" }}
             >
@@ -42,8 +44,8 @@ export default function DetailsDisclosure({
             </strong>
           </div>
 
-          <div>
-            <span>Network fee (est.)</span>
+          <div className={styles.labelDetailsSwap}>
+            <span>Network fee (est.):</span>
             <strong>{networkFeeText ?? "—"}</strong>
           </div>
         </div>

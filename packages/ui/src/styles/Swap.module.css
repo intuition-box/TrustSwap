@@ -104,6 +104,19 @@
     margin-bottom: 1vh;
 }
 
+.inputSwapContainerTo {
+    background-color: var(--bg-btn);
+    border: 1px solid var(--border-btn);
+    box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
+    border-radius: 2.5vh;
+    padding-top: 1.3vh;
+    color: var(--text-grey-input);
+    font-weight: 500;
+    letter-spacing: -0.08vh;
+    font-size: 1.6vh;
+    padding-bottom: 4vh;
+}
+
 .headerInput {
     width: 92%;
     margin-left: auto;

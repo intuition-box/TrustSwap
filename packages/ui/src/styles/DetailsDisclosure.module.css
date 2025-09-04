@@ -1,0 +1,42 @@
+.detailsContainer {
+    display: flex;
+    flex-direction: column;
+    width: 94%;
+    margin-left: auto;
+    margin-right: auto;
+    gap: 1vh;
+    font-size: 1.7vh;
+    margin-bottom: 0;
+    position: relative;
+}
+
+.lineDetails {
+    width: 90%;
+    height: 0.1vh;
+    background-color: var(--border-btn);
+    margin-top: 0.4vh;
+    position: relative;
+}
+
+.lineDetails::after {
+    content: "";
+    position: absolute;
+    top: -0.3vh;
+    width: 90%;
+    height: 0.3vh;
+    background: linear-gradient(to right, #0B0B0B, #000000 80%, #0B0B0B);
+    box-shadow: 0 -1px 6px rgba(0,0,0,0.6);
+}
+
+
+.labelDetailsSwapSlippage {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+}
+
+.labelDetailsSwap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
