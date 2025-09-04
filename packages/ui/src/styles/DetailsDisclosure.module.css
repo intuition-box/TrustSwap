@@ -1,11 +1,31 @@
+.sectionDetails {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.btnDetails {
+    margin-left: auto;
+    background-color: transparent;
+    border: none;
+    color: var(--text-grey);
+    margin-bottom: 1vh;
+    margin-top: 1vh;
+    margin-right: 1vh;
+    cursor: pointer;
+    font-size: 1.4vh;
+    letter-spacing: 0;
+}
+
 .detailsContainer {
     display: flex;
     flex-direction: column;
-    width: 94%;
+    width: 92%;
     margin-left: auto;
     margin-right: auto;
-    gap: 1vh;
-    font-size: 1.7vh;
+    gap: 0.8vh;
+    font-size: 1.8vh;
+    font-weight: 400;
     margin-bottom: 0;
     position: relative;
 }
@@ -13,25 +33,17 @@
 .lineDetails {
     width: 90%;
     height: 0.1vh;
-    background-color: var(--border-btn);
+    background-color: #242424;
     margin-top: 0.4vh;
-    position: relative;
-}
-
-.lineDetails::after {
-    content: "";
-    position: absolute;
-    top: -0.3vh;
-    width: 90%;
-    height: 0.3vh;
-    background: linear-gradient(to right, #0B0B0B, #000000 80%, #0B0B0B);
-    box-shadow: 0 -1px 6px rgba(0,0,0,0.6);
+    margin-bottom: 1vh;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 
 .labelDetailsSwapSlippage {
     display: flex;
-    align-items: end;
+    align-items: top;
     justify-content: space-between;
 }
 
