@@ -1,11 +1,10 @@
 import SwapForm from "./components/SwapForm";
+import styles from "@ui/styles/Swap.module.css";
 
 export default function SwapPage() {
   return (
-    <div style={{ minHeight: "100dvh", display: "grid", placeItems: "center", padding: 16 }}>
-      <div style={{ width: "100%", maxWidth: 420 }}>
+    <div className={styles.swapForm}>
         <SwapForm />
-      </div>
     </div>
   );
 }

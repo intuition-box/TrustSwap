@@ -18,6 +18,8 @@ import ApproveAndSwap from "./ApproveAndSwap";
 import DetailsDisclosure from "./DetailsDisclosure";
 import { parseUnits, formatUnits } from "viem";
 
+import styles from "@ui/styles/Swap.module.css";
+
 export default function SwapForm() {
   const { address } = useAccount();
   const pc = usePublicClient();
@@ -138,45 +140,41 @@ export default function SwapForm() {
   }
 
   return (
-    <div >
-      <div >
-        <h2 >Swap</h2>
-        {/* (slippage déplacé dans Details) */}
+    <div>
+      <div className={styles.inputSwapContainer}>
+        <TokenField
+          label="From"
+          token={tokenIn}
+          onTokenChange={(a) => { setTokenIn(a); }}
+          amount={amountIn}
+          onAmountChange={setAmountIn}
+          readOnly={false}
+        />
+
+        <DetailsDisclosure
+          slippageBps={slippageBps}
+          onChangeSlippage={setSlippageBps}
+          priceText={priceText}
+          priceImpactPct={priceImpact}
+          networkFeeText={networkFeeText}
+        />
       </div>
-
-      <TokenField
-        label="From"
-        token={tokenIn}
-        onTokenChange={(a) => { setTokenIn(a); }}
-        amount={amountIn}
-        onAmountChange={setAmountIn}
-        readOnly={false}
-      />
-
       <FlipButton onClick={() => {
         setTokenIn(tokenOut);
         setTokenOut(tokenIn);
         setAmountOut(""); // re-quote après flip
       }} />
-
-      <TokenField
-        label="To"
-        token={tokenOut}
-        onTokenChange={(a) => { setTokenOut(a); }}
-        amount={amountOut}
-        readOnly
-      />
+      <div className={styles.inputSwapContainer}>
+        <TokenField
+          label="To"
+          token={tokenOut}
+          onTokenChange={(a) => { setTokenOut(a); }}
+          amount={amountOut}
+          readOnly
+        />
+      </div>
 
       <Summary tokenIn={tokenIn} tokenOut={tokenOut} amountIn={amountIn} amountOut={amountOut} />
-
-      {/* ---- DÉTAILS (UX) ---- */}
-      <DetailsDisclosure
-        slippageBps={slippageBps}
-        onChangeSlippage={setSlippageBps}
-        priceText={priceText}
-        priceImpactPct={priceImpact}
-        networkFeeText={networkFeeText}
-      />
 
       <ApproveAndSwap
         connected={Boolean(address)}

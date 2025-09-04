@@ -1,12 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 :root {
+  --secondary-color: #4ADAEA;
+  --halo-bg: #4adaea57;
   --bg-dark: #000000;
   --text-color: #D9D9D9;
   --border-grey: #212121;
-  --border-shadow-grey: #838383;
+  --border-shadow-anim: #4ADAEA;
   --shadow-grey: #7d7d7d30;
   --text-grey: #7E7E7E;
+
+  --text-grey-input: #5F5F5F;
 
   --bg-btn: #0B0B0B;
   --border-btn: #1C1C1C;
