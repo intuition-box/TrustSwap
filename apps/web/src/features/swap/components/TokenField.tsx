@@ -4,7 +4,7 @@ import TokenSelector from "./TokenSelector";
 import AmountInput from "./AmountInput";
 import styles from "@ui/styles/Swap.module.css";
 import walletIcone from "../../../assets/wallet-icone.png";
-import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 
 type TokenFieldProps = {
   label: string;
@@ -13,7 +13,6 @@ type TokenFieldProps = {
   amount?: string;
   onAmountChange?: (v: string) => void;
   readOnly?: boolean;
-
   showWalletOn?: string[] | ((label: string) => boolean);
 };
 
@@ -26,14 +25,13 @@ async function copyToClipboard(text: string) {
     await navigator.clipboard.writeText(text);
     return true;
   } catch {
-    // fallback (context non sécurisé, vieux navigateurs)
-    const ta = document.createElement('textarea');
+    const ta = document.createElement("textarea");
     ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
     document.body.appendChild(ta);
     ta.select();
-    const ok = document.execCommand('copy');
+    const ok = document.execCommand("copy");
     document.body.removeChild(ta);
     return ok;
   }
@@ -46,26 +44,26 @@ export default function TokenField({
   amount,
   onAmountChange,
   readOnly,
-  showWalletOn = ['From'],
+  showWalletOn = ["From"],
 }: TokenFieldProps) {
   const { user } = usePrivy();
   const { wallets } = useWallets();
   const [copied, setCopied] = useState(false);
 
   const primary = useMemo(
-    () => wallets.find(w => w.walletClientType === 'privy') ?? wallets[0],
+    () => wallets.find((w) => w.walletClientType === "privy") ?? wallets[0],
     [wallets]
   );
-  
+
   const addr =
     primary?.address ??
     user?.wallet?.address ??
-    user?.linkedAccounts?.find(a => (a as any).address)?.address;
+    user?.linkedAccounts?.find((a) => (a as any).address)?.address;
 
   const shouldShowWallet =
-    typeof showWalletOn === 'function'
+    typeof showWalletOn === "function"
       ? showWalletOn(label)
-      : showWalletOn.map(s => s.toLowerCase()).includes(label.toLowerCase());
+      : showWalletOn.map((s) => s.toLowerCase()).includes(label.toLowerCase());
 
   const onCopy = async () => {
     if (!addr) return;
@@ -77,7 +75,7 @@ export default function TokenField({
   };
 
   const onKeyCopy: React.KeyboardEventHandler<HTMLSpanElement> = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onCopy();
     }
@@ -115,11 +113,10 @@ export default function TokenField({
           value={amount ?? ""}
           onChange={onAmountChange}
           readOnly={readOnly}
-          placeholder={readOnly ? "-" : "0.0"}
+          placeholder={readOnly ? "-" : "0.00000"}
         />
         <TokenSelector value={token} onChange={onTokenChange} />
       </div>
     </div>
   );
 }
-
