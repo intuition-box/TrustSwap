@@ -7,6 +7,7 @@ export interface Addresses {
   UniswapV2Router02: HexAddr;
   deployer: HexAddr;
   router: HexAddr;
+  NATIVE_PLACEHOLDER: HexAddr;
   TSWP: HexAddr;
   WTTRUST: HexAddr;
   SRF: HexAddr;
