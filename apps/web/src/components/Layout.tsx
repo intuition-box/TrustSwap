@@ -24,6 +24,7 @@ export default function Layout() {
         <div>
           <div>TrustSwap</div>
           <nav className={styles.navbar}>
+          <div className={styles.navbarLine}></div>
             <div
               className={styles.activeBg}
               style={{ width: bgStyle.width, left: bgStyle.left }}

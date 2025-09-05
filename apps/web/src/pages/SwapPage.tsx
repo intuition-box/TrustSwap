@@ -6,7 +6,9 @@ export default function SwapPage() {
     <section className={styles.containerSwap}>
      <div className={styles.halo}></div>
      <div className={styles.swapCard}>
+     <div className={styles.swapCardLineTop}></div>
       <SwapFeature />
+      <div className={styles.swapCardLineBottom}></div>
      </div>
     </section>
   );
