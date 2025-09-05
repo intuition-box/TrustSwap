@@ -1,12 +1,8 @@
 import type { Address } from "viem";
-import { getTokenByAddress } from "../../../lib/tokens";
+import { getTokenByAddress, toWrapped } from "../../../lib/tokens";
 import type { PairData } from "./usePairData";
 import { formatUnits } from "viem";
 
-/**
- * Calcule le price impact (%) à partir des réserves du pair et du quote obtenu.
- * Hypothèse: simple hop (tokenIn ↔ tokenOut).
- */
 export function computePriceImpactPct(
   tokenIn: Address,
   tokenOut: Address,
@@ -21,25 +17,29 @@ export function computePriceImpactPct(
   const tIn = getTokenByAddress(tokenIn);
   const tOut = getTokenByAddress(tokenOut);
 
-  // Réserves mappées dans l'ordre in/out
-  let reserveIn: bigint, reserveOut: bigint;
-  if (tokenIn.toLowerCase() === pair.token0.toLowerCase()) {
+  const wIn = toWrapped(tokenIn);
+  const wOut = toWrapped(tokenOut);
+
+  let reserveIn: bigint | undefined, reserveOut: bigint | undefined;
+  if (wIn.toLowerCase() === pair.token0.toLowerCase()) {
     reserveIn = pair.reserve0; reserveOut = pair.reserve1;
-  } else if (tokenIn.toLowerCase() === pair.token1.toLowerCase()) {
+  } else if (wIn.toLowerCase() === pair.token1.toLowerCase()) {
     reserveIn = pair.reserve1; reserveOut = pair.reserve0;
   } else {
-    return null; // tokenIn pas dans le pair
+    return null;
   }
 
-  // Mid price = (reserveOut / decOut) / (reserveIn / decIn)
+  if (!reserveIn || !reserveOut) return null;
+
   const ri = Number(formatUnits(reserveIn, tIn.decimals));
   const ro = Number(formatUnits(reserveOut, tOut.decimals));
-  if (ri <= 0 || ro <= 0) return null;
+  if (!(ri > 0) || !(ro > 0)) return null;
 
-  const mid = ro / ri;                 // tokensOut per tokenIn (mid)
-  const exec = aout / ain;             // execution price
-  if (mid <= 0) return null;
+  const mid = ro / ri;    
+  const exec = aout / ain; 
+  if (!(mid > 0) || !(exec > 0)) return null;
 
-  const impact = (mid - exec) / mid * 100; // %
-  return Math.max(0, impact);           // clamp
+  const impact = ((mid - exec) / mid) * 100;
+  const clamped = Math.max(0, Math.min(100, impact));
+  return Math.round(clamped * 100) / 100; 
 }

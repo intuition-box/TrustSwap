@@ -73,13 +73,16 @@ export default function SwapForm() {
 
   // Pair data (token0/token1/reserves) — OK si ton hook wrap le natif en interne
   useEffect(() => {
-    let alive = true;
-    (async () => {
-      const pd = await fetchPair(tokenIn, tokenOut);
-      if (alive) setPairData(pd);
-    })();
-    return () => { alive = false; };
-  }, [tokenIn, tokenOut]); // eslint-disable-line
+  let alive = true;
+  (async () => {
+    const pd = await fetchPair(tokenIn, tokenOut);
+    if (alive) {
+      setPairData(pd);
+      if (!pd) console.warn("[pairData] no LP for", tokenIn, tokenOut);
+    }
+  })();
+  return () => { alive = false; };
+}, [tokenIn, tokenOut]);
 
   // Estimation network fee — CHANGE: réutilise bestPath + outBn
   useEffect(() => {
@@ -140,6 +143,9 @@ export default function SwapForm() {
     const out = qd.amountOutBn;
     const minOut = out - (out * BigInt(slippageBps) / 10_000n);
     const deadline = Math.floor(Date.now()/1000) + 60 * 20;
+    if (!address) { setNetworkFeeText(null); /* console.log("no account"); */ return; }
+    if (!isFinite(v) || v <= 0) { setNetworkFeeText(null); /* console.log("no amount"); */ return; }
+    if (!bestPath || !lastOutBn) { setNetworkFeeText(null); /* console.log("no route/quote yet"); */ return; }
 
     // Approve seulement si tokenIn est ERC-20
     if (!isNative(tokenIn) && address) {
@@ -184,7 +190,9 @@ export default function SwapForm() {
           onClick={() => {
             setTokenIn(tokenOut);
             setTokenOut(tokenIn);
-            setAmountOut(""); // re-quote après flip
+            setAmountOut(""); 
+            setBestPath(null);
+            setLastOutBn(null);
           }} 
         />
       </div>
