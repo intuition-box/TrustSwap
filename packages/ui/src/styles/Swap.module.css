@@ -3,16 +3,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.halo {
+  }
+  
+  .halo {
     position: fixed;
     top: 50%;
     left: 50%;
     height: 50%;
     width: 50%;
     border-radius: 50%;
-    background: radial-gradient(circle, var(--secondary-color) 0%, rgba(116, 232, 255, 0.1) 50%, transparent 100%);
+    background: radial-gradient(
+      circle,
+      var(--secondary-color) 0%,
+      rgba(116, 232, 255, 0.1) 50%,
+      transparent 100%
+    );
     transform: translate(-50%, -50%);
     filter: blur(120px);
     animation: moveHalo 7s ease-in-out infinite alternate;
@@ -32,9 +37,7 @@
     }
   }
   
-  
-
-.swapCard {
+  .swapCard {
     background-color: var(--bg-dark);
     border: 0.1vh solid var(--border-grey);
     border-radius: 3vh;
@@ -44,9 +47,9 @@
     z-index: 2;
     padding: 0.7vh;
     position: relative;
-}
-
-.swapCardLineTop {
+  }
+  
+  .swapCardLineTop {
     content: "";
     position: absolute;
     top: -1px;
@@ -55,22 +58,27 @@
     height: 0.05vh;
     min-height: 1px;
     width: 30%;
-    background: linear-gradient(90deg, var(--border-grey), var(--border-shadow-anim), var(--border-grey));
+    background: linear-gradient(
+      90deg,
+      var(--border-grey),
+      var(--border-shadow-anim),
+      var(--border-grey)
+    );
     box-shadow: 0 -2vh 6vh 2vh var(--shadow-grey);
     z-index: 10;
     animation: slideTop 8s ease-in-out infinite alternate;
-}
-
-@keyframes slideTop {
+  }
+  
+  @keyframes slideTop {
     0% {
-        transform: translateX(100%);
+      transform: translateX(100%);
     }
     100% {
-        transform: translateX(0%);
+      transform: translateX(0%);
     }
-}
-
-.swapCardLineBottom {
+  }
+  
+  .swapCardLineBottom {
     content: "";
     position: absolute;
     bottom: -1px;
@@ -79,26 +87,31 @@
     height: 0.05vh;
     min-height: 1px;
     width: 30%;
-    background: linear-gradient(90deg, var(--border-grey), var(--border-shadow-anim), var(--border-grey));
+    background: linear-gradient(
+      90deg,
+      var(--border-grey),
+      var(--border-shadow-anim),
+      var(--border-grey)
+    );
     z-index: 10;
     animation: slideBottom 8s ease-in-out infinite alternate;
-}
-
-@keyframes slideBottom {
+  }
+  
+  @keyframes slideBottom {
     0% {
-        transform: translateX(-100%);
+      transform: translateX(-100%);
     }
     100% {
-        transform: translateX(0%);
+      transform: translateX(0%);
     }
-}
-
-.inputSwapBody {
+  }
+  
+  .inputSwapBody {
     display: flex;
     flex-direction: column;
-}
-
-.inputSwapContainer {
+  }
+  
+  .inputSwapContainer {
     background-color: var(--bg-btn);
     border: 1px solid var(--border-btn);
     box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
@@ -110,9 +123,9 @@
     font-size: 1.6vh;
     padding-bottom: 2vh;
     margin-bottom: 0.6vh;
-}
-
-.inputSwapContainerTo {
+  }
+  
+  .inputSwapContainerTo {
     background-color: var(--bg-btn);
     border: 1px solid var(--border-btn);
     box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
@@ -125,41 +138,41 @@
     padding-bottom: 2vh;
     position: relative;
     margin-top: 0.6vh;
-}
-
-.headerInput {
+  }
+  
+  .headerInput {
     width: 92%;
     margin-left: auto;
     margin-right: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-}
-
-.wallet {
+  }
+  
+  .wallet {
     display: flex;
     align-items: center;
     gap: 0.7vh;
-}
-
-.walletAddress {
-    cursor: pointer;      
-    user-select: none; 
-}
-
-.walletIcone {
+  }
+  
+  .walletAddress {
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  .walletIcone {
     width: 1.3vh;
-}
-
-.bodyInput {
+  }
+  
+  .bodyInput {
     display: flex;
     align-items: start;
     justify-content: space-between;
     padding-top: 1.2vh;
     margin-top: 1vh;
-}
-
-.inputSwap {
+  }
+  
+  .inputSwap {
     width: 70%;
     background-color: transparent;
     border: none;
@@ -172,14 +185,14 @@
     font-style: normal;
     font-weight: 500;
     letter-spacing: -0.2vh;
-}
-
-.inputSwap::placeholder {
+  }
+  
+  .inputSwap::placeholder {
     color: var(--placeholder);
     opacity: 1;
-}
-
-.flipBtn {
+  }
+  
+  .flipBtn {
     background-color: var(--bg-btn);
     border: 1px solid var(--border-btn);
     box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
@@ -197,23 +210,25 @@
     left: 50%;
     transform: translate(-50%, -100%);
     transform-origin: center;
-}
-
-.flipBtn:active {
+  }
+  
+  .flipBtn:active {
     transform: translate(-50%, -100%) scale(0.96);
-}
-
-.flipBtn:hover {
+  }
+  
+  .flipBtn:hover {
     box-shadow: inset 0 0 0.7vh 0.3vh var(--shadow-grey);
-}
-
-.flipIcone {
+  }
+  
+  .flipIcone {
     width: 100%;
     margin-top: 10%;
-}
-
-.swapBtn {
-
+  }
+  
+  .swapBtn {
+    background-color: var(--bg-btn);
+    border: 1px solid var(--border-btn);
+    box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
     color: var(--text-color);
     height: 6vh;
     width: 100%;
@@ -221,17 +236,23 @@
     margin-top: 1.4vh;
     z-index: 1000;
     cursor: pointer;
-    background-color: red;
-}
-
-.textBtnSwap {
+  }
+  
+  .swapBtn:active {
+    transform: scale(0.98);
+  }
+  
+  .textBtnSwap {
     font-size: 2vh;
     font-weight: 500;
     letter-spacing: -0.09vh;
-    background: linear-gradient(to top, var(--text-color), var(--swap-text-color) 80%);
+    background: linear-gradient(
+      to top,
+      var(--text-color),
+      var(--swap-text-color) 80%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-  
     background-clip: text;
     color: transparent;
   }
@@ -245,7 +266,7 @@
     padding-right: 2vh;
     margin-top: 0.4vh;
   }
-
+  
   .badgeBalance {
     font-size: 1.5vh;
     cursor: pointer;
@@ -254,21 +275,25 @@
     margin-top: auto;
     margin-bottom: auto;
   }
-
+  
   .amountBalance {
     font-weight: 600;
     color: var(--text-color);
   }
-
-  .badgeBalance:hover { opacity: 1; text-decoration: underline; }
-
+  
+  .badgeBalance:hover {
+    opacity: 1;
+    text-decoration: underline;
+  }
+  
   .balance {
     display: flex;
     align-items: center;
     gap: 0.3vh;
     font-size: 2vh;
   }
-
+  
   .dollarFont {
     color: var(--placeholder);
   }
+  
