@@ -1,3 +1,12 @@
+.logoPage {
+    position: fixed;
+    top: 2vh;
+    font-size: 3vh;
+    left: 2vh;
+    font-weight: 500;
+    letter-spacing: -0.1vh;
+}
+
 .navbar {
     position: fixed;
     top: 2vh;
@@ -125,6 +134,46 @@
     width: 0.7vh;
     border-radius: 50%;
     margin-right: 0.4vh;
+}
+
+.connectPage {
+    position: fixed;
+    top: 2vh;
+    right: 2vh;
+}
+
+.connectWalletBtn {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-grey);
+    box-shadow: inset 0 0 2vh 1vh var(--shadow-grey);
+    height: 6.4vh;
+    border-radius: 2vh;
+    padding-left: 2vh;
+    padding-right: 2vh;
+    cursor: pointer;
+}
+
+.connectWalletBtn:hover {
+    box-shadow: inset 0 0 0.7vh 0.4vh var(--shadow-grey);
+}
+
+.connectWalletBtn:active {
+    transform: scale(0.98);
+}
+
+.gradientText {
+    background: linear-gradient(
+        to top,
+        var(--text-color),
+        var(--swap-text-color) 80%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    font-weight: 500;
+    font-size: 1.8vh;
+    letter-spacing: -0.08vh;
 }
 
 @media (max-width: 768px) {

@@ -22,7 +22,7 @@ export default function Layout() {
     <div>
       <header>
         <div>
-          <div>TrustSwap</div>
+          <div className={styles.logoPage}>TrustSwap</div>
           <nav className={styles.navbar}>
           <div className={styles.navbarLine}></div>
             <div
@@ -56,7 +56,7 @@ export default function Layout() {
               </div>
             </div>
           </nav>
-          <div><PrivyConnect /></div>
+          <div className={styles.connectPage}><PrivyConnect /></div>
         </div>
       </header>
       <main>
