@@ -28,7 +28,7 @@ export default function DetailsDisclosure({
 
           <div className={styles.labelDetailsSwap}>
             <span>Price:</span>
-            <strong>{priceText ?? "—"}</strong>
+            <span className={styles.dataDetails}>{priceText ?? "—"}</span>
           </div>
 
           <div className={styles.labelDetailsSwap}>
