@@ -91,12 +91,10 @@ export default function SwapForm() {
         if (!isFinite(v) || v <= 0) { setNetworkFeeText(null); return; }
         if (!bestPath || !lastOutBn) { setNetworkFeeText(null); return; }
 
-        // minOut à partir de la quote réelle
         const out = lastOutBn;
         const minOut = out - (out * BigInt(slippageBps) / 10_000n);
         const deadline = BigInt(Math.floor(Date.now()/1000) + 60 * 20);
 
-        // amountIn en base décimales de tokenIn
         const ti = getTokenByAddress(tokenIn);
         const amtIn = parseUnits(String(v), ti.decimals);
 
@@ -170,21 +168,26 @@ export default function SwapForm() {
           readOnly={false}
         />
 
-        <DetailsDisclosure
-          slippageBps={slippageBps}
-          onChangeSlippage={setSlippageBps}
-          priceText={priceText}
-          priceImpactPct={priceImpact}
-          networkFeeText={networkFeeText}
+        {amountIn && Number(amountIn) > 0 && (
+          <>
+            <DetailsDisclosure
+              slippageBps={slippageBps}
+              onChangeSlippage={setSlippageBps}
+              priceText={priceText}
+              priceImpactPct={priceImpact}
+              networkFeeText={networkFeeText}
+            />
+          </>
+        )}
+
+        <FlipButton
+          onClick={() => {
+            setTokenIn(tokenOut);
+            setTokenOut(tokenIn);
+            setAmountOut(""); // re-quote après flip
+          }} 
         />
       </div>
-      <FlipButton onClick={() => {
-        setTokenIn(tokenOut);
-        setTokenOut(tokenIn);
-        setAmountOut("");
-        setBestPath(null);
-        setLastOutBn(null);
-      }} />
       <div className={styles.inputSwapContainerTo}>
         <TokenField
           label="To"
@@ -195,11 +198,15 @@ export default function SwapForm() {
         />
       </div>
 
-      <ApproveAndSwap
-        connected={Boolean(account)}
-        disabled={!amountIn || Number(amountIn) <= 0}
-        onClick={onApproveAndSwap}
-      />
+      {amountIn && Number(amountIn) > 0 && (
+        <>
+          <ApproveAndSwap
+            connected={Boolean(account)}
+            disabled={!amountIn || Number(amountIn) <= 0}
+            onClick={onApproveAndSwap}
+          />
+        </>
+      )}
     </div>
   );
 }
