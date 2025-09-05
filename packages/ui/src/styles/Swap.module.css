@@ -93,6 +93,11 @@
     }
 }
 
+.inputSwapBody {
+    display: flex;
+    flex-direction: column;
+}
+
 .inputSwapContainer {
     background-color: var(--bg-btn);
     border: 1px solid var(--border-btn);
@@ -103,7 +108,8 @@
     font-weight: 500;
     letter-spacing: -0.08vh;
     font-size: 1.6vh;
-    margin-bottom: 1vh;
+    padding-bottom: 2vh;
+    margin-bottom: 0.6vh;
 }
 
 .inputSwapContainerTo {
@@ -116,7 +122,9 @@
     font-weight: 500;
     letter-spacing: -0.08vh;
     font-size: 1.6vh;
-    padding-bottom: 4vh;
+    padding-bottom: 2vh;
+    position: relative;
+    margin-top: 0.6vh;
 }
 
 .headerInput {
@@ -148,6 +156,7 @@
     align-items: start;
     justify-content: space-between;
     padding-top: 1.2vh;
+    margin-top: 1vh;
 }
 
 .inputSwap {
@@ -158,15 +167,17 @@
     color: var(--text-color);
     outline: none;
     padding-left: 2vh;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
     font-weight: 500;
-    letter-spacing: -0.3vh;
+    letter-spacing: -0.2vh;
 }
 
 .inputSwap::placeholder {
     color: var(--placeholder);
     opacity: 1;
 }
-  
 
 .flipBtn {
     background-color: var(--bg-btn);
@@ -174,19 +185,22 @@
     box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
     margin-left: auto;
     margin-right: auto;
-    height: 5vh;
-    width: 5vh;
+    height: 5.4vh;
+    width: 5.4vh;
     cursor: pointer;
-    border-radius: 1vh;
+    border-radius: 1.3vh;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    transform: translateY(50%);
+    position: fixed;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    transform-origin: center;
 }
 
 .flipBtn:active {
-    transform: translateY(50%) scale(0.96);
+    transform: translate(-50%, -100%) scale(0.96);
 }
 
 .flipBtn:hover {
@@ -199,13 +213,15 @@
 }
 
 .swapBtn {
-    background-color: var(--bg-btn);
-    border: 1px solid var(--border-btn);
-    box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
+
     color: var(--text-color);
     height: 6vh;
     width: 100%;
     border-radius: 2.5vh;
+    margin-top: 1.4vh;
+    z-index: 1000;
+    cursor: pointer;
+    background-color: red;
 }
 
 .textBtnSwap {
@@ -227,13 +243,16 @@
     height: 20px;
     padding-left: 2vh;
     padding-right: 2vh;
+    margin-top: 0.4vh;
   }
 
   .badgeBalance {
-    font-size: 12px;
+    font-size: 1.5vh;
     cursor: pointer;
     user-select: none;
     padding-right: 1vh;
+    margin-top: auto;
+    margin-bottom: auto;
   }
 
   .amountBalance {
@@ -242,3 +261,14 @@
   }
 
   .badgeBalance:hover { opacity: 1; text-decoration: underline; }
+
+  .balance {
+    display: flex;
+    align-items: center;
+    gap: 0.3vh;
+    font-size: 2vh;
+  }
+
+  .dollarFont {
+    color: var(--placeholder);
+  }

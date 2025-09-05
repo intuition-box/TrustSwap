@@ -162,7 +162,7 @@ export default function SwapForm() {
 
 
   return (
-    <div>
+    <div className={styles.inputSwapBody}>
       <div className={styles.inputSwapContainer}>
 
         <TokenField
@@ -174,7 +174,10 @@ export default function SwapForm() {
           readOnly={false}
         />
 
-        {amountIn && Number(amountIn) > 0 && (
+
+
+      </div>
+      {amountIn && Number(amountIn) > 0 && (
           <>
             <DetailsDisclosure
               slippageBps={slippageBps}
@@ -185,8 +188,8 @@ export default function SwapForm() {
             />
           </>
         )}
-
-        <FlipButton
+      <div className={styles.inputSwapContainerTo}>
+      <FlipButton
           onClick={() => {
             setTokenIn(tokenOut);
             setTokenOut(tokenIn);
@@ -195,8 +198,7 @@ export default function SwapForm() {
             setLastOutBn(null);
           }} 
         />
-      </div>
-      <div className={styles.inputSwapContainerTo}>
+
         <TokenField
           label="To"
           token={tokenOut}

@@ -1,20 +1,23 @@
 .sectionDetails {
-    width: 100%;
+    width: 98%;
     display: flex;
     flex-direction: column;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .btnDetails {
-    margin-left: auto;
     background-color: transparent;
     border: none;
     color: var(--text-grey);
-    margin-bottom: 1vh;
-    margin-top: 1vh;
-    margin-right: 1vh;
     cursor: pointer;
     font-size: 1.4vh;
     letter-spacing: 0;
+    z-index: 1000;
+    transform-origin: center;
+    border-radius: 2vh;
+    margin-right: auto;
 }
 
 .detailsContainer {
@@ -28,18 +31,14 @@
     font-weight: 400;
     margin-bottom: 0;
     position: relative;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
 }
 
-.lineDetails {
-    width: 90%;
-    height: 0.1vh;
-    background-color: #242424;
-    margin-top: 0.4vh;
-    margin-bottom: 1vh;
-    margin-left: auto;
-    margin-right: auto;
+.labelDetails {
+    color: var(--text-grey);
+    letter-spacing: -0.07vh;
 }
-
 
 .labelDetailsSwapSlippage {
     display: flex;

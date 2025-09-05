@@ -24,15 +24,14 @@ export default function DetailsDisclosure({
 
       {open && (
         <div className={styles.detailsContainer}>
-          <div className={styles.lineDetails}></div>
 
           <div className={styles.labelDetailsSwap}>
-            <span>Price:</span>
+            <span className={styles.labelDetails}>Price:</span>
             <span className={styles.dataDetails}>{priceText ?? "—"}</span>
           </div>
 
           <div className={styles.labelDetailsSwap}>
-            <span>Price impact:</span>
+            <span className={styles.labelDetails}>Price impact:</span>
             <strong
               style={{ color: typeof priceImpactPct === "number" && priceImpactPct > 1 ? "#ef4444" : "inherit" }}
             >
@@ -41,12 +40,12 @@ export default function DetailsDisclosure({
           </div>
 
           <div className={styles.labelDetailsSwap}>
-            <span>Network fee (est.):</span>
+            <span className={styles.labelDetails}>Network fee (est.):</span>
             <strong>{networkFeeText ?? "—"}</strong>
           </div>
 
           <div className={styles.labelDetailsSwapSlippage}>
-            <span>Slippage:</span>
+            <span className={styles.labelDetails}>Slippage:</span>
             <SlippagePopover valueBps={slippageBps} onChangeBps={onChangeSlippage} />
           </div>
         </div>
