@@ -4,6 +4,7 @@ import { TOKENLIST } from "../../../lib/tokens";
 import styles from "@ui/styles/TokenSelector.module.css";
 import searchIcone from "../../../assets/search.png";
 import arrowIcone from "../../../assets/arrow-selector.png";
+import volIcone from "../../../assets/vol.png";
 import { getTokenIcon } from "../../../lib/getTokenIcon";
 
 export default function TokenSelector({
@@ -63,6 +64,15 @@ export default function TokenSelector({
             <span className={styles.placeholderInput}>
               Search by token, address ...
             </span>
+          </span>
+
+          <span className={styles.titleSearchToken}>
+          <img
+              src={volIcone}
+              alt="search"
+              className={styles.volIcone}
+            />
+          Tokens by 24h Volume
           </span>
           {TOKENLIST.map((t) => (
             <div

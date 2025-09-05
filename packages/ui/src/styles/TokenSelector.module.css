@@ -68,6 +68,21 @@
   .arrowIcone {
     width: 2.5vh;
   }
+
+  .titleSearchToken {
+    display: flex;
+    align-items: end;
+    width: 90%;
+    gap: 0.5vh;
+    margin-top: 1.5vh;
+    font-size: 1.8vh;
+    font-weight: 400;
+  }
+
+  .volIcone {
+    width: 2vh;
+    margin-bottom: 0.4vh;
+  }
   
   .dropdown {
     position: absolute;
