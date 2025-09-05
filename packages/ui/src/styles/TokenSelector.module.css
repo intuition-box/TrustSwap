@@ -1,12 +1,72 @@
-.button {
-    flex: 1;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #333;
-    background: rgba(0, 0, 0, 0.1);
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
+.btnTokenSelector {
+  height: 5.4vh;
+  border-radius: 1.5vh;
+  margin-right: 2vh;
+  background-color: transparent;
+  border: 1px solid var(--border-grey);
+  color: var(--text-color);
+  font-weight: 500;
+  font-size: 1.9vh;
+  letter-spacing: -0.08vh;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3vh;
+  padding-left: 1vh;
+  position: relative;
+  }
+
+  .btnTokenSelector:hover {
+    background-color: var(--hover-selector);
+  }
+
+  .btnTokenSelector:active {
+    transform: scale(0.97);
+  }
+
+  .btnTokenSelector:hover .lineSelectorTop {
+    left: 60%;
+    transition: 0.3s;
+    box-shadow: 0px -2px 10px var(--border-anim-selector);
+  }
+
+  .btnTokenSelector:hover .lineSelectorBottom {
+    left: 40%;
+    transition: 0.3s;
+    box-shadow: 0px 2px 10px var(--border-anim-selector);
+  }
+
+  .lineSelectorTop {
+    content: "";
+    position: absolute;
+    top: -1px;
+    height: 1px;
+    width: 40%;
+    left: 50%;
+    transition: 0.3s;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, var(--border-grey) 0%, var(--border-anim-selector) 50%, var(--border-grey) 100%);
+  }
+
+  .lineSelectorBottom {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    height: 1px;
+    width: 40%;
+    left: 50%;
+    transition: 0.3s;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, var(--border-grey) 0%, var(--border-anim-selector) 50%, var(--border-grey) 100%);
+  }
+
+  .tokenIcon {
+    width: 3vh;
+    margin-right: 0.3vh;
+  }
+
+  .arrowIcone {
+    width: 2.5vh;
   }
   
   .dropdown {
