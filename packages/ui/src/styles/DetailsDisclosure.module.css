@@ -55,3 +55,30 @@
 .dataDetails {
     color: var(--text-color);
 }
+
+.containerSlippage {
+    display: flex;
+    align-items: center;
+}
+
+.inputSlippage {
+    background-color: var(--bg-slippage);
+    border: none;
+    outline: none;
+    color: var(--text-color);
+    width: 5vh;
+    border-radius: 0.7vh;
+    padding: 0.3vh;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: 500;
+    text-align: right;
+    font-size: 1.9vh;
+    margin-right: 0.4vh;
+    border: clamp(1px, 0.1vh, 2px) solid var(--border-grey);
+}
+
+.percent {
+    color: var(--text-grey);
+}
