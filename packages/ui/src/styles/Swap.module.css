@@ -220,3 +220,25 @@
     color: transparent;
   }
   
+  .bodyBalance {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 20px;
+    padding-left: 2vh;
+    padding-right: 2vh;
+  }
+
+  .badgeBalance {
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+    padding-right: 1vh;
+  }
+
+  .amountBalance {
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  .badgeBalance:hover { opacity: 1; text-decoration: underline; }

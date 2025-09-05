@@ -5,6 +5,7 @@ import AmountInput from "./AmountInput";
 import styles from "@ui/styles/Swap.module.css";
 import walletIcone from "../../../assets/wallet-icone.png";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
+import TokenBalanceBadge from "./TokenBalanceBadge";
 
 type TokenFieldProps = {
   label: string;
@@ -55,10 +56,15 @@ export default function TokenField({
     [wallets]
   );
 
-  const addr =
+  const rawAddr =
     primary?.address ??
     user?.wallet?.address ??
     user?.linkedAccounts?.find((a) => (a as any).address)?.address;
+
+  // Cast "sûr" en Address uniquement si format valide 0x + 40 hex
+  const owner: Address | undefined = useMemo(() => {
+    return /^0x[a-fA-F0-9]{40}$/.test(rawAddr ?? "") ? (rawAddr as Address) : undefined;
+  }, [rawAddr]);
 
   const shouldShowWallet =
     typeof showWalletOn === "function"
@@ -66,8 +72,8 @@ export default function TokenField({
       : showWalletOn.map((s) => s.toLowerCase()).includes(label.toLowerCase());
 
   const onCopy = async () => {
-    if (!addr) return;
-    const ok = await copyToClipboard(addr);
+    if (!rawAddr) return;
+    const ok = await copyToClipboard(rawAddr);
     if (ok) {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 600);
@@ -86,7 +92,7 @@ export default function TokenField({
       <div className={styles.headerInput}>
         <span>{label}</span>
 
-        {shouldShowWallet && addr && (
+        {shouldShowWallet && owner && (
           <span className={styles.wallet}>
             <img
               src={walletIcone}
@@ -102,7 +108,7 @@ export default function TokenField({
               onKeyDown={onKeyCopy}
               className={styles.walletAddress}
             >
-              {copied ? "Copied!" : shortAddr(addr)}
+              {copied ? "Copied!" : shortAddr(owner)}
             </span>
           </span>
         )}
@@ -111,11 +117,22 @@ export default function TokenField({
       <div className={styles.bodyInput}>
         <AmountInput
           value={amount ?? ""}
-          onChange={onAmountChange}
+          onChange={onAmountChange ?? (() => {})}
           readOnly={readOnly}
           placeholder={readOnly ? "-" : "0.00000"}
         />
+
         <TokenSelector value={token} onChange={onTokenChange} />
+      </div>
+
+      <div className={styles.bodyBalance}>
+        <p>$ 1700</p>
+        <TokenBalanceBadge
+          key={token}  
+          token={token}
+          owner={owner}
+          onClickMax={(val) => onAmountChange?.(val)}
+        />
       </div>
     </div>
   );
