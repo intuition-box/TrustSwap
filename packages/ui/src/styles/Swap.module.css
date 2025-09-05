@@ -46,13 +46,14 @@
     position: relative;
 }
 
-.swapCard::before {
+.swapCardLineTop {
     content: "";
     position: absolute;
-    top: -0.05vh;
+    top: -1px;
     right: 50%;
     transform: translateX(-50%);
     height: 0.05vh;
+    min-height: 1px;
     width: 30%;
     background: linear-gradient(90deg, var(--border-grey), var(--border-shadow-anim), var(--border-grey));
     box-shadow: 0 -2vh 6vh 2vh var(--shadow-grey);
@@ -69,13 +70,14 @@
     }
 }
 
-.swapCard::after {
+.swapCardLineBottom {
     content: "";
     position: absolute;
-    bottom: -0.05vh;
+    bottom: -1px;
     left: 50%;
     transform: translateX(-50%);
     height: 0.05vh;
+    min-height: 1px;
     width: 30%;
     background: linear-gradient(90deg, var(--border-grey), var(--border-shadow-anim), var(--border-grey));
     z-index: 10;
@@ -143,7 +145,8 @@
 
 .bodyInput {
     display: flex;
-    align-items: center;
+    align-items: start;
+    justify-content: space-between;
     padding-top: 1.2vh;
 }
 
