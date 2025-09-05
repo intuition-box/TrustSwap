@@ -3,7 +3,7 @@ import { useTokenBalance } from "../hooks/useTokenBalance";
 import styles from "@ui/styles/Swap.module.css";
 
 // helper pour couper les décimales sans convertir en Number
-function trimDecimals(value: string, decimals = 4) {
+function trimDecimals(value: string, decimals = 5) {
   if (!value.includes(".")) return value;
   const [int, frac] = value.split(".");
   return frac.length > decimals ? `${int}.${frac.slice(0, decimals)}` : value;
@@ -22,13 +22,14 @@ export default function TokenBalanceBadge({
 
   if (!owner || !token) return null;
 
-  const display = formatted ? trimDecimals(formatted, 4) : "0";
+  // valeur tronquée à 5 décimales
+  const display = formatted ? trimDecimals(formatted, 5) : "0";
 
   return (
     <span
       className={styles.badgeBalance}
       title="Balance"
-      onClick={() => formatted && onClickMax?.(formatted)}
+      onClick={() => formatted && onClickMax?.(trimDecimals(formatted, 5))}
       role={onClickMax ? "button" : undefined}
     >
       {isLoading ? (
@@ -36,9 +37,7 @@ export default function TokenBalanceBadge({
       ) : (
         <>
           <span className={styles.label}>Balance: </span>
-          <span className={styles.amountBalance}>
-            {display}
-          </span>
+          <span className={styles.amountBalance}>{display}</span>
         </>
       )}
     </span>

@@ -1,5 +1,6 @@
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useDisconnect as useWagmiDisconnect } from 'wagmi';
+import styles from "../styles/Layout.module.css";
 
 export default function PrivyConnect() {
   const { ready, authenticated, login, logout, user } = usePrivy();
@@ -33,13 +34,17 @@ export default function PrivyConnect() {
   }
 
   if (!authenticated) {
-    return <button onClick={login}>Connect Wallet</button>;
+    return <button onClick={login} className={styles.connectWalletBtn}>
+      <span className={styles.gradientText}>Connect Wallet</span>
+    </button>;
   }
 
   return (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-      <span>{addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : 'Signed in'}</span>
-      <button onClick={disconnectEverywhere}>Disconnect</button>
+    <div>
+      <button onClick={disconnectEverywhere} className={styles.connectWalletBtn}>
+      <span className={styles.gradientText}>Disconnect</span>
+
+      </button>
     </div>
   );
 }
