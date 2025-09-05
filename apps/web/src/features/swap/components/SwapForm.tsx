@@ -2,7 +2,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Address } from "viem";
 import { useAccount } from "wagmi";
-import { getDefaultPair, getTokenByAddress, NATIVE_PLACEHOLDER } from "../../../lib/tokens";
+import {
+  getDefaultPair,
+  getTokenByAddress,
+  NATIVE_PLACEHOLDER,
+} from "../../../lib/tokens";
 import { useQuoteDetails } from "../hooks/useQuoteDetails";
 import { useAllowance } from "../hooks/useAllowance";
 import { useApprove } from "../hooks/useApprove";
@@ -19,13 +23,14 @@ import DetailsDisclosure from "./DetailsDisclosure";
 import { addresses } from "@trustswap/sdk";
 
 // helpers
-const isNative = (a?: Address) => !!a && a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
+const isNative = (a?: Address) =>
+  !!a && a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
 
 export default function SwapForm() {
   const { address } = useAccount();
 
   const defaults = useMemo(() => getDefaultPair(), []);
-  const [tokenIn, setTokenIn]   = useState<Address>(defaults.tokenIn.address);
+  const [tokenIn, setTokenIn] = useState<Address>(defaults.tokenIn.address);
   const [tokenOut, setTokenOut] = useState<Address>(defaults.tokenOut.address);
   const [amountIn, setAmountIn] = useState<string>("");
   const [amountOut, setAmountOut] = useState<string>("");
@@ -33,14 +38,16 @@ export default function SwapForm() {
   const [slippageBps, setSlippageBps] = useState<number>(50); // 0.50%
   const [networkFeeText, setNetworkFeeText] = useState<string | null>(null);
 
-  const quoteDetails = useQuoteDetails(); 
+  const quoteDetails = useQuoteDetails();
   const allowance = useAllowance();
   const approve = useApprove();
   const doSwap = useSwap();
   const fetchPair = usePairData();
   const estimateNetworkFee = useGasEstimate();
 
-  const [pairData, setPairData] = useState<Awaited<ReturnType<typeof fetchPair>>>(null);
+  const [pairData, setPairData] = useState<
+    Awaited<ReturnType<typeof fetchPair>>
+  >(null);
 
   // NEW: on garde en state le "best path" et le outBn pour réutiliser partout
   const [bestPath, setBestPath] = useState<Address[] | null>(null);
@@ -48,11 +55,15 @@ export default function SwapForm() {
 
   // Quote auto (debounce + null)
   useEffect(() => {
-    if (!amountIn || Number(amountIn) <= 0) { setAmountOut(""); setBestPath(null); setLastOutBn(null); return; }
+    if (!amountIn || Number(amountIn) <= 0) {
+      setAmountOut("");
+      setBestPath(null);
+      setLastOutBn(null);
+      return;
+    }
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
-        // CHANGE: utilise la version "details"
         const qd = await quoteDetails(tokenIn, tokenOut, amountIn);
         if (cancelled) return;
         if (!qd) {
@@ -60,43 +71,65 @@ export default function SwapForm() {
           setBestPath(null);
           setLastOutBn(null);
         } else {
-          setAmountOut(qd.amountOutFormatted);
+          // tronquer à 5 décimales
+          const formatted = Number(qd.amountOutFormatted);
+          setAmountOut(
+            isNaN(formatted) ? "" : formatted.toFixed(5).replace(/\.?0+$/, "")
+          );
           setBestPath(qd.path);
           setLastOutBn(qd.amountOutBn);
         }
       } catch {
-        if (!cancelled) { setAmountOut(""); setBestPath(null); setLastOutBn(null); }
+        if (!cancelled) {
+          setAmountOut("");
+          setBestPath(null);
+          setLastOutBn(null);
+        }
       }
     }, 250);
-    return () => { cancelled = true; clearTimeout(timer); };
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [tokenIn, tokenOut, amountIn, quoteDetails]);
 
-  // Pair data (token0/token1/reserves) — OK si ton hook wrap le natif en interne
+  // Pair data (token0/token1/reserves)
   useEffect(() => {
-  let alive = true;
-  (async () => {
-    const pd = await fetchPair(tokenIn, tokenOut);
-    if (alive) {
-      setPairData(pd);
-      if (!pd) console.warn("[pairData] no LP for", tokenIn, tokenOut);
-    }
-  })();
-  return () => { alive = false; };
-}, [tokenIn, tokenOut]);
+    let alive = true;
+    (async () => {
+      const pd = await fetchPair(tokenIn, tokenOut);
+      if (alive) {
+        setPairData(pd);
+        if (!pd) console.warn("[pairData] no LP for", tokenIn, tokenOut);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [tokenIn, tokenOut]);
 
-  // Estimation network fee — CHANGE: réutilise bestPath + outBn
+  // Estimation network fee
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        if (!address) { setNetworkFeeText(null); return; }
+        if (!address) {
+          setNetworkFeeText(null);
+          return;
+        }
         const v = Number(String(amountIn).replace(",", "."));
-        if (!isFinite(v) || v <= 0) { setNetworkFeeText(null); return; }
-        if (!bestPath || !lastOutBn) { setNetworkFeeText(null); return; }
+        if (!isFinite(v) || v <= 0) {
+          setNetworkFeeText(null);
+          return;
+        }
+        if (!bestPath || !lastOutBn) {
+          setNetworkFeeText(null);
+          return;
+        }
 
         const out = lastOutBn;
-        const minOut = out - (out * BigInt(slippageBps) / 10_000n);
-        const deadline = BigInt(Math.floor(Date.now()/1000) + 60 * 20);
+        const minOut = out - (out * BigInt(slippageBps)) / 10_000n;
+        const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 20);
 
         const ti = getTokenByAddress(tokenIn);
         const amtIn = parseUnits(String(v), ti.decimals);
@@ -105,7 +138,7 @@ export default function SwapForm() {
           account: address,
           amountIn: amtIn,
           minOut,
-          path: bestPath,         // CHANGE
+          path: bestPath,
           to: address,
           deadline,
           nativeSymbol: "tTRUST",
@@ -116,18 +149,37 @@ export default function SwapForm() {
         if (alive) setNetworkFeeText(null);
       }
     })();
-    return () => { alive = false; };
-  }, [address, tokenIn, tokenOut, amountIn, slippageBps, bestPath, lastOutBn, estimateNetworkFee]);
+    return () => {
+      alive = false;
+    };
+  }, [
+    address,
+    tokenIn,
+    tokenOut,
+    amountIn,
+    slippageBps,
+    bestPath,
+    lastOutBn,
+    estimateNetworkFee,
+  ]);
 
   // Détails
   const ti = getTokenByAddress(tokenIn);
   const to = getTokenByAddress(tokenOut);
   const priceText =
     Number(amountIn) > 0 && Number(amountOut) > 0
-      ? `1 ${ti.symbol} ≈ ${(Number(amountOut) / Number(amountIn)).toFixed(6)} ${to.symbol}`
+      ? `1 ${ti.symbol} ≈ ${(
+          Number(amountOut) / Number(amountIn)
+        ).toFixed(6)} ${to.symbol}`
       : undefined;
 
-  const priceImpact = computePriceImpactPct(tokenIn, tokenOut, amountIn, amountOut, pairData);
+  const priceImpact = computePriceImpactPct(
+    tokenIn,
+    tokenOut,
+    amountIn,
+    amountOut,
+    pairData
+  );
 
   async function onApproveAndSwap() {
     if (!address) return;
@@ -135,72 +187,86 @@ export default function SwapForm() {
     const v = Number(String(amountIn).replace(",", "."));
     if (!isFinite(v) || v <= 0) return;
 
-    // On s'assure d'avoir la quote/path à jour
     const qd = await quoteDetails(tokenIn, tokenOut, String(v));
     if (!qd) throw new Error("No route/liquidity for this pair");
 
     const amtIn = parseUnits(String(v), ti.decimals);
     const out = qd.amountOutBn;
-    const minOut = out - (out * BigInt(slippageBps) / 10_000n);
-    const deadline = Math.floor(Date.now()/1000) + 60 * 20;
-    if (!address) { setNetworkFeeText(null); /* console.log("no account"); */ return; }
-    if (!isFinite(v) || v <= 0) { setNetworkFeeText(null); /* console.log("no amount"); */ return; }
-    if (!bestPath || !lastOutBn) { setNetworkFeeText(null); /* console.log("no route/quote yet"); */ return; }
+    const minOut = out - (out * BigInt(slippageBps)) / 10_000n;
+    const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
 
-    // Approve seulement si tokenIn est ERC-20
+    if (!address) {
+      setNetworkFeeText(null);
+      return;
+    }
+    if (!isFinite(v) || v <= 0) {
+      setNetworkFeeText(null);
+      return;
+    }
+    if (!bestPath || !lastOutBn) {
+      setNetworkFeeText(null);
+      return;
+    }
+
     if (!isNative(tokenIn) && address) {
-      const curr = await allowance(address, tokenIn, addresses.UniswapV2Router02 as Address);
+      const curr = await allowance(
+        address,
+        tokenIn,
+        addresses.UniswapV2Router02 as Address
+      );
       if (curr < amtIn) {
         await approve(tokenIn, addresses.UniswapV2Router02 as Address, amtIn);
       }
     }
 
-    // Swap — ton hook `useSwap` gère natif/erc20 + mapping interne
     if (!address) throw new Error("No connected account");
     await doSwap(address, tokenIn, tokenOut, String(v), minOut, deadline);
   }
 
-
   return (
-    <div>
+    <div className={styles.inputSwapBody}>
       <div className={styles.inputSwapContainer}>
-
         <TokenField
           label="From"
           token={tokenIn}
-          onTokenChange={(a) => { setTokenIn(a); }}
+          onTokenChange={(a) => {
+            setTokenIn(a);
+          }}
           amount={amountIn}
           onAmountChange={setAmountIn}
           readOnly={false}
         />
+      </div>
 
-        {amountIn && Number(amountIn) > 0 && (
-          <>
-            <DetailsDisclosure
-              slippageBps={slippageBps}
-              onChangeSlippage={setSlippageBps}
-              priceText={priceText}
-              priceImpactPct={priceImpact}
-              networkFeeText={networkFeeText}
-            />
-          </>
-        )}
+      {amountIn && Number(amountIn) > 0 && (
+        <>
+          <DetailsDisclosure
+            slippageBps={slippageBps}
+            onChangeSlippage={setSlippageBps}
+            priceText={priceText}
+            priceImpactPct={priceImpact}
+            networkFeeText={networkFeeText}
+          />
+        </>
+      )}
 
+      <div className={styles.inputSwapContainerTo}>
         <FlipButton
           onClick={() => {
             setTokenIn(tokenOut);
             setTokenOut(tokenIn);
-            setAmountOut(""); 
+            setAmountOut("");
             setBestPath(null);
             setLastOutBn(null);
-          }} 
+          }}
         />
-      </div>
-      <div className={styles.inputSwapContainerTo}>
+
         <TokenField
           label="To"
           token={tokenOut}
-          onTokenChange={(a) => { setTokenOut(a); }}
+          onTokenChange={(a) => {
+            setTokenOut(a);
+          }}
           amount={amountOut}
           readOnly
         />

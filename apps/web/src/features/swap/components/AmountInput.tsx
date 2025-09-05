@@ -21,11 +21,32 @@ export default function AmountInput({
     }
   }, [readOnly]);
 
+  function handleChange(raw: string) {
+    // Autoriser seulement chiffres + point/virgule
+    let cleaned = raw.replace(/[^0-9.,]/g, "");
+
+    // Normaliser virgule → point
+    cleaned = cleaned.replace(",", ".");
+
+    // Limiter à une seule virgule/point
+    const parts = cleaned.split(".");
+    if (parts.length > 2) {
+      cleaned = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    // Limiter à 5 décimales
+    if (parts[1]) {
+      cleaned = parts[0] + "." + parts[1].slice(0, 5);
+    }
+
+    onChange?.(cleaned);
+  }
+
   return (
     <input
       ref={inputRef}
       value={value}
-      onChange={(e) => onChange?.(e.target.value)}
+      onChange={(e) => handleChange(e.target.value)}
       readOnly={readOnly}
       placeholder={placeholder}
       inputMode="decimal"

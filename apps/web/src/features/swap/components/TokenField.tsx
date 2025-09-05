@@ -126,7 +126,10 @@ export default function TokenField({
       </div>
 
       <div className={styles.bodyBalance}>
-        <p>$ 1700</p>
+        <span className={styles.balance}>
+          <span className={styles.dollarFont}>$</span>
+          <span className={styles.valueBalance}>1700.93</span>
+        </span>
         <TokenBalanceBadge
           key={token}  
           token={token}
