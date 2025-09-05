@@ -3,7 +3,7 @@
   border-radius: 1.5vh;
   margin-right: 2vh;
   background-color: transparent;
-  border: 1px solid var(--border-grey);
+  border: clamp(1px, 0.1vh, 2px) solid var(--border-grey);
   color: var(--text-color);
   font-weight: 500;
   font-size: 1.9vh;
@@ -40,7 +40,8 @@
     content: "";
     position: absolute;
     top: -1px;
-    height: 1px;
+    height: 0.1vh;
+    min-height: 1px;
     width: 40%;
     left: 50%;
     transition: 0.3s;
@@ -52,7 +53,8 @@
     content: "";
     position: absolute;
     bottom: -1px;
-    height: 1px;
+    height: 0.1vh;
+    min-height: 1px;
     width: 40%;
     left: 50%;
     transition: 0.3s;
