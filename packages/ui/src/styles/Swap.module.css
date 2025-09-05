@@ -230,9 +230,10 @@
   }
 
   .badgeBalance {
-    font-size: 14px;
+    font-size: 12px;
     cursor: pointer;
     user-select: none;
+    padding-right: 1vh;
   }
 
   .amountBalance {
