@@ -122,14 +122,16 @@ export default function TokenField({
           placeholder={readOnly ? "-" : "0.00000"}
         />
 
-        {/* Balance cliquable (remplit l’input) */}
+        <TokenSelector value={token} onChange={onTokenChange} />
+      </div>
+
+      <div className={styles.bodyBalance}>
+        <p>$ 1700</p>
         <TokenBalanceBadge
           token={token}
           owner={owner}
           onClickMax={(val) => onAmountChange?.(val)}
         />
-
-        <TokenSelector value={token} onChange={onTokenChange} />
       </div>
     </div>
   );
