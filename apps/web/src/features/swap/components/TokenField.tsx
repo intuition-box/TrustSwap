@@ -128,6 +128,7 @@ export default function TokenField({
       <div className={styles.bodyBalance}>
         <p>$ 1700</p>
         <TokenBalanceBadge
+          key={token}  
           token={token}
           owner={owner}
           onClickMax={(val) => onAmountChange?.(val)}

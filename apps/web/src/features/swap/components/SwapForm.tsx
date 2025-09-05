@@ -22,7 +22,7 @@ import { addresses } from "@trustswap/sdk";
 const isNative = (a?: Address) => !!a && a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
 
 export default function SwapForm() {
-  const { address: account  } = useAccount();
+  const { address } = useAccount();
 
   const defaults = useMemo(() => getDefaultPair(), []);
   const [tokenIn, setTokenIn]   = useState<Address>(defaults.tokenIn.address);
@@ -86,7 +86,7 @@ export default function SwapForm() {
     let alive = true;
     (async () => {
       try {
-        if (!account) { setNetworkFeeText(null); return; }
+        if (!address) { setNetworkFeeText(null); return; }
         const v = Number(String(amountIn).replace(",", "."));
         if (!isFinite(v) || v <= 0) { setNetworkFeeText(null); return; }
         if (!bestPath || !lastOutBn) { setNetworkFeeText(null); return; }
@@ -99,11 +99,11 @@ export default function SwapForm() {
         const amtIn = parseUnits(String(v), ti.decimals);
 
         const feeText = await estimateNetworkFee({
-          account: account,
+          account: address,
           amountIn: amtIn,
           minOut,
           path: bestPath,         // CHANGE
-          to: account,
+          to: address,
           deadline,
           nativeSymbol: "tTRUST",
         });
@@ -114,7 +114,7 @@ export default function SwapForm() {
       }
     })();
     return () => { alive = false; };
-  }, [account, tokenIn, tokenOut, amountIn, slippageBps, bestPath, lastOutBn, estimateNetworkFee]);
+  }, [address, tokenIn, tokenOut, amountIn, slippageBps, bestPath, lastOutBn, estimateNetworkFee]);
 
   // Détails
   const ti = getTokenByAddress(tokenIn);
@@ -127,7 +127,7 @@ export default function SwapForm() {
   const priceImpact = computePriceImpactPct(tokenIn, tokenOut, amountIn, amountOut, pairData);
 
   async function onApproveAndSwap() {
-    if (!account) return;
+    if (!address) return;
 
     const v = Number(String(amountIn).replace(",", "."));
     if (!isFinite(v) || v <= 0) return;
@@ -142,16 +142,16 @@ export default function SwapForm() {
     const deadline = Math.floor(Date.now()/1000) + 60 * 20;
 
     // Approve seulement si tokenIn est ERC-20
-    if (!isNative(tokenIn) && account) {
-      const curr = await allowance(account, tokenIn, addresses.UniswapV2Router02 as Address);
+    if (!isNative(tokenIn) && address) {
+      const curr = await allowance(address, tokenIn, addresses.UniswapV2Router02 as Address);
       if (curr < amtIn) {
         await approve(tokenIn, addresses.UniswapV2Router02 as Address, amtIn);
       }
     }
 
     // Swap — ton hook `useSwap` gère natif/erc20 + mapping interne
-    if (!account) throw new Error("No connected account");
-    await doSwap(account, tokenIn, tokenOut, String(v), minOut, deadline);
+    if (!address) throw new Error("No connected account");
+    await doSwap(address, tokenIn, tokenOut, String(v), minOut, deadline);
   }
 
 
@@ -201,7 +201,7 @@ export default function SwapForm() {
       {amountIn && Number(amountIn) > 0 && (
         <>
           <ApproveAndSwap
-            connected={Boolean(account)}
+            connected={Boolean(address)}
             disabled={!amountIn || Number(amountIn) <= 0}
             onClick={onApproveAndSwap}
           />
