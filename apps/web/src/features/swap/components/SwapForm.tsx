@@ -1,39 +1,39 @@
+// SwapForm.tsx
 import { useEffect, useMemo, useState } from "react";
 import type { Address } from "viem";
-import { useAccount, usePublicClient } from "wagmi";
-import { getDefaultPair, getTokenByAddress } from "../../../lib/tokens";
-import { useQuote } from "../hooks/useQuote";
+import { useAccount } from "wagmi";
+import { getDefaultPair, getTokenByAddress, NATIVE_PLACEHOLDER } from "../../../lib/tokens";
+import { useQuoteDetails } from "../hooks/useQuoteDetails";
 import { useAllowance } from "../hooks/useAllowance";
 import { useApprove } from "../hooks/useApprove";
 import { useSwap } from "../hooks/useSwap";
 import { usePairData } from "../hooks/usePairData";
 import { computePriceImpactPct } from "../hooks/usePriceImpact";
 import { useGasEstimate } from "../hooks/useGasEstimate";
-import { abi, addresses } from "@trustswap/sdk";
-
+import { parseUnits } from "viem";
+import styles from "@ui/styles/Swap.module.css";
 import TokenField from "./TokenField";
 import FlipButton from "./FlipButton";
-import Summary from "./Summary";
 import ApproveAndSwap from "./ApproveAndSwap";
 import DetailsDisclosure from "./DetailsDisclosure";
-import { parseUnits, formatUnits } from "viem";
+import { addresses } from "@trustswap/sdk";
 
-import styles from "@ui/styles/Swap.module.css";
+// helpers
+const isNative = (a?: Address) => !!a && a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
 
 export default function SwapForm() {
-  const { address } = useAccount();
-  const pc = usePublicClient();
+  const { address: account  } = useAccount();
 
   const defaults = useMemo(() => getDefaultPair(), []);
-  const [tokenIn, setTokenIn] = useState<Address>(defaults.tokenIn.address);
+  const [tokenIn, setTokenIn]   = useState<Address>(defaults.tokenIn.address);
   const [tokenOut, setTokenOut] = useState<Address>(defaults.tokenOut.address);
-  const [amountIn, setAmountIn] = useState<string>("");
+  const [amountIn, setAmountIn] = useState<string>("1");
   const [amountOut, setAmountOut] = useState<string>("");
 
   const [slippageBps, setSlippageBps] = useState<number>(50); // 0.50%
   const [networkFeeText, setNetworkFeeText] = useState<string | null>(null);
 
-  const quote = useQuote();
+  const quoteDetails = useQuoteDetails(); 
   const allowance = useAllowance();
   const approve = useApprove();
   const doSwap = useSwap();
@@ -42,79 +42,81 @@ export default function SwapForm() {
 
   const [pairData, setPairData] = useState<Awaited<ReturnType<typeof fetchPair>>>(null);
 
-  // Quote auto
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        if (!amountIn || Number(amountIn) <= 0) {
-          setAmountOut("");
-          return;
-        }
-        const q = await quote(tokenIn, tokenOut, amountIn);
-        if (alive) setAmountOut(q);
-      } catch {
-        if (alive) setAmountOut("");
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [tokenIn, tokenOut, amountIn]); // eslint-disable-line
+  // NEW: on garde en state le "best path" et le outBn pour réutiliser partout
+  const [bestPath, setBestPath] = useState<Address[] | null>(null);
+  const [lastOutBn, setLastOutBn] = useState<bigint | null>(null);
 
-  // Pair data (token0/token1/reserves)
+  // Quote auto (debounce + null)
+  useEffect(() => {
+    if (!amountIn || Number(amountIn) <= 0) { setAmountOut(""); setBestPath(null); setLastOutBn(null); return; }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        // CHANGE: utilise la version "details"
+        const qd = await quoteDetails(tokenIn, tokenOut, amountIn);
+        if (cancelled) return;
+        if (!qd) {
+          setAmountOut("");
+          setBestPath(null);
+          setLastOutBn(null);
+        } else {
+          setAmountOut(qd.amountOutFormatted);
+          setBestPath(qd.path);
+          setLastOutBn(qd.amountOutBn);
+        }
+      } catch {
+        if (!cancelled) { setAmountOut(""); setBestPath(null); setLastOutBn(null); }
+      }
+    }, 250);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [tokenIn, tokenOut, amountIn, quoteDetails]);
+
+  // Pair data (token0/token1/reserves) — OK si ton hook wrap le natif en interne
   useEffect(() => {
     let alive = true;
     (async () => {
       const pd = await fetchPair(tokenIn, tokenOut);
       if (alive) setPairData(pd);
     })();
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, [tokenIn, tokenOut]); // eslint-disable-line
 
-  // Estimation network fee (change avec montant, slippage, tokens)
+  // Estimation network fee — CHANGE: réutilise bestPath + outBn
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        if (!address || !amountIn || Number(amountIn) <= 0) {
-          setNetworkFeeText(null);
-          return;
-        }
-        // pré-calc amtIn et minOut via getAmountsOut (même que pour le swap)
-        const tIn = getTokenByAddress(tokenIn);
-        const amtIn = parseUnits(amountIn || "0", tIn.decimals);
-        const amounts = (await pc.readContract({
-          address: addresses.UniswapV2Router02 as Address,
-          abi: abi.UniswapV2Router02,
-          functionName: "getAmountsOut",
-          args: [amtIn, [tokenIn, tokenOut]],
-        })) as bigint[];
-        const out = amounts[amounts.length - 1] ?? 0n;
-        const minOut = out - (out * BigInt(slippageBps)) / 10_000n;
-        const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 20);
+        if (!account) { setNetworkFeeText(null); return; }
+        const v = Number(String(amountIn).replace(",", "."));
+        if (!isFinite(v) || v <= 0) { setNetworkFeeText(null); return; }
+        if (!bestPath || !lastOutBn) { setNetworkFeeText(null); return; }
 
-        const fee = await estimateNetworkFee({
-          account: address,
+        // minOut à partir de la quote réelle
+        const out = lastOutBn;
+        const minOut = out - (out * BigInt(slippageBps) / 10_000n);
+        const deadline = BigInt(Math.floor(Date.now()/1000) + 60 * 20);
+
+        // amountIn en base décimales de tokenIn
+        const ti = getTokenByAddress(tokenIn);
+        const amtIn = parseUnits(String(v), ti.decimals);
+
+        const feeText = await estimateNetworkFee({
+          account: account,
           amountIn: amtIn,
           minOut,
-          path: [tokenIn, tokenOut],
-          to: address,
+          path: bestPath,         // CHANGE
+          to: account,
           deadline,
-          nativeSymbol: "tTRUST", // adapte si tu exposes ça via SDK plus tard
+          nativeSymbol: "tTRUST",
         });
 
-        if (alive) setNetworkFeeText(fee);
+        if (alive) setNetworkFeeText(feeText);
       } catch {
         if (alive) setNetworkFeeText(null);
       }
     })();
-    return () => {
-      alive = false;
-    };
-  }, [address, tokenIn, tokenOut, amountIn, slippageBps]); // eslint-disable-line
+    return () => { alive = false; };
+  }, [account, tokenIn, tokenOut, amountIn, slippageBps, bestPath, lastOutBn, estimateNetworkFee]);
 
   // Détails
   const ti = getTokenByAddress(tokenIn);
@@ -127,88 +129,77 @@ export default function SwapForm() {
   const priceImpact = computePriceImpactPct(tokenIn, tokenOut, amountIn, amountOut, pairData);
 
   async function onApproveAndSwap() {
-    if (!address) return;
+    if (!account) return;
 
-    const amtIn = parseUnits(amountIn || "0", ti.decimals);
+    const v = Number(String(amountIn).replace(",", "."));
+    if (!isFinite(v) || v <= 0) return;
 
-    // 1) Allowance
-    const curr = await allowance(address, tokenIn, addresses.UniswapV2Router02 as Address);
-    if (curr < amtIn) {
-      await approve(tokenIn, addresses.UniswapV2Router02 as Address, amtIn);
+    // On s'assure d'avoir la quote/path à jour
+    const qd = await quoteDetails(tokenIn, tokenOut, String(v));
+    if (!qd) throw new Error("No route/liquidity for this pair");
+
+    const amtIn = parseUnits(String(v), ti.decimals);
+    const out = qd.amountOutBn;
+    const minOut = out - (out * BigInt(slippageBps) / 10_000n);
+    const deadline = Math.floor(Date.now()/1000) + 60 * 20;
+
+    // Approve seulement si tokenIn est ERC-20
+    if (!isNative(tokenIn) && account) {
+      const curr = await allowance(account, tokenIn, addresses.UniswapV2Router02 as Address);
+      if (curr < amtIn) {
+        await approve(tokenIn, addresses.UniswapV2Router02 as Address, amtIn);
+      }
     }
 
-    // 2) MinOut
-    const amounts = (await pc.readContract({
-      address: addresses.UniswapV2Router02 as Address,
-      abi: abi.UniswapV2Router02,
-      functionName: "getAmountsOut",
-      args: [amtIn, [tokenIn, tokenOut]],
-    })) as bigint[];
-
-    const out = amounts[amounts.length - 1] ?? 0n;
-    const minOut = out - (out * BigInt(slippageBps)) / 10_000n;
-    const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
-
-    // 3) Swap
-    await doSwap(address, tokenIn, tokenOut, amountIn, minOut, deadline);
+    // Swap — ton hook `useSwap` gère natif/erc20 + mapping interne
+    if (!account) throw new Error("No connected account");
+    await doSwap(account, tokenIn, tokenOut, String(v), minOut, deadline);
   }
+
 
   return (
     <div>
       <div className={styles.inputSwapContainer}>
+
         <TokenField
           label="From"
           token={tokenIn}
-          onTokenChange={(a) => setTokenIn(a)}
+          onTokenChange={(a) => { setTokenIn(a); }}
           amount={amountIn}
           onAmountChange={setAmountIn}
           readOnly={false}
         />
 
-        {/* Rendu conditionnel */}
-        {amountIn && Number(amountIn) > 0 && (
-          <>
-            <DetailsDisclosure
-              slippageBps={slippageBps}
-              onChangeSlippage={setSlippageBps}
-              priceText={priceText}
-              priceImpactPct={priceImpact}
-              networkFeeText={networkFeeText}
-            />
-          </>
-        )}
-
-        <FlipButton
-          onClick={() => {
-            setTokenIn(tokenOut);
-            setTokenOut(tokenIn);
-            setAmountOut(""); // re-quote après flip
-          }}
+        <DetailsDisclosure
+          slippageBps={slippageBps}
+          onChangeSlippage={setSlippageBps}
+          priceText={priceText}
+          priceImpactPct={priceImpact}
+          networkFeeText={networkFeeText}
         />
       </div>
-
+      <FlipButton onClick={() => {
+        setTokenIn(tokenOut);
+        setTokenOut(tokenIn);
+        setAmountOut("");
+        setBestPath(null);
+        setLastOutBn(null);
+      }} />
       <div className={styles.inputSwapContainerTo}>
         <TokenField
           label="To"
           token={tokenOut}
-          onTokenChange={(a) => setTokenOut(a)}
+          onTokenChange={(a) => { setTokenOut(a); }}
           amount={amountOut}
           readOnly
         />
       </div>
 
-     
-      {amountIn && Number(amountIn) > 0 && (
-        <>
-         <Summary tokenIn={tokenIn} tokenOut={tokenOut} amountIn={amountIn} amountOut={amountOut} />
-
-          <ApproveAndSwap
-            connected={Boolean(address)}
-            disabled={!amountIn || Number(amountIn) <= 0}
-            onClick={onApproveAndSwap}
-          />
-        </>
-      )}
+      <ApproveAndSwap
+        connected={Boolean(account)}
+        disabled={!amountIn || Number(amountIn) <= 0}
+        onClick={onApproveAndSwap}
+      />
     </div>
   );
 }

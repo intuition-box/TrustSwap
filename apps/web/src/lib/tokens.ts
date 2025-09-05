@@ -1,20 +1,23 @@
 import type { Address } from "viem";
 import { addresses } from "@trustswap/sdk";
 
+export const NATIVE_PLACEHOLDER = addresses.NATIVE_PLACEHOLDER as Address;
+
 export type TokenInfo = {
   address: Address;
   symbol: string;
   name: string;
   decimals: number;
+  isNative?: boolean;
 };
 
-// Tokenlist minimale pilotée par le SDK
 export const TOKENLIST: TokenInfo[] = [
   {
-    address: addresses.WTTRUST as Address,
-    symbol: "WTTRUST",
-    name: "Wrapped TRUST",
+    address: NATIVE_PLACEHOLDER,
+    symbol: "TTRUST",
+    name: "Native TRUST",
     decimals: 18,
+    isNative: true,
   },
   {
     address: addresses.TSWP as Address,
@@ -25,12 +28,22 @@ export const TOKENLIST: TokenInfo[] = [
 ];
 
 export function getTokenByAddress(addr: string): TokenInfo {
+  if (addr?.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase()) {
+    return {
+      address: NATIVE_PLACEHOLDER,
+      symbol: "TTRUST",
+      name: "Native TRUST",
+      decimals: 18,
+      isNative: true,
+    };
+  }
   const t = TOKENLIST.find(t => t.address.toLowerCase() === addr.toLowerCase());
   if (!t) throw new Error("Token not in tokenlist");
   return t;
 }
 
-export function getDefaultPair() {
-  const [a, b] = TOKENLIST;
-  return { tokenIn: a, tokenOut: b };
+export function getDefaultPair(): { tokenIn: TokenInfo; tokenOut: TokenInfo } {
+  const native = TOKENLIST.find(t => t.isNative) ?? TOKENLIST[0];
+  const other = TOKENLIST.find(t => t.address !== native.address) ?? native;
+  return { tokenIn: native, tokenOut: other };
 }
