@@ -238,18 +238,6 @@ export default function SwapForm() {
         />
       </div>
 
-      {amountIn && Number(amountIn) > 0 && (
-        <>
-          <DetailsDisclosure
-            slippageBps={slippageBps}
-            onChangeSlippage={setSlippageBps}
-            priceText={priceText}
-            priceImpactPct={priceImpact}
-            networkFeeText={networkFeeText}
-          />
-        </>
-      )}
-
       <div className={styles.inputSwapContainerTo}>
         <FlipButton
           onClick={() => {
@@ -272,6 +260,17 @@ export default function SwapForm() {
         />
       </div>
 
+      {amountIn && Number(amountIn) > 0 && (
+        <>
+          <DetailsDisclosure
+            slippageBps={slippageBps}
+            onChangeSlippage={setSlippageBps}
+            priceText={priceText}
+            priceImpactPct={priceImpact}
+            networkFeeText={networkFeeText}
+          />
+        </>
+      )}
       {amountIn && Number(amountIn) > 0 && (
         <>
           <ApproveAndSwap

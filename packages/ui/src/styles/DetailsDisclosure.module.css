@@ -2,9 +2,12 @@
     width: 98%;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     height: auto;
     margin-left: auto;
     margin-right: auto;
+    margin-top: 0.7vh;
+    margin-bottom: 0.7vh;
 }
 
 .btnDetails {
@@ -12,12 +15,12 @@
     border: none;
     color: var(--text-grey);
     cursor: pointer;
-    font-size: 1.4vh;
+    font-size: 1.6vh;
     letter-spacing: 0;
     z-index: 1000;
     transform-origin: center;
     border-radius: 2vh;
-    margin-right: auto;
+    margin-left: auto;
 }
 
 .detailsContainer {

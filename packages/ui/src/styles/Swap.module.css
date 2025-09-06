@@ -232,7 +232,6 @@
     height: 6vh;
     width: 100%;
     border-radius: 2.5vh;
-    margin-top: 1.4vh;
     z-index: 1000;
     cursor: pointer;
   }
