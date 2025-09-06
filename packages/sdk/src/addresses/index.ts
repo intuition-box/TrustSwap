@@ -10,7 +10,7 @@ export interface Addresses {
   NATIVE_PLACEHOLDER: HexAddr;
   TSWP: HexAddr;
   WTTRUST: HexAddr;
-  SRF: HexAddr;
+  StakingRewardsFactory: HexAddr;
 }
 
 const BOOK: Record<number, Addresses> = {

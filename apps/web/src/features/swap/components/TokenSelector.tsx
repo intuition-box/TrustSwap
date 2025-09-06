@@ -28,7 +28,8 @@ export default function TokenSelector({
   }, []);
 
   const selectedToken = TOKENLIST.find((t) => t.address === value);
-
+  const visibleTokens = TOKENLIST.filter(t => !t.hidden);
+  
   return (
     <div ref={ref} className={styles.container}>
       <button

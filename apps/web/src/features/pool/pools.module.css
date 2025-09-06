@@ -1,0 +1,14 @@
+/* apps/web/src/features/pools/pools.module.css */
+.page { padding: 16px; }
+.title { font-size: 22px; margin-bottom: 12px; }
+.tableWrap { overflow: auto; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 10px; border-bottom: 1px solid #222; text-align: left; }
+.skeleton { opacity: 0.7; }
+.error { color: #ff6b6b; }
+.filters { margin-bottom: 10px; }
+.stakeCell { display:flex; gap:8px; align-items:center; }
+.amountInput { width: 120px; }
+.btn { padding: 6px 10px; border-radius: 6px; border: 1px solid #444; }
+.btnGhost { padding: 6px 10px; border-radius: 6px; border: 1px dashed #444; }
+.drawer { position: fixed; right:0; top:0; bottom:0; width: 360px; background:#111; padding:16px; box-shadow: -8px 0 24px rgba(0,0,0,.4); }
