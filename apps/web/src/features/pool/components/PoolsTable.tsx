@@ -16,9 +16,9 @@ export function PoolsTable({
   onOpenLiquidity: (a: Address, b: Address) => void;
 }) {
   const { items, loading, error } = usePoolsData(50, (page - 1) * 50);
-  const { volMap, priceMap } = usePairsVolume1D(items);
-  const withMetrics = usePairMetrics(items, volMap, priceMap);
-  const withStaking = useStakingData(withMetrics);
+  const { volMap, priceMap } = usePairsVolume1D(items);       // 1) prix & vol
+  const withMetrics = usePairMetrics(items, volMap, priceMap); // 2) TVL & APR pool
+  const withStaking = useStakingData(withMetrics);            // 3) APR epoch perso & rewards
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

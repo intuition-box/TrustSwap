@@ -2,11 +2,18 @@
 import type { TokenInfo } from "../../types";
 import { fmtUnits } from "../../utils";
 
-export function RewardCell({ rewardToken, ratePerSec }: { rewardToken?: TokenInfo; ratePerSec?: bigint }) {
-  if (!rewardToken || !ratePerSec) return <td>—</td>;
+export function RewardCell({
+  rewardToken,
+  earned,
+}: {
+  rewardToken?: TokenInfo;
+  earned?: bigint;
+}) {
+  if (!rewardToken) return <td>—</td>;
+  const v = earned ?? 0n;
   return (
     <td>
-      {fmtUnits(ratePerSec, rewardToken.decimals, 6)} {rewardToken.symbol}/s
+      {fmtUnits(v, rewardToken.decimals, 4)} {rewardToken.symbol}
     </td>
   );
 }

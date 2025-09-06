@@ -35,7 +35,7 @@ export function PoolRow({
       <EpochAprCell value={pool.epochAprPct} />
       <RewardCell
         rewardToken={pool.rewardToken}
-        ratePerSec={pool.rewardRatePerSec}
+        earned={pool.earned}
       />
       <StakeClaimCell pool={pool} />
     </tr>

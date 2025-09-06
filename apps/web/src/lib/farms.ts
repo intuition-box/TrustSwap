@@ -1,0 +1,11 @@
+// features/pools/config/farms.ts
+export const FARMS = [
+  {
+    name: "WTTRUST–TSWP",
+    stakingRewards: "0x0951046AeE7DD0A951C87A2440d5627c2a893FDe",
+    stakingToken:   "0xf469C73611521974cd4e702B4578e92a42Fe65dE", // = pair (LP)
+    rewardsToken:   "0x7da120065e104C085fAc6f800d257a6296549cF3",
+    decimalsLp: 18,
+    decimalsRw: 18,
+  },
+] as const;
