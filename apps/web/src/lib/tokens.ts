@@ -10,6 +10,7 @@ export type TokenInfo = {
   name: string;
   decimals: number;
   isNative?: boolean;
+  hidden?: boolean; // 👈 ajouté
 };
 
 export const TOKENLIST: TokenInfo[] = [
@@ -26,6 +27,19 @@ export const TOKENLIST: TokenInfo[] = [
     name: "TrustSwap",
     decimals: 18,
   },
+  {
+    address: WNATIVE_ADDRESS,
+    symbol: "WTTRUST",
+    name: "Wrapped TRUST",
+    decimals: 18,
+    hidden: true, // 👈 important : pas dans le selector
+  },
+
+    // ✅ Ajoute TKA/TKB (depuis ton projet)
+  { address: "0x124C4E8470eD201Ae896C2DF6ee7152AB7438d80", symbol: "TKA", name: "Token A", decimals: 18 },
+  { address: "0x5Fdd4EdD250b9214D77103881bE0F09812d501D6", symbol: "TKB", name: "Token B", decimals: 18 },
+  { address: "0x51379Cc2C942EE2AE2fF0BD67a7b475F0be39Dcf", symbol: "WETH", name: "Wrapped Ether", decimals: 18 },
+
   // ajoute ici d'autres tokens…
 ];
 
@@ -46,6 +60,6 @@ export function getTokenByAddress(addr: string): TokenInfo {
 
 export function getDefaultPair(): { tokenIn: TokenInfo; tokenOut: TokenInfo } {
   const native = TOKENLIST.find(t => t.isNative) ?? TOKENLIST[0];
-  const other  = TOKENLIST.find(t => t.address !== native.address) ?? native;
+  const other  = TOKENLIST.find(t => t.address !== native.address && !t.hidden) ?? native;
   return { tokenIn: native, tokenOut: other };
 }
