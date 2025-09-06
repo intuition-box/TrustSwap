@@ -41,3 +41,8 @@ if (!rewardPerSecNativePrice || !tvlStakedNative) return 0;
 const yearlyRewards = rewardPerSecNativePrice * 31_536_000; // 365d
 return (yearlyRewards / tvlStakedNative) * 100;
 }
+
+
+export function formatNetworkFeeWei(feeWei: bigint, decimals = 18) {
+  try { return `${formatUnits(feeWei, decimals)} tTRUST`; } catch { return "—"; }
+}
