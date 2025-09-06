@@ -1,31 +1,48 @@
-// apps/web/src/features/pools/components/liquidity/RemoveLiquidityDrawer.tsx
 import { useState } from "react";
 import type { Address } from "viem";
+import { parseUnits } from "viem";
+import { useAccount } from "wagmi";
 import { useLiquidityActions } from "../../hooks/useLiquidityActions";
-import styles from "../../pools.module.css";
 
+export function RemoveLiquidityDrawer({
+  tokenA,
+  tokenB,
+  onClose,
+}: {
+  tokenA?: Address;
+  tokenB?: Address;
+  onClose: () => void;
+}) {
+  const { address: to } = useAccount();
+  const { removeLiquidity } = useLiquidityActions();
+  const [lpAmount, setLpAmount] = useState("");
+  const [deadlineSec, setDeadlineSec] = useState(600);
 
-export function RemoveLiquidityDrawer({ tokenA, tokenB, onClose }:{ tokenA: Address; tokenB: Address; onClose: () => void; }) {
-const { removeLiquidity } = useLiquidityActions();
-const [lp, setLp] = useState("");
-const [deadline, setDeadline] = useState(600);
+  async function onSubmit() {
+    if (!tokenA || !tokenB || !to) return;
+    await removeLiquidity(
+      tokenA,
+      tokenB,
+      parseUnits(lpAmount || "0", 18),
+      0n,
+      0n,
+      to,
+      Math.floor(Date.now() / 1000) + Number(deadlineSec)
+    );
+    onClose();
+  }
 
-
-async function submit() {
-await removeLiquidity(tokenA, tokenB, to18(lp), 0n, 0n, /*to*/ (window as any).selectedAddr, Math.floor(Date.now()/1000)+deadline);
-onClose();
+  return (
+    <div style={{ display: "grid", gap: 8 }}>
+      <div>Pair: <code>{tokenA}</code> / <code>{tokenB}</code></div>
+      <input placeholder="LP Amount" value={lpAmount} onChange={(e) => setLpAmount(e.target.value)} />
+      <input
+        placeholder="Deadline (sec)"
+        type="number"
+        value={deadlineSec}
+        onChange={(e) => setDeadlineSec(Number(e.target.value))}
+      />
+      <button onClick={onSubmit}>Remove</button>
+    </div>
+  );
 }
-
-
-return (
-<div className={styles.drawer}>
-<h3>Remove Liquidity</h3>
-<input value={lp} onChange={e=>setLp(e.target.value)} placeholder="LP amount" />
-<button onClick={submit}>Remove</button>
-<button onClick={onClose}>Close</button>
-</div>
-);
-}
-
-
-function to18(x: string): bigint { try { return BigInt(Math.floor(Number(x)*1e18)); } catch { return 0n; } }
