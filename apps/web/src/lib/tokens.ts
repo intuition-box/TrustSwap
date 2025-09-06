@@ -1,8 +1,10 @@
 import type { Address } from "viem";
 import { INTUITION, addresses } from "@trustswap/sdk";
+import { createPublicClient, http, erc20Abi } from "viem";
 
 export const NATIVE_PLACEHOLDER = addresses.NATIVE_PLACEHOLDER as Address;
 export const WNATIVE_ADDRESS   = addresses.WTTRUST as Address;
+
 
 export type TokenInfo = {
   address: Address;
@@ -43,6 +45,19 @@ export const TOKENLIST: TokenInfo[] = [
   // ajoute ici d'autres tokens…
 ];
 
+const TOKEN_CACHE: Record<string, TokenInfo> = {};
+for (const t of TOKENLIST) TOKEN_CACHE[t.address.toLowerCase()] = t;
+
+const client = createPublicClient({
+  chain: INTUITION,
+  transport: http(INTUITION.rpcUrls?.default?.http?.[0] || ""),
+});
+
+function findToken(addr: string): TokenInfo | null {
+  return TOKEN_CACHE[addr.toLowerCase()] || null;
+}
+
+
 export const isNative = (addr?: string) =>
   !!addr && addr.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
 
@@ -62,4 +77,25 @@ export function getDefaultPair(): { tokenIn: TokenInfo; tokenOut: TokenInfo } {
   const native = TOKENLIST.find(t => t.isNative) ?? TOKENLIST[0];
   const other  = TOKENLIST.find(t => t.address !== native.address && !t.hidden) ?? native;
   return { tokenIn: native, tokenOut: other };
+}
+
+export async function getOrFetchToken(address: Address): Promise<TokenInfo> {
+  const cached = findToken(address);
+  if (cached) return cached;
+
+  const [symbol, decimals, name] = await Promise.all([
+    client.readContract({ address, abi: erc20Abi, functionName: "symbol" }).catch(() => "TKN"),
+    client.readContract({ address, abi: erc20Abi, functionName: "decimals" }).catch(() => 18),
+    client.readContract({ address, abi: erc20Abi, functionName: "name" }).catch(() => "Unknown"),
+  ]);
+
+  const info: TokenInfo = {
+    address,
+    symbol: String(symbol),
+    name: String(name),
+    decimals: Number(decimals),
+  };
+
+  TOKEN_CACHE[address.toLowerCase()] = info; // ajoute au cache (pas au selector)
+  return info;
 }

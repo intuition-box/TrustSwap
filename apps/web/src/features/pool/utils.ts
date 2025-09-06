@@ -23,14 +23,13 @@ return s.toFixed(digits);
 }
 
 
-export const FEE_BPS = 30; // 0.3%
+export const FEE_BPS_TO_LPS = 25; // 0.3%
 
 
-export function aprFromFees(vol1d: number, tvl: number, feeBps = FEE_BPS) {
-if (!vol1d || !tvl) return 0;
-const dailyFees = vol1d * (feeBps / 10_000);
-const dailyApr = dailyFees / tvl; // in native units
-return dailyApr * 365 * 100; // %
+export function aprFromFees(vol1dNative: number, tvlNative: number, feeBps = FEE_BPS_TO_LPS) {
+  if (!vol1dNative || !tvlNative) return 0;
+  const dailyFees = vol1dNative * (feeBps / 10_000);
+  return (dailyFees / tvlNative) * 365 * 100; // %
 }
 
 

@@ -4,6 +4,7 @@ import { usePoolsData } from "../hooks/usePoolsData";
 import { usePairMetrics } from "../hooks/usePairMetrics";
 import { useStakingData } from "../hooks/useStakingData";
 import { PoolRow } from "./PoolRow";
+import { usePairsVolume1D } from "../hooks/usePairsVolume1D";
 
 export function PoolsTable({
   page,
@@ -15,7 +16,8 @@ export function PoolsTable({
   onOpenLiquidity: (a: Address, b: Address) => void;
 }) {
   const { items, loading, error } = usePoolsData(50, (page - 1) * 50);
-  const withMetrics = usePairMetrics(items);
+  const { volMap, priceMap } = usePairsVolume1D(items);
+  const withMetrics = usePairMetrics(items, volMap, priceMap);
   const withStaking = useStakingData(withMetrics);
 
   const filtered = useMemo(() => {
