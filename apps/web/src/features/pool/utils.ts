@@ -15,7 +15,7 @@ export function pct(n?: number | null, digits = 2) {
 
 export function fmt(n?: number | null, digits = 2) {
   if (n == null || !isFinite(n)) return "—";
-  return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
+  return new Intl.NumberFormat(undefined, {minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
 }
 
 export function fmtUnits(x?: bigint, decimals = 18, digits = 4) {

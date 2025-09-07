@@ -1,14 +1,142 @@
-/* apps/web/src/features/pools/pools.module.css */
-.page { padding: 16px; }
-.title { font-size: 22px; margin-bottom: 12px; }
-.tableWrap { overflow: auto; }
-.table { width: 100%; border-collapse: collapse; }
-.table th, .table td { padding: 10px; border-bottom: 1px solid #222; text-align: left; }
-.skeleton { opacity: 0.7; }
-.error { color: #ff6b6b; }
-.filters { margin-bottom: 10px; }
-.stakeCell { display:flex; gap:8px; align-items:center; }
-.amountInput { width: 120px; }
-.btn { padding: 6px 10px; border-radius: 6px; border: 1px solid #444; }
-.btnGhost { padding: 6px 10px; border-radius: 6px; border: 1px dashed #444; }
-.drawer { position: fixed; right:0; top:0; bottom:0; width: 360px; background:#111; padding:16px; box-shadow: -8px 0 24px rgba(0,0,0,.4); }
+.sectionPool {
+    height: 100vh;
+    padding-top: 12vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.halo {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    height: 60%;
+    width: 70%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      var(--secondary-color) 0%,
+      rgba(116, 232, 255, 0.1) 50%,
+      transparent 100%
+    );
+    transform: translate(-50%, -50%);
+    filter: blur(120px);
+    animation: moveHalo 7s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  @keyframes moveHalo {
+    0% {
+      transform: translate(-60%, -60%) rotate(0deg);
+    }
+    50% {
+      transform: translate(-50%, -50%) rotate(10deg);
+    }
+    100% {
+      transform: translate(-40%, -40%) rotate(20deg);
+    }
+  }
+  
+
+.containerPool {
+    width: 100%;
+    z-index: 100;
+}
+
+.containerHaloPool {
+
+}
+
+.filterPoolContainer {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 1vh;
+    width: 100%;
+    margin-bottom: 1vh;
+}
+
+.addLiquidityBtn {
+    background-color: var(--bg-white);
+    border: none;
+    height: 4.2vh;
+    padding-left: 1.2vh;
+    padding-right: 1.2vh;
+    border-radius: 1vh;
+    font-size: 1.6vh;
+    letter-spacing: -0.07vh;
+    cursor: pointer;
+}
+
+.addLiquidityBtn:active {
+    transform: scale(0.97);
+}
+
+.tableauContainer {
+    background-color: var(--bg-dark);
+    border: clamp(1px, 0.1vh, 2px) solid var(--border-tableau);
+    border-radius: 2.5vh;
+    min-height: 60vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.tableauContainerLineTop {
+    content: "";
+    position: absolute;
+    top: -1px;
+    right: 50%;
+    transform: translateX(-50%);
+    height: 0.05vh;
+    min-height: 1px;
+    width: 30%;
+    background: linear-gradient(
+      90deg,
+      var(--border-grey),
+      var(--border-shadow-anim),
+      var(--border-grey)
+    );
+    box-shadow: 0 -2vh 6vh 2vh var(--shadow-grey);
+    z-index: 10;
+    animation: slideTopPool 8s ease-in-out infinite alternate;
+  }
+  
+  @keyframes slideTopPool {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
+  
+
+  .tableauContainerLineBottom {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 0.05vh;
+    min-height: 1px;
+    width: 30%;
+    background: linear-gradient(
+      90deg,
+      var(--border-grey),
+      var(--border-shadow-anim),
+      var(--border-grey)
+    );
+    z-index: 10;
+    animation: slideBottomPool 8s ease-in-out infinite alternate;
+  }
+  
+  @keyframes slideBottomPool {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
+

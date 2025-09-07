@@ -35,7 +35,7 @@ export function AddLiquidityDrawer({
   }
 
   return (
-    <div style={{ display: "grid", gap: 8 }}>
+    <div>
       <div>Token A: <code>{tokenA}</code></div>
       <input placeholder="Amount A" value={amountA} onChange={(e) => setAmountA(e.target.value)} />
       <div>Token B: <code>{tokenB}</code></div>

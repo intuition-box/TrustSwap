@@ -5,6 +5,7 @@ import { usePairMetrics } from "../hooks/usePairMetrics";
 import { useStakingData } from "../hooks/useStakingData";
 import { PoolRow } from "./PoolRow";
 import { usePairsVolume1D } from "../hooks/usePairsVolume1D";
+import styles from "../tableau.module.css";
 
 export function PoolsTable({
   page,
@@ -36,7 +37,7 @@ export function PoolsTable({
   return (
     <div style={{ overflow: "auto" }}>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
+        <thead className={styles.poolFilters}>
           <tr>
             <th>#</th>
             <th>Pool</th>

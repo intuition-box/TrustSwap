@@ -1,5 +1,7 @@
 import type { Address } from "viem";
 import type { TokenInfo } from "../../types";
+import { getTokenIcon } from "../../../../lib/getTokenIcon";
+import styles from "../../tableau.module.css";
 
 export function PoolCell({
   token0,
@@ -14,13 +16,27 @@ export function PoolCell({
 }) {
   return (
     <td>
-      <button
-        title="Open liquidity actions"
-        onClick={() => onOpenLiquidity?.(token0.address as Address, token1.address as Address)}
-        style={{ display: "flex", gap: 8, alignItems: "center", border: "none", padding: 0, cursor: "pointer" }}
-      >
-        <span>{token0.symbol}/{token1.symbol}</span>
-      </button>
+      <div className={styles.containerTokenTab}>
+        {/* token0 */}
+        <span className={styles.tokenName}>
+          <img
+            src={getTokenIcon(token0.address)}
+            alt={token0.symbol}
+            className={styles.tokenSymbol}
+          />
+          {token0.symbol}
+        </span>
+
+        {/* token1 */}
+        <span className={styles.tokenName}>
+          <img
+            src={getTokenIcon(token1.address)}
+            alt={token1.symbol}
+            className={styles.tokenSymbol}
+          />
+          {token1.symbol}
+        </span>
+        </div>
     </td>
   );
 }
