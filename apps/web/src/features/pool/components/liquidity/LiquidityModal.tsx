@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Address } from "viem";
 import { AddLiquidityDrawer } from "./AddLiquidityDrawer";
 import { RemoveLiquidityDrawer } from "./RemoveLiquidityDrawer";
+import styles from "../../popup.module.css";
 
 export function LiquidityModal({
   tokenA,
@@ -13,44 +14,45 @@ export function LiquidityModal({
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<"add" | "remove">("add");
+  const [closing, setClosing] = useState(false);
+
+  const handleClose = () => {
+    setClosing(true);
+    setTimeout(onClose, 400);
+  };
 
   return (
     <div
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,.5)",
-        display: "grid",
-        placeItems: "center",
-        zIndex: 50,
-      }}
+      onClick={handleClose}
+      className={`${styles.popUpLiquidity} ${closing ? styles.closing : ""}`}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{
-          width: 480,
-          maxWidth: "90vw",
-          background: "#111",
-          border: "1px solid #222",
-          borderRadius: 12,
-          padding: 16,
-        }}
+        className={styles.popUpBody}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <strong>Liquidity</strong>
-          <button onClick={onClose}>✕</button>
-        </div>
+        <div className={styles.headerLiquidityPopUp}>
+          <div className={styles.headerChoiceLiquidity}>
+            <button
+              className={tab === "add" ? styles.activeTab : styles.inactiveTab}
+              onClick={() => setTab("add")}
+            >
+              Add Liquidity
+            </button>
+            <button
+              className={tab === "remove" ? styles.activeTab : styles.inactiveTab}
+              onClick={() => setTab("remove")}
+            >
+              Remove
+            </button>
+          </div>
 
-        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-          <button onClick={() => setTab("add")} style={{ borderBottom: tab === "add" ? "2px solid #fff" : "2px solid transparent" }}>Add</button>
-          <button onClick={() => setTab("remove")} style={{ borderBottom: tab === "remove" ? "2px solid #fff" : "2px solid transparent" }}>Remove</button>
+          <button onClick={handleClose}>✕</button>
         </div>
 
         {tab === "add" ? (
-          <AddLiquidityDrawer tokenA={tokenA} tokenB={tokenB} onClose={onClose} />
+          <AddLiquidityDrawer tokenA={tokenA} tokenB={tokenB} onClose={handleClose} />
         ) : (
-          <RemoveLiquidityDrawer tokenA={tokenA} tokenB={tokenB} onClose={onClose} />
+          <RemoveLiquidityDrawer tokenA={tokenA} tokenB={tokenB} onClose={handleClose} />
         )}
       </div>
     </div>

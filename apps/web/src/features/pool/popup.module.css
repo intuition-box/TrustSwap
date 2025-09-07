@@ -1,0 +1,75 @@
+.popUpLiquidity {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    animation: slideUp 0.4s ease forwards;
+  }
+  
+  .popUpLiquidity.closing {
+    animation: slideDown 0.4s ease forwards;
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideDown {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+  
+.popUpBody {
+    background-color: var(--bg-dark);
+    width: 100%;
+    height: 100%;
+    padding-top: 2vh;
+}
+
+.headerLiquidityPopUp {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.headerChoiceLiquidity {
+    margin-left: 2vh;
+}
+
+.activeTab {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border-radius: 8px;
+    font-weight: 550;
+    font-size: 3vh;
+    letter-spacing: -0.12vh;
+  }
+  
+  
+  .inactiveTab {
+    background-color: transparent;
+    color: var(--text-grey);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 400;
+    cursor: pointer;
+  }
+  
+  .headerChoiceLiquidity button {
+    border: none;
+    cursor: pointer;
+  }
+  

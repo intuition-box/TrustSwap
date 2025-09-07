@@ -1,9 +1,9 @@
 import PoolsFeature from "../features/pool";
+import styles from "../features/pool/pools.module.css";
 
 export default function PoolsPage() {
   return (
-    <section className="grid gap-4">
-      <h1 className="text-2xl font-semibold">Pools</h1>
+    <section className={styles.sectionPool}>
 
       <div className="rounded-2xl border border-white/10 p-4">
         <PoolsFeature />

@@ -1,0 +1,59 @@
+.poolFilters {
+    background-color: var(--bg-filter);
+    border-bottom: clamp(1px, 0.1vh, 2px) solid var(--border-tableau);
+    height: 3.5vh;
+  }
+
+  .poolFilters tr th {
+    color: var(--text-grey-input);
+    font-size: 1.4vh;
+    font-weight: 300;
+    letter-spacing: -0.06vh;
+  }
+  
+  .poolFilters tr th:nth-child(1){
+    padding: 0 2vh;
+  }
+
+  .ligneTableau td {
+    border-bottom: clamp(1px, 0.1vh, 2px) solid var(--border-tableau);
+    height: 5vh;
+    padding: 0 2vh;
+    color: var(--data-tab);
+    font-size: 1.5vh;
+  }
+
+  .ligneTableau:hover td {
+    background-color: var(--bg-filter);
+    cursor: pointer;
+  }
+
+  .containerTokenTab {
+    display: flex;
+    align-items: center;
+    gap: 0.5vh;
+  }
+
+  .tokenName {
+    background-color: var(--bg-filter);
+    color: var(--text-color);
+    height: 3.2vh;
+    display: flex;
+    align-items: center;
+    gap: 0.5vh;
+    border-radius: 1.2vh;
+    padding-left: 1vh;
+    padding-right: 1vh;
+    border: clamp(1px, 0.1vh, 1px) solid var(--border-grey);
+  }
+
+  .tokenSymbol {
+    width: 2vh;
+    margin-bottom: 0.2vh;
+  }
+
+
+  .dollarSymbol {
+    color: var(--dollar-color);
+    margin-right: 0.3vh;
+  }

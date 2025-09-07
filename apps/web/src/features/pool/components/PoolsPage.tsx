@@ -5,6 +5,7 @@ import { PoolsFilters } from "./filters/PoolsFilters";
 import { PoolsPagination } from "./filters/PoolsPagination";
 import { LiquidityModal } from "./liquidity/LiquidityModal";
 import { getDefaultPair } from "../../../lib/tokens"; // ← adapte le chemin
+import styles from "../pools.module.css";
 
 export default function PoolsPage() {
   const [page, setPage] = useState(1);
@@ -28,31 +29,32 @@ export default function PoolsPage() {
   }
 
   return (
-    <div style={{ padding: 16 }}>
-              <br />
-        <br />
-        <br />
-                <br />
-        <br />
-        <br />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <h1 style={{ margin: 0 }}>Pools</h1>
-
-
-        <button onClick={openEmptyModal}>+ Add Liquidity</button>
+    <div className={styles.sectionPool}>
+      <div className={styles.halo}></div> {/* halo au fond */}
+  
+      <div className={styles.containerPool}>
+        <div className={styles.filterPoolContainer}>
+          <button onClick={openEmptyModal} className={styles.addLiquidityBtn}>
+            + Add Liquidity
+          </button>
+          <PoolsFilters query={query} onQuery={setQuery} />
+        </div>
+  
+        <div className={styles.tableauContainer}>
+          <div className={styles.tableauContainerLineTop}></div>
+          <PoolsTable page={page} query={query} onOpenLiquidity={openWithPair} />
+          <PoolsPagination page={page} onPage={setPage} />
+  
+          {isOpen && (
+            <LiquidityModal
+              tokenA={tokenA}
+              tokenB={tokenB}
+              onClose={() => setIsOpen(false)}
+            />
+          )}
+                    <div className={styles.tableauContainerLineBottom}></div>
+        </div>
       </div>
-
-      <PoolsFilters query={query} onQuery={setQuery} />
-      <PoolsTable page={page} query={query} onOpenLiquidity={openWithPair} />
-      <PoolsPagination page={page} onPage={setPage} />
-
-      {isOpen && (
-        <LiquidityModal
-          tokenA={tokenA}
-          tokenB={tokenB}
-          onClose={() => setIsOpen(false)}
-        />
-      )}
     </div>
   );
-}
+}  
