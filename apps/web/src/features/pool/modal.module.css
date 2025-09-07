@@ -3,11 +3,10 @@
     top: 0;
     width: 100%;
     height: 100%;
-    animation: slideUp 0.4s ease forwards;
   }
   
   .popUpLiquidity.closing {
-    animation: slideDown 0.4s ease forwards;
+
   }
   
   @keyframes slideUp {
@@ -44,7 +43,6 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
 }
 
 .headerLiquidityPopUp {
@@ -85,6 +83,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 90%;
   }
 
   .inputAddLiquidityContainer {
@@ -93,9 +92,8 @@
     justify-content: center;
     gap: 2vh;
     width: 100%;
-    margin-top: 3vh;
-    position: relative;
     z-index: 100;
+    margin-top: 5vh;
   }
   
   .inputAddContainer {
@@ -108,81 +106,12 @@
     letter-spacing: -0.08vh;
     font-size: 1.6vh;
     padding-bottom: 3vh;
-    padding-top: 3vh;
+    padding-top: 1vh;
     margin-top: 0.6vh;
     width: 40%;
     display: flex;
-    align-items: end;
-    justify-content: space-between;
-  }
-
-  .inputAdd {
-    background-color: transparent;
-    border: none;
-    font-size: 5vh;
-    color: var(--text-color);
-    outline: none;
-    padding-left: 2vh;
-    font-family: "Inter", sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-    font-weight: 500;
-    letter-spacing: -0.2vh;
-    width: 70%;
-    box-sizing: border-box;
-    margin-left: auto;
-    text-align: right;
-    padding-right: 10%;
-  }
-
-  .inputAdd::placeholder {
-    color: var(--placeholder);
-    opacity: 1;
-  }
-
-
-  .labelTokenAdd {
-    height: 5.4vh;
-    border-radius: 1.5vh;
-    margin-right: 2vh;
-    background-color: transparent;
-    border: clamp(1px, 0.1vh, 2px) solid var(--border-grey);
-    color: var(--text-color);
-    font-size: 1.9vh;
-    letter-spacing: -0.06vh;
-    display: flex;
     align-items: center;
-    gap: 0.3vh;
-    padding-left: 1vh;
-    padding-right: 1vh;
-    margin-left: 2vh;
-    position: relative;
-  }
-
-  .lineTokenTop {
-    content: "";
-    position: absolute;
-    top: -1px;
-    height: 0.1vh;
-    min-height: 1px;
-    width: 40%;
-    left: 50%;
-    transition: 0.3s;
-    transform: translateX(-50%);
-    background: linear-gradient(90deg, var(--border-grey) 0%, var(--border-anim-selector) 50%, var(--border-grey) 100%);
-  }
-
-  .lineTokenBottom {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    height: 0.1vh;
-    min-height: 1px;
-    width: 40%;
-    left: 50%;
-    transition: 0.3s;
-    transform: translateX(-50%);
-    background: linear-gradient(90deg, var(--border-grey) 0%, var(--border-anim-selector) 50%, var(--border-grey) 100%);
+    justify-content: space-between;
   }
 
   .btnAddLiquidity {
@@ -194,17 +123,23 @@
     border-radius: 1vh;
     font-size: 1.8vh;
     letter-spacing: -0.07vh;
-    position: fixed;
-    bottom: 2vh;
     cursor: pointer;
     box-shadow: 0 -1vh 30vh 0.05vh var(--bg-white);
+    transition: 0.3s;
+    z-index: 100;
+    margin-bottom: 1vh;
+  }
+
+  .btnAddLiquidity:hover {
+    box-shadow: 0 -1vh 40vh 1vh var(--bg-white);
+    transition: 0.3s;
   }
 
   .wormholeContainer {
     display: flex;
     align-items: end;
     justify-content: center;
-    flex-grow: 1;
+    height: 60%;
     width: 100%;
     background: url("../../assets/wormhole.png") no-repeat center;
     background-size: contain;
@@ -217,7 +152,7 @@
     width: 10vh;
     border-radius: 50%;
     position: absolute;
-    top: 10vh;
+    top: 12vh;
     z-index: 0;
     animation-duration: 4s;
     animation-iteration-count: infinite;
@@ -237,7 +172,7 @@
   
   @keyframes slideLeftDown {
     0% {
-      top: 10vh;
+      top: 12vh;
       right: 20%;
       width: 10vh;
       opacity: 1;
@@ -247,6 +182,7 @@
       right: 50%;
       width: 4vh;
       opacity: 1;
+      z-index: 0;
     }
 
     99% {
@@ -263,7 +199,7 @@
   
   @keyframes slideRightDown {
     0% {
-      top: 10vh;
+      top: 12vh;
       left: 20%;
       width: 10vh;
       opacity: 1;
@@ -273,6 +209,7 @@
       left: 50%;
       width: 4vh;
       opacity: 1;
+      z-index: 0;
     }
 
     99% {
