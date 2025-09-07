@@ -3,6 +3,10 @@ import type { Address } from "viem";
 import { parseUnits } from "viem";
 import { useAccount } from "wagmi";
 import { useLiquidityActions } from "../../hooks/useLiquidityActions";
+import { TOKENLIST } from "../../../../lib/tokens";
+import { getTokenIcon } from "../../../../lib/getTokenIcon";
+import styles from "../../modal.module.css";
+import wormhole from "../../../../assets/wormhole.png";
 
 export function AddLiquidityDrawer({
   tokenA,
@@ -17,7 +21,10 @@ export function AddLiquidityDrawer({
   const { addLiquidity } = useLiquidityActions();
   const [amountA, setAmountA] = useState("");
   const [amountB, setAmountB] = useState("");
-  const [deadlineSec, setDeadlineSec] = useState(600);
+
+  // 🔎 Cherche les infos dans TOKENLIST
+  const infoA = TOKENLIST.find((t) => t.address === tokenA);
+  const infoB = TOKENLIST.find((t) => t.address === tokenB);
 
   async function onSubmit() {
     if (!tokenA || !tokenB || !to) return;
@@ -29,24 +36,96 @@ export function AddLiquidityDrawer({
       0n,
       0n,
       to,
-      Math.floor(Date.now() / 1000) + Number(deadlineSec)
+      Math.floor(Date.now() / 1000) // deadline retiré
     );
     onClose();
   }
 
   return (
-    <div>
-      <div>Token A: <code>{tokenA}</code></div>
-      <input placeholder="Amount A" value={amountA} onChange={(e) => setAmountA(e.target.value)} />
-      <div>Token B: <code>{tokenB}</code></div>
-      <input placeholder="Amount B" value={amountB} onChange={(e) => setAmountB(e.target.value)} />
-      <input
-        placeholder="Deadline (sec)"
-        type="number"
-        value={deadlineSec}
-        onChange={(e) => setDeadlineSec(Number(e.target.value))}
-      />
-      <button onClick={onSubmit}>Supply</button>
+    <div className={styles.bodyAddModal}>
+      <div className={styles.inputAddLiquidityContainer}>
+        <div className={styles.inputAddContainer}>
+          <div className={styles.labelTokenAdd}>
+            <div className={styles.lineTokenTop}></div>
+            {infoA && (
+              <>
+                <img
+                  src={getTokenIcon(infoA.address)}
+                  alt={infoA.symbol}
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                    marginRight: 6,
+                  }}
+                />
+                <span>{infoA.symbol}</span>
+              </>
+            )}
+            <div className={styles.lineTokenBottom}></div>
+          </div>
+          <input
+            placeholder={`0.00000`}
+            value={amountA}
+            onChange={(e) => setAmountA(e.target.value)}
+            className={styles.inputAdd}
+          />
+        </div>
+
+        <div className={styles.inputAddContainer}>
+          <div className={styles.labelTokenAdd}>
+            <div className={styles.lineTokenTop}></div>
+            {infoB && (
+              <>
+                <img
+                  src={getTokenIcon(infoB.address)}
+                  alt={infoB.symbol}
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                    marginRight: 6,
+                  }}
+                />
+                <span>{infoB.symbol}</span>
+              </>
+            )}
+            <div className={styles.lineTokenBottom}></div>
+          </div>
+          <input
+            placeholder={`0.00000`}
+            value={amountB}
+            onChange={(e) => setAmountB(e.target.value)}
+            className={styles.inputAdd}
+          />
+        </div>
+      </div>
+
+      {infoB && (
+        <>
+          <img
+            src={getTokenIcon(infoB.address)}
+            alt={infoB.symbol}
+            className={styles.tokenImgWorLeft}
+          />
+        </>
+      )}
+
+      {infoA && (
+        <>
+          <img
+            src={getTokenIcon(infoA.address)}
+            alt={infoA.symbol}
+            className={styles.tokenImgWorRight}
+          />
+        </>
+      )}
+
+      <div className={styles.wormholeContainer}>
+        <button onClick={onSubmit} className={styles.btnAddLiquidity}>
+          Add Liquidity
+        </button>
+      </div>
     </div>
   );
 }

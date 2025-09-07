@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { Address } from "viem";
 import { AddLiquidityDrawer } from "./AddLiquidityDrawer";
 import { RemoveLiquidityDrawer } from "./RemoveLiquidityDrawer";
-import styles from "../../popup.module.css";
+import styles from "../../modal.module.css";
 
 export function LiquidityModal({
   tokenA,
