@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import type { Address } from "viem";
-import { isAddress } from "viem";
+import { isAddress, getAddress, erc20Abi } from "viem";
+import { usePublicClient } from "wagmi";
 import { TOKENLIST } from "../../../lib/tokens";
 import styles from "@ui/styles/TokenSelector.module.css";
 import arrowIcone from "../../../assets/arrow-selector.png";
@@ -18,6 +19,11 @@ type Token = {
   hidden?: boolean;
 };
 
+const norm = (a: string) => a.toLowerCase();
+const checksum = (a: string): Address => {
+  try { return getAddress(a as Address); } catch { return a as Address; }
+};
+
 export default function TokenSelector({
   value,
   onChange,
@@ -27,7 +33,9 @@ export default function TokenSelector({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [importing, setImporting] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const pc = usePublicClient();
 
   const { tokens: imported, add: addImported, remove: removeImported, byAddress } =
     useImportedTokens();
@@ -52,16 +60,16 @@ export default function TokenSelector({
   // Merge base + imported (dedupe by address)
   const allTokens: Token[] = useMemo(() => {
     const map = new Map<string, Token>();
-    for (const t of baseTokens) map.set(t.address.toLowerCase(), t);
+    for (const t of baseTokens) map.set(norm(t.address), t);
     for (const t of imported) {
-      const key = t.address.toLowerCase();
+      const key = norm(t.address);
       if (!map.has(key)) map.set(key, t as Token);
     }
     return Array.from(map.values());
   }, [baseTokens, imported]);
 
   const selectedToken = useMemo(
-    () => allTokens.find((t) => t.address === value),
+    () => allTokens.find((t) => norm(t.address) === norm(value)),
     [allTokens, value]
   );
 
@@ -69,24 +77,54 @@ export default function TokenSelector({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return allTokens;
-
     return allTokens.filter((t) => {
       const symbol = t.symbol?.toLowerCase() || "";
       const name = t.name?.toLowerCase() || "";
       const addr = t.address.toLowerCase();
-      return (
-        symbol.includes(q) || name.includes(q) || addr.includes(q)
-      );
+      return symbol.includes(q) || name.includes(q) || addr.includes(q);
     });
   }, [allTokens, query]);
 
-  // Is the query a valid ERC-20 address not already listed?
+  // Valid ERC-20 address not already listed?
   const canShowImport = useMemo(() => {
     if (!isAddress(query as Address)) return false;
-    const exists =
-      allTokens.some((t) => t.address.toLowerCase() === query.toLowerCase());
-    return !exists;
-  }, [query, allTokens]);
+    const exists = allTokens.some((t) => norm(t.address) === norm(query));
+    return !exists && !importing;
+  }, [query, allTokens, importing]);
+
+  // Minimal import: resolve symbol via standard ERC-20 ABI (strings); fallback UNKNOWN
+  async function resolveAndImport(addr: Address) {
+    const ca = checksum(addr);
+    setImporting(true);
+    try {
+      let symbol = "UNKNOWN";
+      let name: string | undefined = undefined;
+      let decimals: number | undefined = undefined;
+
+      if (pc) {
+        try {
+          const [s, n, d] = await Promise.all([
+            pc.readContract({ address: ca, abi: erc20Abi, functionName: "symbol" }),
+            pc.readContract({ address: ca, abi: erc20Abi, functionName: "name" }),
+            pc.readContract({ address: ca, abi: erc20Abi, functionName: "decimals" }),
+          ]);
+          if (typeof s === "string" && s) symbol = s;
+          if (typeof n === "string" && n) name = n;
+          if (typeof d === "number") decimals = d;
+        } catch {
+          // keep fallbacks
+        }
+      }
+
+      addImported({ address: ca, symbol, name, decimals });
+      // Select immediately
+      onChange(ca);
+      setOpen(false);
+      setQuery("");
+    } finally {
+      setImporting(false);
+    }
+  }
 
   return (
     <div ref={ref} className={styles.container}>
@@ -103,7 +141,6 @@ export default function TokenSelector({
             className={styles.tokenIcon}
           />
         )}
-
         {selectedToken ? selectedToken.symbol : "Select token"}
 
         <img src={arrowIcone} alt="toggle" className={styles.arrowIcone} />
@@ -114,14 +151,13 @@ export default function TokenSelector({
         <div className={styles.dropdown}>
           <span className={styles.titleDropdown}>Select a Token</span>
 
-          {/* Search */}
           <SearchBar value={query} onChange={setQuery} />
 
-          {/* If the query is a valid address not already present, offer import */}
           {canShowImport && (
             <ImportTokenRow
               query={query}
-              onImport={(t) => addImported({ ...t })}
+              onImport={() => resolveAndImport(checksum(query))}
+              disabled={importing}
             />
           )}
 
@@ -130,21 +166,20 @@ export default function TokenSelector({
             Tokens by 24h Volume
           </span>
 
-          {/* Token list */}
           <div className={styles.list}>
             {filtered.map((t) => {
-              const lower = t.address.toLowerCase();
-              const isImported = !!byAddress.get(lower as Address);
+              const isImported = !!byAddress.get(norm(t.address));
               return (
                 <div
                   key={t.address}
-                  onClick={() => {
-                    onChange(t.address);
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // sélection avant fermeture globale
+                    onChange(checksum(t.address));
                     setOpen(false);
                     setQuery("");
                   }}
                   className={`${styles.item} ${
-                    t.address === value ? styles.selected : ""
+                    norm(t.address) === norm(value) ? styles.selected : ""
                   }`}
                 >
                   <img
@@ -161,8 +196,9 @@ export default function TokenSelector({
                     <button
                       className={styles.removeBtn}
                       title="Remove imported token"
-                      onClick={(e) => {
+                      onMouseDown={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         removeImported(t.address as Address);
                       }}
                     >

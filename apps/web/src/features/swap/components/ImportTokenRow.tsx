@@ -1,4 +1,3 @@
-// ImportTokenRow.tsx
 import React from "react";
 import type { Address } from "viem";
 import { isAddress } from "viem";
@@ -10,7 +9,7 @@ export function ImportTokenRow({
   disabled,
 }: {
   query: string;
-  onImport: (t: { address: Address; symbol: string }) => void;
+  onImport: () => void;        
   disabled?: boolean;
 }) {
   const valid = isAddress(query as Address);
@@ -26,9 +25,10 @@ export function ImportTokenRow({
       </div>
       <button
         className={styles.importBtn}
-        onClick={() =>
-          onImport({ address: query as Address, symbol: "CUSTOM" })
-        }
+        onMouseDown={(e) => {       
+          e.preventDefault();
+          if (!disabled) onImport(); 
+        }}
         disabled={disabled}
       >
         Import
