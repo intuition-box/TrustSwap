@@ -243,9 +243,10 @@ export default function SwapForm() {
           onClick={() => {
             setTokenIn(tokenOut);
             setTokenOut(tokenIn);
-            setAmountOut("");
+            setAmountIn(amountOut);
+            setAmountOut(amountIn);
             setBestPath(null);
-            setLastOutBn(null);
+            setLastOutBn(null); 
           }}
         />
 
