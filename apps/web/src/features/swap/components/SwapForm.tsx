@@ -28,7 +28,7 @@ const isNative = (a?: Address) =>
 
 const norm = (a: string) => a.toLowerCase();
 
-// Helpers affichage / quote
+
 const normalizeAmountStr = (s: string) => String(s).replace(",", ".").trim();
 const fmt5 = (n: string | number) => {
   const x = Number(n);
@@ -36,7 +36,7 @@ const fmt5 = (n: string | number) => {
   return x.toFixed(5).replace(/\.?0+$/, "");
 };
 
-// Prend la première promesse qui résout avec succès (équivalent sans TS-issues à Promise.any)
+
 function firstSuccess<T>(promises: Promise<T>[]): Promise<T> {
   return new Promise((resolve, reject) => {
     let pending = promises.length;
@@ -85,11 +85,10 @@ export default function SwapForm() {
   const [pairData, setPairData] =
     useState<Awaited<ReturnType<typeof fetchPair>>>(null);
 
-  // best path + outBn
   const [bestPath, setBestPath] = useState<Address[] | null>(null);
   const [lastOutBn, setLastOutBn] = useState<bigint | null>(null);
 
-  // merge TOKENLIST + imported
+
   const { tokens: imported } = useImportedTokens();
 
   const tokenMap = useMemo(() => {
@@ -125,7 +124,6 @@ export default function SwapForm() {
     };
   }
 
-  // Construit des paths candidats (Router attend le wrapped pour le natif)
   function buildPaths(tin: Address, tout: Address): Address[][] {
     const WT = addresses.WTTRUST as Address;
     const TSWP = addresses.TSWP as Address;
@@ -133,14 +131,13 @@ export default function SwapForm() {
     const A = isNative(tin) ? WT : tin;
     const B = isNative(tout) ? WT : tout;
 
-    // direct + via connecteurs principaux
+    
     const paths: Address[][] = [
       [A, B],
       [A, WT, B],
       [A, TSWP, B],
     ];
 
-    // dédup
     const seen = new Set<string>();
     const uniq: Address[][] = [];
     for (const p of paths) {
@@ -153,7 +150,7 @@ export default function SwapForm() {
     return uniq;
   }
 
-  // Quote rapide via Router: essaie plusieurs paths en parallèle et renvoie la première qui marche
+  
   async function fastRouterQuote(
     tin: Address,
     tout: Address,
@@ -178,7 +175,7 @@ export default function SwapForm() {
     return firstSuccess(calls);
   }
 
-  // Effet de quote: lance hook + router en parallèle, prend la 1ère réponse
+  
   const quoteSeq = useRef(0);
   useEffect(() => {
     const amtNorm = normalizeAmountStr(amountIn);
@@ -206,7 +203,7 @@ export default function SwapForm() {
 
         const first = await firstSuccess([pHook, pFast]);
 
-        if (quoteSeq.current !== seq) return; // réponse obsolète
+        if (quoteSeq.current !== seq) return; 
 
         setAmountOut(fmt5(first.outFmt));
         setBestPath(first.path);
@@ -220,9 +217,9 @@ export default function SwapForm() {
     }, 80); // micro-debounce
 
     return () => clearTimeout(timer);
-  }, [tokenIn, tokenOut, amountIn, quoteDetails]); // pc n’est pas requis ici (capturé dans fastRouterQuote)
+  }, [tokenIn, tokenOut, amountIn, quoteDetails]); 
 
-  // Pair data (pour price impact)
+  // Pair data 
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -237,7 +234,7 @@ export default function SwapForm() {
     };
   }, [tokenIn, tokenOut, fetchPair]);
 
-  // Estimation réseau (utilise bestPath & lastOutBn)
+  // Estimation réseau
   useEffect(() => {
     let alive = true;
     (async () => {

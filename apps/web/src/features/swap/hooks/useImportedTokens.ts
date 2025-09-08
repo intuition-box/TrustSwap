@@ -29,7 +29,6 @@ export function useImportedTokens(opts?: { chainId?: number }) {
   const [tokens, setTokens] = useState<ImportedToken[]>([]);
   const bcRef = useRef<BroadcastChannel | null>(null);
 
-  // Lecture initiale (synchro pour éviter le "flash")
   useLayoutEffect(() => {
     if (!ls) return;
     try {
@@ -40,7 +39,6 @@ export function useImportedTokens(opts?: { chainId?: number }) {
     }
   }, [ls, key]);
 
-  // Abonnements: storage (autres onglets), BroadcastChannel (même onglet autres instances), CustomEvent (fallback)
   useEffect(() => {
     function onStorage(e: StorageEvent) {
       if (e.key !== key) return;
@@ -101,7 +99,7 @@ export function useImportedTokens(opts?: { chainId?: number }) {
       );
       if (exists) return prev;
       const next = [token, ...prev];
-      commit(next);         // ⬅️ notifie les autres instances
+      commit(next);  
       return next;
     });
   }
@@ -111,7 +109,7 @@ export function useImportedTokens(opts?: { chainId?: number }) {
       const next = prev.filter(
         (t) => t.address.toLowerCase() !== address.toLowerCase()
       );
-      if (next.length !== prev.length) commit(next); // ⬅️ notifie les autres instances
+      if (next.length !== prev.length) commit(next);
       return next;
     });
   }

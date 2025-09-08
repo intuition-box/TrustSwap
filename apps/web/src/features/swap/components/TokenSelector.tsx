@@ -92,7 +92,7 @@ export default function TokenSelector({
     return !exists && !importing;
   }, [query, allTokens, importing]);
 
-  // Minimal import: resolve symbol via standard ERC-20 ABI (strings); fallback UNKNOWN
+  
   async function resolveAndImport(addr: Address) {
     const ca = checksum(addr);
     setImporting(true);
@@ -173,7 +173,7 @@ export default function TokenSelector({
                 <div
                   key={t.address}
                   onMouseDown={(e) => {
-                    e.preventDefault(); // sélection avant fermeture globale
+                    e.preventDefault(); 
                     onChange(checksum(t.address));
                     setOpen(false);
                     setQuery("");
