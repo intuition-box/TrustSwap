@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import styles from "../styles/Layout.module.css";
-import PrivyConnect from "./PrivyConnect";
+import { ConnectButton } from "./ConnectButton"
 
 export default function Layout() {
   const location = useLocation();
@@ -56,7 +56,7 @@ export default function Layout() {
               </div>
             </div>
           </nav>
-          <div className={styles.connectPage}><PrivyConnect /></div>
+          <div className={styles.connectPage}><ConnectButton /></div>
         </div>
       </header>
       <main>
