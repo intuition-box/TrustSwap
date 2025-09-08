@@ -1,4 +1,3 @@
-// useImportedTokens.ts
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Address } from "viem";
 
@@ -11,61 +10,89 @@ export type ImportedToken = {
 
 const BASE_KEY = "ts:importedTokens";
 
-function safeStorage() {
+function safeStorage(): Storage | null {
   try {
-    const testKey = "__ts_test__";
-    window.localStorage.setItem(testKey, "1");
-    window.localStorage.removeItem(testKey);
-    return window.localStorage;
+    const k = "__ts_test__";
+    localStorage.setItem(k, "1");
+    localStorage.removeItem(k);
+    return localStorage;
   } catch {
     return null;
   }
 }
 
-function readJSON<T>(ls: Storage, key: string, fallback: T): T {
-  try {
-    const raw = ls.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-function writeJSON(ls: Storage, key: string, value: unknown) {
-  try {
-    ls.setItem(key, JSON.stringify(value));
-  } catch {
-    // quota/full/blocked → ignore mais garde l'état en mémoire
-  }
-}
-
 export function useImportedTokens(opts?: { chainId?: number }) {
   const ls = typeof window !== "undefined" ? safeStorage() : null;
-  const key = (opts?.chainId ? `${BASE_KEY}:${opts.chainId}` : BASE_KEY);
+  const key = opts?.chainId ? `${BASE_KEY}:${opts.chainId}` : BASE_KEY;
+  const LOCAL_EVT = `${key}:sync`;
 
   const [tokens, setTokens] = useState<ImportedToken[]>([]);
-  const dirtyRef = useRef(false);
+  const bcRef = useRef<BroadcastChannel | null>(null);
 
-  // Lecture initiale synchro pour éviter le "flash" sans tokens
+  // Lecture initiale (synchro pour éviter le "flash")
   useLayoutEffect(() => {
     if (!ls) return;
-    const initial = readJSON<ImportedToken[]>(ls, key, []);
-    setTokens(initial);
+    try {
+      const raw = ls.getItem(key);
+      setTokens(raw ? JSON.parse(raw) : []);
+    } catch {
+      setTokens([]);
+    }
   }, [ls, key]);
 
-  // Écriture dès qu'on modifie tokens
+  // Abonnements: storage (autres onglets), BroadcastChannel (même onglet autres instances), CustomEvent (fallback)
   useEffect(() => {
-    if (!ls) return;
-    if (!dirtyRef.current) return;
-    writeJSON(ls, key, tokens);
-    dirtyRef.current = false;
-  }, [ls, key, tokens]);
+    function onStorage(e: StorageEvent) {
+      if (e.key !== key) return;
+      try {
+        setTokens(e.newValue ? JSON.parse(e.newValue) : []);
+      } catch {}
+    }
+    window.addEventListener("storage", onStorage);
 
-  const byAddress = useMemo(
-    () => new Map(tokens.map((t) => [t.address.toLowerCase(), t])),
-    [tokens]
-  );
+    let bc: BroadcastChannel | null = null;
+    if (typeof BroadcastChannel !== "undefined") {
+      bc = new BroadcastChannel(key);
+      bcRef.current = bc;
+      bc.onmessage = (ev) => {
+        const data = ev?.data;
+        if (data?.type === "sync" && Array.isArray(data.tokens)) {
+          setTokens(data.tokens);
+        }
+      };
+    }
+
+    const onLocal = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { tokens?: ImportedToken[] } | undefined;
+      if (detail && Array.isArray(detail.tokens)) setTokens(detail.tokens);
+    };
+    window.addEventListener(LOCAL_EVT, onLocal as EventListener);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener(LOCAL_EVT, onLocal as EventListener);
+      if (bc) {
+        bc.close();
+        bcRef.current = null;
+      }
+    };
+  }, [key, LOCAL_EVT]);
+
+  function commit(next: ImportedToken[]) {
+    if (ls) {
+      try {
+        ls.setItem(key, JSON.stringify(next));
+      } catch {}
+    }
+    if (bcRef.current) {
+      try {
+        bcRef.current.postMessage({ type: "sync", tokens: next });
+      } catch {}
+    }
+    try {
+      window.dispatchEvent(new CustomEvent(LOCAL_EVT, { detail: { tokens: next } }));
+    } catch {}
+  }
 
   function add(token: ImportedToken) {
     setTokens((prev) => {
@@ -73,8 +100,9 @@ export function useImportedTokens(opts?: { chainId?: number }) {
         (t) => t.address.toLowerCase() === token.address.toLowerCase()
       );
       if (exists) return prev;
-      dirtyRef.current = true;
-      return [token, ...prev];
+      const next = [token, ...prev];
+      commit(next);         // ⬅️ notifie les autres instances
+      return next;
     });
   }
 
@@ -83,17 +111,15 @@ export function useImportedTokens(opts?: { chainId?: number }) {
       const next = prev.filter(
         (t) => t.address.toLowerCase() !== address.toLowerCase()
       );
-      if (next.length !== prev.length) dirtyRef.current = true;
+      if (next.length !== prev.length) commit(next); // ⬅️ notifie les autres instances
       return next;
     });
   }
 
-  // Option pour forcer une sauvegarde immédiate (utile juste après un import)
-  function flush() {
-    if (!ls) return;
-    writeJSON(ls, key, tokens);
-    dirtyRef.current = false;
-  }
+  const byAddress = useMemo(
+    () => new Map(tokens.map((t) => [t.address.toLowerCase(), t])),
+    [tokens]
+  );
 
-  return { tokens, add, remove, byAddress, flush, storageAvailable: !!ls };
+  return { tokens, add, remove, byAddress };
 }

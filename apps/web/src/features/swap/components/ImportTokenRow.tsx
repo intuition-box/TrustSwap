@@ -7,30 +7,15 @@ export function ImportTokenRow({
   query,
   onImport,
   disabled,
-}: {
-  query: string;
-  onImport: () => void;        
-  disabled?: boolean;
-}) {
-  const valid = isAddress(query as Address);
-  if (!valid) return null;
-
+}: { query: string; onImport: () => void; disabled?: boolean }) {
+  if (!isAddress(query as Address)) return null;
   return (
     <div className={styles.importRow}>
       <div className={styles.importInfo}>
         <span className={styles.importBadge}>Unlisted</span>
-        <span className={styles.addr}>
-          {query.slice(0, 6)}…{query.slice(-4)}
-        </span>
+        <span className={styles.addr}>{query.slice(0,6)}…{query.slice(-4)}</span>
       </div>
-      <button
-        className={styles.importBtn}
-        onMouseDown={(e) => {       
-          e.preventDefault();
-          if (!disabled) onImport(); 
-        }}
-        disabled={disabled}
-      >
+      <button className={styles.importBtn} onMouseDown={(e) => { e.preventDefault(); if (!disabled) onImport(); }} disabled={disabled}>
         Import
       </button>
     </div>
