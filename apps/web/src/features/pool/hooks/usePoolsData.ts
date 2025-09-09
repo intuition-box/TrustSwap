@@ -1,102 +1,135 @@
 // apps/web/src/features/pools/hooks/usePoolsData.ts
-import { useEffect, useMemo, useState } from "react";
-import { type Address, zeroAddress, createPublicClient, http } from "viem";
-import { abi, addresses, INTUITION } from "@trustswap/sdk";
-import { getTokenByAddress, getOrFetchToken } from "../../../lib/tokens";
-import type { PoolItem, TokenInfo } from "../types";
+import { useEffect, useRef, useState } from "react";
+import { type Address, type Abi } from "viem";
+import { usePublicClient } from "wagmi";
+import { abi, addresses } from "@trustswap/sdk";
+import { getOrFetchToken } from "../../../lib/tokens";
+import type { PoolItem } from "../types";
 
-const client = createPublicClient({
-chain: INTUITION,
-transport: http(INTUITION.rpcUrls.default.http[0])
-});
+const chunk = <T,>(a: T[], n = 300) =>
+  a.reduce<T[][]>((acc, _, i) => (i % n ? acc : [...acc, a.slice(i, i + n)]), []);
 
+function toAbi(x: unknown): Abi { return (Array.isArray(x) ? x : (x as any)?.abi) as Abi; }
+const FACTORY_ABI = toAbi(abi.UniswapV2Factory);
+const PAIR_ABI    = toAbi(abi.UniswapV2Pair);
+const dbg = (...args: any[]) => console.log("[usePoolsData]", ...args);
 
 export function usePoolsData(limit = 50, offset = 0) {
-const [loading, setLoading] = useState(true);
-const [error, setError] = useState<string | null>(null);
-const [items, setItems] = useState<PoolItem[]>([]);
+  const pc = usePublicClient({ chainId: 13579 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState<string | null>(null);
+  const [items, setItems]     = useState<PoolItem[]>([]);
+  const runIdRef = useRef(0);
 
+  useEffect(() => {
+    if (!pc) { dbg("no public client"); return; }
 
-useEffect(() => {
-(async () => {
-try {
-setLoading(true);
-const total = await client.readContract({
-address: addresses.UniswapV2Factory as Address,
-abi: abi.UniswapV2Factory,
-functionName: "allPairsLength",
-}) as bigint;
-const start = Number(offset);
-const end = Math.min(Number(total), start + limit);
+    dbg("start", { limit, offset, chainId: pc?.chain?.id, hasMulticall3: !!pc.chain?.contracts?.multicall3 });
 
+    const runId = ++runIdRef.current;
+    (async () => {
+      try {
+        setLoading(true); setError(null);
 
-const pairAddrs = await Promise.all(
-Array.from({ length: end - start }, (_, i) =>
-client.readContract({
-address: addresses.UniswapV2Factory as Address,
-abi: abi.UniswapV2Factory,
-functionName: "allPairs",
-args: [BigInt(start + i)],
-})
-)
-);
+        const factory = addresses.UniswapV2Factory as Address;
+        const canMulticall = !!pc.chain?.contracts?.multicall3;
+        dbg("factory", factory);
 
+        const total = await pc.readContract({
+          address: factory, abi: FACTORY_ABI, functionName: "allPairsLength",
+        }) as bigint;
+        dbg("total pairs", total?.toString());
 
-const pairs = await Promise.all(
-  pairAddrs.map(async (pair) => {
-    const [t0, t1] = await Promise.all([
-      client.readContract({ address: pair as Address, abi: abi.UniswapV2Pair, functionName: "token0" }),
-      client.readContract({ address: pair as Address, abi: abi.UniswapV2Pair, functionName: "token1" }),
-    ]);
+        const start = Number(offset);
+        const end   = Math.min(Number(total), start + limit);
+        const idxs  = Array.from({ length: end - start }, (_, i) => BigInt(start + i));
+        dbg("range", { start, end, count: idxs.length });
 
-    // 🚑 viem renvoie un tuple ou des props sans underscore
-    const reserves: any = await client.readContract({
-      address: pair as Address,
-      abi: abi.UniswapV2Pair,
-      functionName: "getReserves",
-    });
+        // 1) Pairs
+        const pairs: Address[] = [];
+        for (const ids of chunk(idxs, 900)) {
+          dbg("fetch pairs chunk", { size: ids.length, mode: canMulticall ? "multicall" : "loop" });
+          const res = canMulticall
+            ? await pc.multicall({
+                allowFailure: false,
+                contracts: ids.map((i) => ({
+                  address: factory, abi: FACTORY_ABI, functionName: "allPairs", args: [i],
+                })),
+              })
+            : await Promise.all(ids.map((i) =>
+                pc.readContract({ address: factory, abi: FACTORY_ABI, functionName: "allPairs", args: [i] })
+              ));
+          pairs.push(...(res as Address[]));
+          dbg("pairs so far", pairs.length);
+        }
+        if (!pairs.length) { if (runId === runIdRef.current) setItems([]); return; }
 
-    const reserve0: bigint =
-      (Array.isArray(reserves) ? reserves[0] : reserves?.reserve0 ?? reserves?._reserve0) ?? 0n;
-    const reserve1: bigint =
-      (Array.isArray(reserves) ? reserves[1] : reserves?.reserve1 ?? reserves?._reserve1) ?? 0n;
+        // 2) token0 / token1 / reserves
+        type Meta = { pair: Address; t0: Address; t1: Address; r0: bigint; r1: bigint };
+        const metas: Meta[] = [];
 
-    const t0Info = await getOrFetchToken(t0 as Address);
-    const t1Info = await getOrFetchToken(t1 as Address);
+        for (const grp of chunk(pairs, 300)) {
+          dbg("fetch meta chunk", { size: grp.length, mode: canMulticall ? "multicall" : "loop" });
+          if (canMulticall) {
+            const contracts = grp.flatMap((p) => ([
+              { address: p, abi: PAIR_ABI, functionName: "token0" } as const,
+              { address: p, abi: PAIR_ABI, functionName: "token1" } as const,
+              { address: p, abi: PAIR_ABI, functionName: "getReserves" } as const,
+            ]));
+            const res = await pc.multicall({ allowFailure: false, contracts });
 
-    const item: PoolItem = {
-      pair: pair as Address,
-      token0: t0Info,
-      token1: t1Info,
-      reserve0,               // ✅ toujours bigint
-      reserve1,               // ✅ toujours bigint
-      srf: addresses.StakingRewardsFactory as Address,
-      staking: null,
-    };
-    return item;
-  })
-);
+            for (let i = 0; i < grp.length; i++) {
+              const t0 = res[i * 3 + 0] as Address;
+              const t1 = res[i * 3 + 1] as Address;
+              const rv = res[i * 3 + 2] as any;
+              const r0 = (Array.isArray(rv) ? rv[0] : (rv?.reserve0 ?? rv?._reserve0 ?? 0n)) as bigint;
+              const r1 = (Array.isArray(rv) ? rv[1] : (rv?.reserve1 ?? rv?._reserve1 ?? 0n)) as bigint;
+              metas.push({ pair: grp[i], t0, t1, r0, r1 });
+            }
+          } else {
+            const batch = await Promise.all(grp.map(async (p) => {
+              const [t0, t1, rv] = await Promise.all([
+                pc.readContract({ address: p, abi: PAIR_ABI, functionName: "token0" }),
+                pc.readContract({ address: p, abi: PAIR_ABI, functionName: "token1" }),
+                pc.readContract({ address: p, abi: PAIR_ABI, functionName: "getReserves" }),
+              ]) as [Address, Address, any];
+              const r0 = (Array.isArray(rv) ? rv[0] : (rv?.reserve0 ?? rv?._reserve0 ?? 0n)) as bigint;
+              const r1 = (Array.isArray(rv) ? rv[1] : (rv?.reserve1 ?? rv?._reserve1 ?? 0n)) as bigint;
+              return { pair: p, t0, t1, r0, r1 } as Meta;
+            }));
+            metas.push(...batch);
+          }
+          dbg("metas so far", metas.length);
+        }
 
+        // 3) Enrichissement metadata tokens
+        dbg("enrich tokens", { count: metas.length });
+        const rows: PoolItem[] = await Promise.all(metas.map(async (m) => {
+          const [t0Info, t1Info] = await Promise.all([
+            getOrFetchToken(m.t0), getOrFetchToken(m.t1),
+          ]);
+          return {
+            pair: m.pair,
+            token0: t0Info,
+            token1: t1Info,
+            reserve0: m.r0,
+            reserve1: m.r1,
+            srf: addresses.StakingRewardsFactory as Address,
+            staking: null,
+          } satisfies PoolItem;
+        }));
+        dbg("rows ready", rows.length);
 
-setItems(pairs);
-} catch (e: any) {
-setError(e?.message || String(e));
-} finally {
-setLoading(false);
-}
-})();
-}, [limit, offset]);
+        if (runId === runIdRef.current) setItems(rows);
+      } catch (e: any) {
+        console.error("[usePoolsData] error", e);
+        if (runId === runIdRef.current) setError(e?.message ?? String(e));
+      } finally {
+        if (runId === runIdRef.current) setLoading(false);
+        dbg("done");
+      }
+    })();
+  }, [pc?.chain?.id, limit, offset]); 
 
-
-return { loading, error, items };
-}
-
-
-function tokenToInfo(x: any): TokenInfo {
-return {
-address: x.address,
-symbol: x.symbol,
-decimals: x.decimals,
-logoURI: x.logoURI,
-};
+  return { loading, error, items };
 }

@@ -58,10 +58,8 @@ const FALLBACK_SYMBOLS: Record<number, ProtocolSymbols> = {
 
 // --- API exportée par le module ---
 export function getProtocolConfig() {
-  // 1) on prend d’abord le SDK normalisé (source de vérité)
   let addrs: ProtocolAddresses | undefined = FROM_SDK;
 
-  // 2) sinon fallback par chainId (utile offline)
   if (!addrs?.ROUTER02 || !addrs?.FACTORY || !addrs?.WNATIVE) {
     addrs = FALLBACK_ADDRESSES[APP_CHAIN_ID];
   }

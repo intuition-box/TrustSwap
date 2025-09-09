@@ -1,6 +1,6 @@
 // apps/web/src/features/pools/hooks/useStakingData.ts
 import { useAccount, usePublicClient } from "wagmi";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Address, Abi } from "viem";
 import { erc20Abi, formatUnits, zeroAddress } from "viem";
 import { addresses } from "@trustswap/sdk";
@@ -28,21 +28,45 @@ const PAIR_ABI = [
   ] },
 ] as const satisfies Abi;
 
+type StakingSlice = {
+  staking: Address | null;
+  rewardToken?: Awaited<ReturnType<typeof getOrFetchToken>>;
+  rewardRatePerSec?: bigint;
+  earned?: bigint;
+  stakedBalance?: bigint;
+  epochAprPct?: number;
+};
+
 export function useStakingData(pools: PoolItem[]) {
   const { address: user } = useAccount();
   const client = usePublicClient();
-  const [data, setData] = useState<PoolItem[]>(pools);
 
+  // ✅ on stocke uniquement le “slice” staking par paire
+  const [stakingMap, setStakingMap] = useState<Record<string, StakingSlice>>({});
+
+  // clé stable des paires (évite JSON.stringify volumineux)
+  const pairsKey = useMemo(
+    () => pools.length ? pools.map(p => (p.pair as string).toLowerCase()).sort().join(",") : "none",
+    [pools]
+  );
+
+  // 👇 Lecture on-chain du staking (ne se déclenche que si la liste d’adresses change)
   useEffect(() => {
-    if (!client || !pools?.length) return;
+    if (!client || !pools.length) return;
+    let cancelled = false;
 
     (async () => {
       const now = Math.floor(Date.now() / 1000);
-      const out: PoolItem[] = [];
 
       for (const p of pools) {
-        const farm = FARMS.find(f => f.stakingToken.toLowerCase() === (p.pair as string).toLowerCase());
-        if (!farm) { out.push({ ...p, epochAprPct: 0, staking: null }); continue; }
+        const key = (p.pair as string).toLowerCase();
+        const farm = FARMS.find(f => f.stakingToken.toLowerCase() === key);
+        if (!farm) {
+          if (!cancelled) {
+            setStakingMap(prev => ({ ...prev, [key]: { staking: null, epochAprPct: 0 } }));
+          }
+          continue;
+        }
 
         const staking = farm.stakingRewards as Address;
         const rewardsToken = farm.rewardsToken as Address;
@@ -65,28 +89,32 @@ export function useStakingData(pools: PoolItem[]) {
             );
           }
           const res = await Promise.all(reads);
-          rewardRate    = res[0] as bigint;       // tokens/sec (en "wei" du token)
+          rewardRate    = res[0] as bigint;
           periodFinish  = res[1] as bigint;
           totalStakedLP = res[2] as bigint;
           earned        = user ? (res[3] as bigint) : 0n;
           userStakedLP  = user ? (res[4] as bigint) : 0n;
         } catch {
-          out.push({
-            ...p,
-            staking,
-            rewardToken: await getOrFetchToken(rewardsToken),
-            rewardRatePerSec: rewardRate,
-            earned,
-            stakedBalance: userStakedLP,
-            epochAprPct: 0,
-          });
+          if (!cancelled) {
+            setStakingMap(prev => ({
+              ...prev,
+              [key]: {
+                staking,
+                rewardToken: prev[key]?.rewardToken, // garde si déjà fetch
+                rewardRatePerSec: rewardRate,
+                earned,
+                stakedBalance: userStakedLP,
+                epochAprPct: 0,
+              }
+            }));
+          }
           continue;
         }
 
         // --- prix du token de reward en WTTRUST ---
         const rewardPriceNative = await getNativePriceViaPair(client, rewardsToken, WNATIVE_ADDRESS);
 
-        // --- valeur de TA MISE en WTTRUST ---
+        // --- valeur TA mise (WTTRUST) ---
         let userStakeNative = 0; // WTTRUST
         try {
           const totalSupplyLP = await client.readContract({
@@ -95,48 +123,61 @@ export function useStakingData(pools: PoolItem[]) {
             functionName: "totalSupply",
           }) as bigint;
 
-          const tvlNative = Number(p.tvlNative || 0);                 // en WTTRUST
+          const tvlNative = Number(p.tvlNative || 0);
           const userSharePool = totalSupplyLP === 0n ? 0 : Number(userStakedLP) / Number(totalSupplyLP);
-          userStakeNative = tvlNative * userSharePool;                 // valeur de ta mise
+          userStakeNative = tvlNative * userSharePool;
         } catch {
           userStakeNative = 0;
         }
 
-        // --- TON flux de rewards (normalisé par décimales) ---
-        const rewardRateTokens = Number(formatUnits(rewardRate, decRw)); // tokens/sec (en unités humaines)
+        // --- APR perso ---
+        const rewardRateTokens = Number(formatUnits(rewardRate, decRw));
         const userShareStaked = totalStakedLP === 0n ? 0 : Number(userStakedLP) / Number(totalStakedLP);
-        const userRewardPerSecNative = rewardRateTokens * rewardPriceNative * userShareStaked; // WTTRUST/sec
-
-        // --- APR perso (sur 365j) ---
+        const userRewardPerSecNative = rewardRateTokens * rewardPriceNative * userShareStaked;
         const active = now < Number(periodFinish || 0n);
-        let epochAprPct = 0;
-        if (active && userStakeNative > 0 && userRewardPerSecNative > 0) {
-          const yearly = userRewardPerSecNative * 31_536_000;          // 365 j
-          epochAprPct = (yearly / userStakeNative) * 100;
-        } else {
-          epochAprPct = 0;
+        const epochAprPct =
+          active && userStakeNative > 0 && userRewardPerSecNative > 0
+            ? (userRewardPerSecNative * 31_536_000 / userStakeNative) * 100
+            : 0;
+        const fetchedRewardToken = await getOrFetchToken(rewardsToken);
+
+        if (!cancelled) {
+          setStakingMap(prev => {
+            const cur = prev[key]; 
+            return {
+              ...prev,
+              [key]: {
+                staking,
+                rewardToken: cur?.rewardToken ?? fetchedRewardToken,
+                rewardRatePerSec: rewardRate,
+                earned,
+                stakedBalance: userStakedLP,
+                epochAprPct,
+              },
+            };
+          });
         }
-
-        out.push({
-          ...p,
-          staking,
-          rewardToken: await getOrFetchToken(rewardsToken),
-          rewardRatePerSec: rewardRate, // garde la valeur brute si tu en as besoin ailleurs
-          earned,
-          stakedBalance: userStakedLP,
-          epochAprPct,
-        });
       }
-
-      setData(out);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, JSON.stringify(pools.map(x => (x.pair as string).toLowerCase()))]);
 
-  return data;
+    return () => { cancelled = true; };
+  }, [client, pairsKey, WNATIVE_ADDRESS, addresses.UniswapV2Factory]);
+
+  const merged = useMemo<PoolItem[]>(() => {
+    return pools.map(p => {
+      const key = (p.pair as string).toLowerCase();
+      const s = stakingMap[key];
+      return {
+        ...p,
+        ...(s ?? { staking: null, epochAprPct: 0 }),
+      } as PoolItem;
+    });
+  }, [pools, stakingMap]);
+
+  return merged;
 }
 
-// ---- helpers identiques à avant ----
+// ---- helpers inchangés ----
 async function getNativePriceViaPair(client: any, token: Address, WNATIVE: Address): Promise<number> {
   try {
     if (token.toLowerCase() === WNATIVE.toLowerCase()) return 1;

@@ -1,3 +1,4 @@
+// apps/web/src/features/pools/components/PoolsTable.tsx
 import { useMemo } from "react";
 import type { Address } from "viem";
 import { usePoolsData } from "../hooks/usePoolsData";
@@ -16,10 +17,41 @@ export function PoolsTable({
   query: string;
   onOpenLiquidity: (a: Address, b: Address) => void;
 }) {
-  const { items, loading, error } = usePoolsData(50, (page - 1) * 50);
-  const { volMap, priceMap } = usePairsVolume1D(items);       // 1) prix & vol
-  const withMetrics = usePairMetrics(items, volMap, priceMap); // 2) TVL & APR pool
-  const withStaking = useStakingData(withMetrics);            // 3) APR epoch perso & rewards
+  const pageSize = 50;
+  const { items, loading, error } = usePoolsData(pageSize, (page - 1) * pageSize);
+
+  if (loading) return <div>Loading pools…</div>;
+  if (error)   return <div style={{ color: "#f66" }}>Error: {error}</div>;
+  if (!items.length) return <div>Aucune pool</div>;
+
+  return (
+    <PoolsTableInner
+      page={page}
+      query={query}
+      items={items}
+      onOpenLiquidity={onOpenLiquidity}
+      pageSize={pageSize}
+    />
+  );
+}
+
+function PoolsTableInner({
+  page,
+  query,
+  items,
+  onOpenLiquidity,
+  pageSize,
+}: {
+  page: number;
+  query: string;
+  items: ReturnType<typeof usePoolsData>["items"];
+  onOpenLiquidity: (a: Address, b: Address) => void;
+  pageSize: number;
+}) {
+  // ⬇️ Ces hooks ne se montent que quand `items` est non-vide
+  const { volMap, priceMap }   = usePairsVolume1D(items);
+  const withMetrics            = usePairMetrics(items, volMap, priceMap);
+  const withStaking            = useStakingData(withMetrics);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -30,9 +62,6 @@ export function PoolsTable({
         p.token1.symbol.toLowerCase().includes(q)
     );
   }, [withStaking, query]);
-
-  if (loading) return <div>Loading pools…</div>;
-  if (error) return <div style={{ color: "#f66" }}>Error: {error}</div>;
 
   return (
     <div style={{ overflow: "auto" }}>
@@ -53,7 +82,7 @@ export function PoolsTable({
           {filtered.map((p, i) => (
             <PoolRow
               key={p.pair}
-              index={i + 1}
+              index={(page - 1) * pageSize + i + 1}
               pool={p}
               onOpenLiquidity={onOpenLiquidity}
             />
