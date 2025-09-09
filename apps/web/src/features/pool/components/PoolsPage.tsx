@@ -53,7 +53,7 @@ export default function PoolsPage() {
       <div className={styles.halo}></div>
 
       {/* Stats globales au-dessus du tableau */}
-      <div>
+      <div className={styles.containerStat}>
         <GlobalStats />
       </div>
 

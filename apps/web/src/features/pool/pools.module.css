@@ -1,9 +1,12 @@
 .sectionPool {
     height: 100vh;
-    padding-top: 12vh;
+    padding-top: 9vh;
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 70vw;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .halo {
@@ -140,3 +143,39 @@
     }
   }
 
+.containerStat {
+  margin-right: auto;
+  margin-bottom: 5vh;
+}
+
+.statGlobalPool {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  height: 5vh;
+  margin-right: auto;
+}
+
+.lineStatGlobal {
+  height: 100%;
+  width: 0.1vh;
+  min-width: 1px;
+  background-color: var(--border-grey);
+}
+
+.statPool {
+  display: flex;
+  flex-direction: column;
+}
+
+.titleStat {
+  color: var(--stat-text);
+  letter-spacing: -0.05vh;
+  margin-bottom: 0.7vh;
+}
+
+.valueStat {
+  font-size: 2.5vh;
+  color: var(--text-color);
+}

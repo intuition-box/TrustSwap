@@ -1,3 +1,4 @@
+// apps/web/src/features/pools/components/PoolRow.tsx
 import React from "react";
 import type { Address } from "viem";
 import type { PoolItem } from "../types";
@@ -12,7 +13,8 @@ import { StakeClaimCell } from "./cells/StakeClaimCell";
 import styles from "../tableau.module.css";
 
 export default React.memo(PoolRow, (prev, next) => {
-  const a = prev.pool, b = next.pool;
+  const a = prev.pool,
+    b = next.pool;
   return (
     a.pair === b.pair &&
     a.tvlNative === b.tvlNative &&
@@ -25,32 +27,30 @@ export default React.memo(PoolRow, (prev, next) => {
 export function PoolRow({
   index,
   pool,
+  loading = false,
   onOpenLiquidity,
 }: {
   index: number;
   pool: PoolItem;
+  loading?: boolean;
   onOpenLiquidity: (a: Address, b: Address) => void;
 }) {
   return (
     <tr
-    className={styles.ligneTableau}
-    onClick={() =>
-      onOpenLiquidity(pool.token0.address, pool.token1.address)
-    }
-  >
-    <IndexCell index={index} />
-    <PoolCell
-      token0={pool.token0}
-      token1={pool.token1}
-      pair={pool.pair}
-    />
-    <TvlCell value={pool.tvlNative} />
-    <Volume1DCell value={pool.vol1dNative} />
-    <PoolAprCell value={pool.poolAprPct} />
-    <EpochAprCell value={pool.epochAprPct} />
-    <RewardCell rewardToken={pool.rewardToken} earned={pool.earned} />
-    <StakeClaimCell pool={pool} />
-  </tr>
-  
+      className={styles.ligneTableau}
+      onClick={() =>
+        !loading &&
+        onOpenLiquidity(pool.token0.address, pool.token1.address)
+      }
+    >
+      <IndexCell index={index} loading={loading} />
+      <PoolCell token0={pool.token0} token1={pool.token1} pair={pool.pair} loading={loading} />
+      <TvlCell value={pool.tvlNative} loading={loading} />
+      <Volume1DCell value={pool.vol1dNative} loading={loading} />
+      <PoolAprCell value={pool.poolAprPct} loading={loading} />
+      <EpochAprCell value={pool.epochAprPct} loading={loading} />
+      <RewardCell rewardToken={pool.rewardToken} earned={pool.earned} loading={loading} />
+      <StakeClaimCell pool={pool} loading={loading} />
+    </tr>
   );
 }

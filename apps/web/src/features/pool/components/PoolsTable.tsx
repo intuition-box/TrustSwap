@@ -7,6 +7,7 @@ import { useStakingData } from "../hooks/useStakingData";
 import { PoolRow } from "./PoolRow";
 import { usePairsVolume1D } from "../hooks/usePairsVolume1D";
 import styles from "../tableau.module.css";
+import type { PoolItem } from "../types";
 
 export function PoolsTable({
   page,
@@ -20,15 +21,34 @@ export function PoolsTable({
   const pageSize = 50;
   const { items, loading, error } = usePoolsData(pageSize, (page - 1) * pageSize);
 
-  if (loading) return <div>Loading pools…</div>;
-  if (error)   return <div style={{ color: "#f66" }}>Error: {error}</div>;
-  if (!items.length) return <div>Aucune pool</div>;
+  // Skeleton pool factice pour afficher lors du loading
+  const skeletonPool: PoolItem = {
+    pair: "",
+    token0: { symbol: "", address: "" as `0x${string}` },
+    token1: { symbol: "", address: "" as `0x${string}` },
+    reserve0: 0n,
+    reserve1: 0n,
+    tvlNative: 0,
+    vol1dNative: 0,
+    poolAprPct: 0,
+    epochAprPct: 0,
+    rewardToken: { symbol: "", address: "" as `0x${string}` },
+    earned: 0,
+  };
+
+  const rowsToRender = loading
+    ? Array.from({ length: pageSize }, () => skeletonPool)
+    : items;
+
+  if (error) return <div style={{ color: "#f66" }}>Error: {error}</div>;
+  if (!items.length && !loading) return <div>Aucune pool</div>;
 
   return (
     <PoolsTableInner
       page={page}
       query={query}
-      items={items}
+      items={rowsToRender}
+      loading={loading}
       onOpenLiquidity={onOpenLiquidity}
       pageSize={pageSize}
     />
@@ -39,19 +59,21 @@ function PoolsTableInner({
   page,
   query,
   items,
+  loading,
   onOpenLiquidity,
   pageSize,
 }: {
   page: number;
   query: string;
-  items: ReturnType<typeof usePoolsData>["items"];
+  items: PoolItem[];
+  loading: boolean;
   onOpenLiquidity: (a: Address, b: Address) => void;
   pageSize: number;
 }) {
-  // ⬇️ Ces hooks ne se montent que quand `items` est non-vide
-  const { volMap, priceMap }   = usePairsVolume1D(items);
-  const withMetrics            = usePairMetrics(items, volMap, priceMap);
-  const withStaking            = useStakingData(withMetrics);
+  // Ces hooks ne se montent que quand `items` est non-vide
+  const { volMap, priceMap } = usePairsVolume1D(items);
+  const withMetrics = usePairMetrics(items, volMap, priceMap);
+  const withStaking = useStakingData(withMetrics);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -64,7 +86,7 @@ function PoolsTableInner({
   }, [withStaking, query]);
 
   return (
-    <div style={{ overflow: "auto" }}>
+    <div className={styles.tableauContainer}>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead className={styles.poolFilters}>
           <tr>
@@ -81,9 +103,10 @@ function PoolsTableInner({
         <tbody>
           {filtered.map((p, i) => (
             <PoolRow
-              key={p.pair}
+              key={loading ? `loading-${i}` : p.pair}
               index={(page - 1) * pageSize + i + 1}
               pool={p}
+              loading={loading}
               onOpenLiquidity={onOpenLiquidity}
             />
           ))}
