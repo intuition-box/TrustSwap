@@ -4,9 +4,23 @@ import type { PoolItem } from "../../types";
 import { useStakeActions } from "../../hooks/useStakeActions";
 import styles from "../../pools.module.css";
 
-export function StakeClaimCell({ pool }: { pool: PoolItem }) {
+export function StakeClaimCell({
+  pool,
+  loading = false,
+}: {
+  pool: PoolItem;
+  loading?: boolean;
+}) {
   const [amt, setAmt] = useState("");
   const { stake, withdraw, claim } = useStakeActions(pool.staking || undefined);
+
+  if (loading) {
+    return (
+      <td>
+        <div className={styles.skeletonLine}></div>
+      </td>
+    );
+  }
 
   return (
     <td>
