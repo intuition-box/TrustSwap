@@ -23,7 +23,6 @@ export function usePairsVolume1D(items: PoolItem[]) {
 
   useEffect(() => {
     if (!pc || !items?.length) {
-      console.log("[usePairsVolume1D] skip", { hasPc: !!pc, items: items?.length ?? 0 });
       setVolMap({});
       setPriceMap({});
       return;
@@ -34,7 +33,6 @@ export function usePairsVolume1D(items: PoolItem[]) {
 
     (async () => {
       try {
-        console.log("[usePairsVolume1D] start", { items: items.length, pairsKey });
         const w = WNATIVE_ADDRESS.toLowerCase();
 
         // 1) prix spot via réserves sur les paires WNATIVE
@@ -48,7 +46,6 @@ export function usePairsVolume1D(items: PoolItem[]) {
           if (a1 === w && r0 > 0) prices[a0] = r1 / r0;
         }
         if (cancelled || runId !== runIdRef.current) return;
-        console.log("[usePairsVolume1D] priceMap size", Object.keys(prices).length);
         setPriceMap(prices);
 
         // 2) fenêtre 24h estimée dynamiquement
@@ -71,14 +68,12 @@ export function usePairsVolume1D(items: PoolItem[]) {
           arr.reduce<T[][]>((acc, _, i) => (i % n ? acc : [...acc, arr.slice(i, i + n)]), []);
 
         for (const grp of chunk(pairs, 200)) {
-          console.log("[usePairsVolume1D] fetch logs chunk", { size: grp.length });
           const logs = await pc.getLogs({
             address: grp,
             event: swapEvent,
             fromBlock,
             toBlock: latest.number,
           });
-          console.log("[usePairsVolume1D] logs received", logs.length);
 
           for (const lg of logs) {
             const key = lg.address.toLowerCase();
@@ -127,7 +122,6 @@ export function usePairsVolume1D(items: PoolItem[]) {
             })
             .sort((a, b) => b.v - a.v)
             .slice(0, 10);
-          console.log("[usePairsVolume1D] vol per pair (top)", dump);
           console.log("[usePairsVolume1D] volMap size", Object.keys(vol).length);
           setVolMap(vol);
         }

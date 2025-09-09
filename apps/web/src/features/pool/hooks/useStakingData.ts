@@ -140,15 +140,14 @@ export function useStakingData(pools: PoolItem[]) {
             ? (userRewardPerSecNative * 31_536_000 / userStakeNative) * 100
             : 0;
         const fetchedRewardToken = await getOrFetchToken(rewardsToken);
-        
+
         if (!cancelled) {
           setStakingMap(prev => {
-            const cur = prev[key]; // état courant pour cette pair (peut déjà exister)
+            const cur = prev[key]; 
             return {
               ...prev,
               [key]: {
                 staking,
-                // si on avait déjà un rewardToken, on le garde, sinon on prend celui qu'on vient de fetch
                 rewardToken: cur?.rewardToken ?? fetchedRewardToken,
                 rewardRatePerSec: rewardRate,
                 earned,
@@ -164,13 +163,12 @@ export function useStakingData(pools: PoolItem[]) {
     return () => { cancelled = true; };
   }, [client, pairsKey, WNATIVE_ADDRESS, addresses.UniswapV2Factory]);
 
-  // ✅ Fusion dynamique: à chaque render, on renvoie pools + slices staking
   const merged = useMemo<PoolItem[]>(() => {
     return pools.map(p => {
       const key = (p.pair as string).toLowerCase();
       const s = stakingMap[key];
       return {
-        ...p,                 // <-- contient tvlNative, vol1dNative, poolAprPct frais (toujours frais)
+        ...p,
         ...(s ?? { staking: null, epochAprPct: 0 }),
       } as PoolItem;
     });

@@ -10,10 +10,8 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-// 🔒 util d'affichage: bigint(18) -> string
 const fmt18 = (x?: bigint) => (x !== undefined ? formatUnits(x, 18) : "0");
 
-// optionnel: mise en forme "jolie"
 const pretty = (s: string) => {
   const n = Number(s);
   return Number.isFinite(n)

@@ -22,7 +22,7 @@ export function usePoolsData(limit = 50, offset = 0) {
   const runIdRef = useRef(0);
 
   useEffect(() => {
-    if (!pc) { dbg("no public client"); return; } // gated par PoolsPage aussi
+    if (!pc) { dbg("no public client"); return; }
 
     dbg("start", { limit, offset, chainId: pc?.chain?.id, hasMulticall3: !!pc.chain?.contracts?.multicall3 });
 

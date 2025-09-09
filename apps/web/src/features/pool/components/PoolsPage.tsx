@@ -20,10 +20,8 @@ export default function PoolsPage() {
   const [tokenA, setTokenA] = useState<Address | undefined>();
   const [tokenB, setTokenB] = useState<Address | undefined>();
 
-  // 🔐 S’assure que le client est prêt sur la bonne chaîne (Intuition Testnet: 13579)
   const pc = usePublicClient({ chainId: 13579 });
 
-  // 👇 clé pour re-monter la table quand le client est prêt (premier rendu) ou si la page change
   const tableKey = useMemo(
     () => (pc ? `chain:${pc.chain?.id ?? "unknown"}:p${page}` : "init"),
     [pc?.chain?.id, page]

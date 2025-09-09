@@ -45,7 +45,6 @@ export function useGlobalStats() {
           abi: UniFactoryAbi,
           functionName: "allPairsLength",
         }) as bigint;
-        console.log("[useGlobalStats] total pairs", len?.toString());
  
         const ids = Array.from({ length: Number(len) }, (_, i) => BigInt(i));
         const chunk = <T,>(a: T[], n = 300) => a.reduce<T[][]>((acc, _, i) => (i % n ? acc : [...acc, a.slice(i, i + n)]), []);
@@ -54,7 +53,6 @@ export function useGlobalStats() {
         // 1) pairs
         const pairs: Address[] = [];
         for (const ch of idChunks) {
-          console.log("[useGlobalStats] fetch pairs chunk", ch.length);
           const res = await pc.multicall({
             allowFailure: false,
             contracts: ch.map((i) => ({
@@ -77,7 +75,6 @@ export function useGlobalStats() {
             { address: p, abi: UniPairAbi, functionName: "getReserves" } as const,
           ])),
         });
-        console.log("[useGlobalStats] meta entries", meta.length);
  
         let tvlWT = 0n;
         let vol24hWT = 0n;
@@ -86,7 +83,6 @@ export function useGlobalStats() {
         const wtPairs: Address[] = [];
         const isWT0: Record<string, boolean> = {};
 
-        // ⚠️ selon l’ABI, getReserves peut revenir en tuple [r0, r1, ts] ou en objet { _reserve0, _reserve1, ... }.
         const getR0R1 = (x: any): [bigint, bigint] =>
           Array.isArray(x) ? [x[0] as bigint, x[1] as bigint] : [x._reserve0 as bigint, x._reserve1 as bigint];
 
@@ -106,18 +102,15 @@ export function useGlobalStats() {
             tvlWT += 2n * r1;
           }
         }
-        console.log("[useGlobalStats] wtPairs", wtPairs.length, "tvlWT", tvlWT.toString());
  
         // 3) Volume & TX 24h (logs Swap)
         if (wtPairs.length) {
           const latest = await pc.getBlockNumber(); // bigint
           const span = 17280n;                      // bigint (~24h à 5s/bloc)
           const fromBlock = latest > span ? (latest - span) : 0n;
-          console.log("[useGlobalStats] logs window", { from: fromBlock.toString(), to: latest.toString() });
  
           const addrChunks = chunk(wtPairs, 200);
           for (const addrs of addrChunks) {
-            console.log("[useGlobalStats] fetch logs for", addrs.length, "pairs");
             const logs = await pc.getLogs({
               address: addrs,
               event: swapEvent,
