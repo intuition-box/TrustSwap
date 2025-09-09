@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { parseAbiItem, formatUnits } from "viem";
 import { usePublicClient } from "wagmi";
 import { WNATIVE_ADDRESS } from "../../../lib/tokens";
+import type { PoolItem } from "../types"; // Adjust the path if PoolItem is defined elsewhere
 
 const swapEvent = parseAbiItem(
   "event Swap(address indexed sender, uint amount0In, uint amount1In, uint amount0Out, uint amount1Out, address indexed to)"

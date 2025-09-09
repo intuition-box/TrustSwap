@@ -1,5 +1,3 @@
-// GlobalStats.tsx
-import React from "react";
 import { formatUnits } from "viem";
 import { useGlobalStats } from "../hooks/useGlobalStats";
 
