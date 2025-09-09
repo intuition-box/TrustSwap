@@ -11,6 +11,13 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./abi": {
+      "types": "./dist/abi/index.d.ts",
+      "import": "./dist/abi/index.js"
+    },
+    "./abi/*": {
+      "import": "./dist/abi/*.json"
     }
   },
   "scripts": {
@@ -20,5 +27,8 @@
   "devDependencies": {
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "viem": "^2.37.2"
   }
 }

@@ -121,9 +121,6 @@ importers:
       ethers:
         specifier: ^6.15.0
         version: 6.15.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      viem:
-        specifier: ^2.37.1
-        version: 2.37.2(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@4.0.5)
     devDependencies:
       '@nomicfoundation/hardhat-ethers':
         specifier: 3.1.0
@@ -133,7 +130,7 @@ importers:
         version: 1.1.0(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))
       '@nomicfoundation/hardhat-toolbox':
         specifier: ^6.1.0
-        version: 6.1.0(zhqzdtowebg5t2b57gveqajuuu)
+        version: 6.1.0(3wzis7jaxvpx2a4fngdbtnc2lu)
       '@nomicfoundation/hardhat-verify':
         specifier: 2.1.1
         version: 2.1.1(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))
@@ -154,7 +151,7 @@ importers:
         version: 2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10)
       hardhat-gas-reporter:
         specifier: 2.3.0
-        version: 2.3.0(bufferutil@4.0.9)(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@4.0.5)
+        version: 2.3.0(bufferutil@4.0.9)(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))(typescript@5.9.2)(utf-8-validate@5.0.10)
       solidity-coverage:
         specifier: 0.8.16
         version: 0.8.16(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))
@@ -172,6 +169,10 @@ importers:
         version: 5.9.2
 
   packages/sdk:
+    dependencies:
+      viem:
+        specifier: ^2.37.2
+        version: 2.37.2(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@4.0.5)
     devDependencies:
       tsx:
         specifier: ^4.20.5
@@ -6503,7 +6504,7 @@ snapshots:
       ethereumjs-util: 7.1.5
       hardhat: 2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10)
 
-  '@nomicfoundation/hardhat-toolbox@6.1.0(zhqzdtowebg5t2b57gveqajuuu)':
+  '@nomicfoundation/hardhat-toolbox@6.1.0(3wzis7jaxvpx2a4fngdbtnc2lu)':
     dependencies:
       '@nomicfoundation/hardhat-chai-matchers': 2.1.0(@nomicfoundation/hardhat-ethers@3.1.0(ethers@6.15.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10)))(chai@4.5.0)(ethers@6.15.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))
       '@nomicfoundation/hardhat-ethers': 3.1.0(ethers@6.15.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))
@@ -6518,7 +6519,7 @@ snapshots:
       chai: 4.5.0
       ethers: 6.15.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       hardhat: 2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10)
-      hardhat-gas-reporter: 2.3.0(bufferutil@4.0.9)(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@4.0.5)
+      hardhat-gas-reporter: 2.3.0(bufferutil@4.0.9)(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))(typescript@5.9.2)(utf-8-validate@5.0.10)
       solidity-coverage: 0.8.16(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))
       ts-node: 10.9.2(@types/node@24.3.0)(typescript@5.9.2)
       typechain: 8.3.2(typescript@5.9.2)
@@ -9615,7 +9616,7 @@ snapshots:
     optionalDependencies:
       uglify-js: 3.19.3
 
-  hardhat-gas-reporter@2.3.0(bufferutil@4.0.9)(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@4.0.5):
+  hardhat-gas-reporter@2.3.0(bufferutil@4.0.9)(hardhat@2.26.3(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@24.3.0)(typescript@5.9.2))(typescript@5.9.2)(utf-8-validate@5.0.10))(typescript@5.9.2)(utf-8-validate@5.0.10):
     dependencies:
       '@ethersproject/abi': 5.8.0
       '@ethersproject/bytes': 5.8.0
@@ -9632,7 +9633,7 @@ snapshots:
       lodash: 4.17.21
       markdown-table: 2.0.0
       sha1: 1.1.1
-      viem: 2.37.2(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@4.0.5)
+      viem: 2.37.2(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -10331,6 +10332,21 @@ snapshots:
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.8.3
+    transitivePeerDependencies:
+      - zod
+
+  ox@0.9.3(typescript@5.9.2):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.0
+      '@noble/ciphers': 1.3.0
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.1.0(typescript@5.9.2)(zod@4.0.5)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 5.9.2
     transitivePeerDependencies:
       - zod
 
@@ -11358,6 +11374,23 @@ snapshots:
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     optionalDependencies:
       typescript: 5.8.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+
+  viem@2.37.2(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10):
+    dependencies:
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.1.0(typescript@5.9.2)(zod@4.0.5)
+      isows: 1.0.7(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      ox: 0.9.3(typescript@5.9.2)
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    optionalDependencies:
+      typescript: 5.9.2
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate

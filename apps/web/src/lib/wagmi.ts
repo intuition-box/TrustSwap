@@ -1,14 +1,14 @@
-import { createConfig, http } from "wagmi"
-import type { Chain } from "viem"
-import { INTUITION } from "@trustswap/sdk" 
-
-
-const INTUITION_CHAIN = INTUITION as unknown as Chain
+import { createConfig, http } from "wagmi";
+import { INTUITION } from "@trustswap/sdk";
 
 export const wagmiConfig = createConfig({
-  chains: [INTUITION_CHAIN],
+  chains: [INTUITION],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [INTUITION_CHAIN.id]: http(INTUITION_CHAIN.rpcUrls.default.http[0]),
+    [INTUITION.id]: http(
+      INTUITION.rpcUrls.default.http[0],
+      { batch: true } 
+    ),
   },
-})
+  batch: { multicall: { wait: 32, batchSize: 1024 } },
+});

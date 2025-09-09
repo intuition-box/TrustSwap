@@ -16,11 +16,16 @@ export function PoolsTable({
   query: string;
   onOpenLiquidity: (a: Address, b: Address) => void;
 }) {
-  const { items, loading, error } = usePoolsData(50, (page - 1) * 50);
-  const { volMap, priceMap } = usePairsVolume1D(items);       // 1) prix & vol
-  const withMetrics = usePairMetrics(items, volMap, priceMap); // 2) TVL & APR pool
-  const withStaking = useStakingData(withMetrics);            // 3) APR epoch perso & rewards
+  const pageSize = 50;
+  const { items, loading, error } = usePoolsData(pageSize, (page - 1) * pageSize);
 
+  const { volMap, priceMap } = usePairsVolume1D(items);
+
+  const withMetrics = usePairMetrics(items, volMap, priceMap);
+
+  const withStaking = useStakingData(withMetrics);
+
+  // Filtre mémoïsé
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return withStaking;
@@ -31,8 +36,21 @@ export function PoolsTable({
     );
   }, [withStaking, query]);
 
-  if (loading) return <div>Loading pools…</div>;
-  if (error) return <div style={{ color: "#f66" }}>Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className={styles.loadingBox}>
+        <span>Chargement des pools…</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div style={{ color: "#f66" }}>Error: {error}</div>;
+  }
+
+  if (!filtered.length) {
+    return <div className={styles.emptyBox}>Aucune pool trouvée.</div>;
+  }
 
   return (
     <div style={{ overflow: "auto" }}>
@@ -53,7 +71,7 @@ export function PoolsTable({
           {filtered.map((p, i) => (
             <PoolRow
               key={p.pair}
-              index={i + 1}
+              index={(page - 1) * pageSize + i + 1}
               pool={p}
               onOpenLiquidity={onOpenLiquidity}
             />
