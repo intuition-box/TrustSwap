@@ -1,3 +1,4 @@
+// apps/web/src/features/pools/components/PoolsTable.tsx
 import { useMemo } from "react";
 import type { Address } from "viem";
 import { usePoolsData } from "../hooks/usePoolsData";
@@ -19,13 +20,39 @@ export function PoolsTable({
   const pageSize = 50;
   const { items, loading, error } = usePoolsData(pageSize, (page - 1) * pageSize);
 
-  const { volMap, priceMap } = usePairsVolume1D(items);
+  if (loading) return <div>Loading pools…</div>;
+  if (error)   return <div style={{ color: "#f66" }}>Error: {error}</div>;
+  if (!items.length) return <div>Aucune pool</div>;
 
-  const withMetrics = usePairMetrics(items, volMap, priceMap);
+  return (
+    <PoolsTableInner
+      page={page}
+      query={query}
+      items={items}
+      onOpenLiquidity={onOpenLiquidity}
+      pageSize={pageSize}
+    />
+  );
+}
 
-  const withStaking = useStakingData(withMetrics);
+function PoolsTableInner({
+  page,
+  query,
+  items,
+  onOpenLiquidity,
+  pageSize,
+}: {
+  page: number;
+  query: string;
+  items: ReturnType<typeof usePoolsData>["items"];
+  onOpenLiquidity: (a: Address, b: Address) => void;
+  pageSize: number;
+}) {
+  // ⬇️ Ces hooks ne se montent que quand `items` est non-vide
+  const { volMap, priceMap }   = usePairsVolume1D(items);
+  const withMetrics            = usePairMetrics(items, volMap, priceMap);
+  const withStaking            = useStakingData(withMetrics);
 
-  // Filtre mémoïsé
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return withStaking;
@@ -35,22 +62,6 @@ export function PoolsTable({
         p.token1.symbol.toLowerCase().includes(q)
     );
   }, [withStaking, query]);
-
-  if (loading) {
-    return (
-      <div className={styles.loadingBox}>
-        <span>Chargement des pools…</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div style={{ color: "#f66" }}>Error: {error}</div>;
-  }
-
-  if (!filtered.length) {
-    return <div className={styles.emptyBox}>Aucune pool trouvée.</div>;
-  }
 
   return (
     <div style={{ overflow: "auto" }}>

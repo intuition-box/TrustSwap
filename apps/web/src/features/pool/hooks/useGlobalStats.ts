@@ -21,34 +21,40 @@ export function useGlobalStats() {
   const [data, setData] = useState<{ tvlWT: bigint; vol24hWT: bigint; tx24h: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setErr] = useState<string | null>(null);
-
+ 
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-
+ 
         if (!pc) {
           setErr("Public client is not defined.");
+          console.log("[useGlobalStats] no public client");
           setLoading(false);
           return;
         }
-
+ 
         const factory = addresses.UniswapV2Factory as Address;
-
+        console.log("[useGlobalStats] start", {
+          chainId: pc?.chain?.id, factory, multicall3: pc?.chain?.contracts?.multicall3
+        });
+ 
         // allPairsLength → bigint
         const len = await pc.readContract({
           address: factory,
           abi: UniFactoryAbi,
           functionName: "allPairsLength",
         }) as bigint;
-
+        console.log("[useGlobalStats] total pairs", len?.toString());
+ 
         const ids = Array.from({ length: Number(len) }, (_, i) => BigInt(i));
         const chunk = <T,>(a: T[], n = 300) => a.reduce<T[][]>((acc, _, i) => (i % n ? acc : [...acc, a.slice(i, i + n)]), []);
         const idChunks = chunk(ids);
-
+ 
         // 1) pairs
         const pairs: Address[] = [];
         for (const ch of idChunks) {
+          console.log("[useGlobalStats] fetch pairs chunk", ch.length);
           const res = await pc.multicall({
             allowFailure: false,
             contracts: ch.map((i) => ({
@@ -60,7 +66,8 @@ export function useGlobalStats() {
           });
           pairs.push(...(res as Address[]));
         }
-
+        console.log("[useGlobalStats] pairs length", pairs.length);
+ 
         // 2) token0/token1/getReserves
         const meta = await pc.multicall({
           allowFailure: false,
@@ -70,11 +77,12 @@ export function useGlobalStats() {
             { address: p, abi: UniPairAbi, functionName: "getReserves" } as const,
           ])),
         });
-
+        console.log("[useGlobalStats] meta entries", meta.length);
+ 
         let tvlWT = 0n;
         let vol24hWT = 0n;
         let tx24h = 0;
-
+ 
         const wtPairs: Address[] = [];
         const isWT0: Record<string, boolean> = {};
 
@@ -90,30 +98,34 @@ export function useGlobalStats() {
 
           if (t0.toLowerCase() === WNATIVE_ADDRESS.toLowerCase()) {
             wtPairs.push(pairs[i]);
-            isWT0[pairs[i]] = true;
-            tvlWT += 2n * r0;               // bigint only
+            isWT0[pairs[i].toLowerCase()] = true;
+            tvlWT += 2n * r0;
           } else if (t1.toLowerCase() === WNATIVE_ADDRESS.toLowerCase()) {
             wtPairs.push(pairs[i]);
-            isWT0[pairs[i]] = false;
-            tvlWT += 2n * r1;               // bigint only
+            isWT0[pairs[i].toLowerCase()] = false;
+            tvlWT += 2n * r1;
           }
         }
-
+        console.log("[useGlobalStats] wtPairs", wtPairs.length, "tvlWT", tvlWT.toString());
+ 
         // 3) Volume & TX 24h (logs Swap)
         if (wtPairs.length) {
           const latest = await pc.getBlockNumber(); // bigint
           const span = 17280n;                      // bigint (~24h à 5s/bloc)
           const fromBlock = latest > span ? (latest - span) : 0n;
-
+          console.log("[useGlobalStats] logs window", { from: fromBlock.toString(), to: latest.toString() });
+ 
           const addrChunks = chunk(wtPairs, 200);
           for (const addrs of addrChunks) {
+            console.log("[useGlobalStats] fetch logs for", addrs.length, "pairs");
             const logs = await pc.getLogs({
               address: addrs,
               event: swapEvent,
               fromBlock,
               toBlock: latest,
             });
-
+            console.log("[useGlobalStats] logs received", logs.length);
+ 
             for (const { address, args } of logs) {
               const wtIs0 = isWT0[address.toLowerCase()];
               // sécurise en bigint explicite
@@ -128,16 +140,18 @@ export function useGlobalStats() {
             }
           }
         }
-
+ 
+        console.log("[useGlobalStats] done", { tvlWT: tvlWT.toString(), vol24hWT: vol24hWT.toString(), tx24h });
         setData({ tvlWT, vol24hWT, tx24h });
         setErr(null);
       } catch (e: any) {
+        console.error("[useGlobalStats] error", e);
         setErr(e?.message ?? String(e));
       } finally {
         setLoading(false);
       }
     })();
   }, [pc]);
-
+ 
   return { data, loading, error };
 }

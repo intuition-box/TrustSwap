@@ -1,3 +1,4 @@
+import React from "react";
 import type { Address } from "viem";
 import type { PoolItem } from "../types";
 import { IndexCell } from "./cells/IndexCell";
@@ -9,6 +10,17 @@ import { EpochAprCell } from "./cells/EpochAprCell";
 import { RewardCell } from "./cells/RewardCell";
 import { StakeClaimCell } from "./cells/StakeClaimCell";
 import styles from "../tableau.module.css";
+
+export default React.memo(PoolRow, (prev, next) => {
+  const a = prev.pool, b = next.pool;
+  return (
+    a.pair === b.pair &&
+    a.tvlNative === b.tvlNative &&
+    a.vol1dNative === b.vol1dNative &&
+    a.poolAprPct === b.poolAprPct &&
+    prev.index === next.index
+  );
+});
 
 export function PoolRow({
   index,

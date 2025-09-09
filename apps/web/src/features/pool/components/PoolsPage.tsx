@@ -1,11 +1,15 @@
-import { useState } from "react";
+// apps/web/src/features/pools/components/PoolsPage.tsx
+import React, { useMemo, useState } from "react";
 import type { Address } from "viem";
+import { usePublicClient } from "wagmi";
+
+import GlobalStats from "./GlobalStats";
 import { PoolsTable } from "./PoolsTable";
 import { PoolsFilters } from "./filters/PoolsFilters";
 import { PoolsPagination } from "./filters/PoolsPagination";
 import { LiquidityModal } from "./liquidity/LiquidityModal";
-import { getDefaultPair } from "../../../lib/tokens"; // ← adapte le chemin
-import GlobalStats from "./GlobalStats";
+import { getDefaultPair } from "../../../lib/tokens";
+
 import styles from "../pools.module.css";
 
 export default function PoolsPage() {
@@ -15,6 +19,15 @@ export default function PoolsPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [tokenA, setTokenA] = useState<Address | undefined>();
   const [tokenB, setTokenB] = useState<Address | undefined>();
+
+  // 🔐 S’assure que le client est prêt sur la bonne chaîne (Intuition Testnet: 13579)
+  const pc = usePublicClient({ chainId: 13579 });
+
+  // 👇 clé pour re-monter la table quand le client est prêt (premier rendu) ou si la page change
+  const tableKey = useMemo(
+    () => (pc ? `chain:${pc.chain?.id ?? "unknown"}:p${page}` : "init"),
+    [pc?.chain?.id, page]
+  );
 
   function openEmptyModal() {
     const { tokenIn, tokenOut } = getDefaultPair();
@@ -29,25 +42,52 @@ export default function PoolsPage() {
     setIsOpen(true);
   }
 
+  function onPageChange(next: number) {
+    setPage(next);
+    // confort UX: remonte en haut sur changement de page
+    try {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {}
+  }
+
   return (
     <div className={styles.sectionPool}>
-      <div className={styles.halo}></div> {/* halo au fond */}
+      <div className={styles.halo}></div>
+
+      {/* Stats globales au-dessus du tableau */}
       <div>
         <GlobalStats />
       </div>
+
       <div className={styles.containerPool}>
+        {/* Filtres + bouton Add Liquidity */}
         <div className={styles.filterPoolContainer}>
           <button onClick={openEmptyModal} className={styles.addLiquidityBtn}>
             + Add Liquidity
           </button>
           <PoolsFilters query={query} onQuery={setQuery} />
         </div>
-  
+
+        {/* Tableau des pools */}
         <div className={styles.tableauContainer}>
           <div className={styles.tableauContainerLineTop}></div>
-          <PoolsTable page={page} query={query} onOpenLiquidity={openWithPair} />
-          <PoolsPagination page={page} onPage={setPage} />
-  
+
+          {/* ⛳️ On ne monte la table que quand le client réseau est prêt */}
+          {!pc ? (
+            <div className={styles.loadingBox}>Initialisation du réseau…</div>
+          ) : (
+            <>
+              <PoolsTable
+                key={tableKey}
+                page={page}
+                query={query}
+                onOpenLiquidity={openWithPair}
+              />
+              <PoolsPagination page={page} onPage={onPageChange} />
+            </>
+          )}
+
+          {/* Modal d’ajout de liquidité */}
           {isOpen && (
             <LiquidityModal
               tokenA={tokenA}
@@ -55,9 +95,10 @@ export default function PoolsPage() {
               onClose={() => setIsOpen(false)}
             />
           )}
-                    <div className={styles.tableauContainerLineBottom}></div>
+
+          <div className={styles.tableauContainerLineBottom}></div>
         </div>
       </div>
     </div>
   );
-}  
+}

@@ -33,6 +33,48 @@ export function useStakingData(pools: PoolItem[]) {
   const client = usePublicClient();
   const [data, setData] = useState<PoolItem[]>(pools);
 
+  // NEW: propage les métriques calculées (tvl/vol/apr) dans l'état local
+useEffect(() => {
+  if (!pools?.length) return;
+
+  setData(prev => {
+    if (!prev?.length) return pools; // 1er remplissage
+
+    const nextByAddr = new Map(
+      pools.map(p => [(p.pair as string).toLowerCase(), p])
+    );
+
+    const merged = prev.map(row => {
+      const key = (row.pair as string).toLowerCase();
+      const src = nextByAddr.get(key);
+      if (!src) return row;
+      return {
+        ...row,
+        // ↑ on conserve tout le "staking" déjà lu…
+        // …et on met à jour les métriques qui changent côté pools
+        tvlNative:   src.tvlNative,
+        vol1dNative: src.vol1dNative,
+        poolAprPct:  src.poolAprPct,
+        // (optionnel) si tes tokens/réserves évoluent, tu peux aussi sync :
+        token0: src.token0,
+        token1: src.token1,
+        reserve0: src.reserve0,
+        reserve1: src.reserve1,
+      } as PoolItem;
+    });
+
+    // ajoute les nouvelles paires qui n'existaient pas encore
+    for (const [k, src] of nextByAddr.entries()) {
+      if (!merged.some(r => (r.pair as string).toLowerCase() === k)) {
+        merged.push(src);
+      }
+    }
+
+    return merged;
+  });
+}, [pools]);
+
+
   useEffect(() => {
     if (!client || !pools?.length) return;
 

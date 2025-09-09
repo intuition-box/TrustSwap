@@ -1,45 +1,42 @@
 // apps/web/src/features/pools/hooks/usePairsVolume1D.ts
-import { useEffect, useMemo, useState } from "react";
-import { usePublicClient } from "wagmi";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { parseAbiItem, formatUnits } from "viem";
-import type { PoolItem } from "../types";
+import { usePublicClient } from "wagmi";
 import { WNATIVE_ADDRESS } from "../../../lib/tokens";
 
 const swapEvent = parseAbiItem(
   "event Swap(address indexed sender, uint amount0In, uint amount1In, uint amount0Out, uint amount1Out, address indexed to)"
 );
 
-// cache in-memory
-const volCache = new Map<string, number>();
-const CONCURRENCY = 12;
-
-function key(pair: string, from: bigint, to: bigint) {
-  return `${pair.toLowerCase()}:${from}:${to}`;
-}
-
 export function usePairsVolume1D(items: PoolItem[]) {
   const pc = usePublicClient({ chainId: 13579 });
   const [volMap, setVolMap] = useState<Record<string, number>>({});
   const [priceMap, setPriceMap] = useState<Record<string, number>>({});
+  const runIdRef = useRef(0);
 
-  // 🔑 clé stable quand la liste de paires change
+  // 🔑 clé stable quand les paires changent
   const pairsKey = useMemo(() => {
     if (!items?.length) return "none";
-    // l’ordre importe peu → on trie pour éviter les changements non nécessaires
-    return items.map((p) => (p.pair as string).toLowerCase()).sort().join(",");
+    return items.map(p => (p.pair as string).toLowerCase()).sort().join(",");
   }, [items]);
 
   useEffect(() => {
     if (!pc || !items?.length) {
+      console.log("[usePairsVolume1D] skip", { hasPc: !!pc, items: items?.length ?? 0 });
       setVolMap({});
+      setPriceMap({});
       return;
     }
 
+    const runId = ++runIdRef.current;
     let cancelled = false;
+
     (async () => {
       try {
-        // 1) Prix spot rapides depuis réserves (priorité aux paires WTTRUST)
+        console.log("[usePairsVolume1D] start", { items: items.length, pairsKey });
         const w = WNATIVE_ADDRESS.toLowerCase();
+
+        // 1) prix spot via réserves sur les paires WNATIVE
         const prices: Record<string, number> = { [w]: 1 };
         for (const p of items) {
           const a0 = p.token0.address.toLowerCase();
@@ -49,104 +46,92 @@ export function usePairsVolume1D(items: PoolItem[]) {
           if (a0 === w && r1 > 0) prices[a1] = r0 / r1;
           if (a1 === w && r0 > 0) prices[a0] = r1 / r0;
         }
-        if (cancelled) return;
+        if (cancelled || runId !== runIdRef.current) return;
+        console.log("[usePairsVolume1D] priceMap size", Object.keys(prices).length);
         setPriceMap(prices);
 
-        // 2) Fenêtre 24h dynamique
+        // 2) fenêtre 24h estimée dynamiquement
         const latest = await pc.getBlock({ blockTag: "latest" });
-        const prev   = await pc.getBlock({ blockNumber: latest.number - 100n });
-        const blockTime = Number(latest.timestamp - prev.timestamp) / 100 || 5; // sec
+        const back = latest.number && latest.number > 100n ? 100n : 0n;
+        const prev = back > 0n ? await pc.getBlock({ blockNumber: latest.number - back }) : latest;
+        const blockTime = Number(latest.timestamp - prev.timestamp) / Number(back || 1n) || 5;
         const blocks24h = BigInt(Math.ceil(86_400 / blockTime));
         const fromBlock = latest.number > blocks24h ? latest.number - blocks24h : 0n;
-        const toBlock   = latest.number;
+        console.log("[usePairsVolume1D] blocks", {
+          latest: latest.number?.toString(),
+          from: fromBlock.toString(),
+          estBlockTime: blockTime,
+        });
 
-        // 3) Métadonnées par paire
-        const meta: Record<string, { dec0: number; dec1: number; p0: number; p1: number; wIs0?: boolean }> = {};
-        for (const p of items) {
-          const k = (p.pair as string).toLowerCase();
-          const a0 = p.token0.address.toLowerCase();
-          const a1 = p.token1.address.toLowerCase();
-          meta[k] = {
-            dec0: p.token0.decimals,
-            dec1: p.token1.decimals,
-            p0: prices[a0] ?? (a0 === w ? 1 : 0),
-            p1: prices[a1] ?? (a1 === w ? 1 : 0),
-            wIs0: a0 === w ? true : a1 === w ? false : undefined,
-          };
-        }
+        // 3) logs par groupes
+        const pairs = items.map(p => (p.pair as `0x${string}`));
+        const vol: Record<string, number> = {};
+        const chunk = <T,>(arr: T[], n = 200) =>
+          arr.reduce<T[][]>((acc, _, i) => (i % n ? acc : [...acc, arr.slice(i, i + n)]), []);
 
-        // 4) Process en 2 vagues (WTTRUST d’abord), concurrence limitée + updates progressifs
-        const wtPairs = items
-          .filter(p => p.token0.address.toLowerCase() === w || p.token1.address.toLowerCase() === w)
-          .map(p => p.pair as `0x${string}`);
-        const otherPairs = items
-          .filter(p => p.token0.address.toLowerCase() !== w && p.token1.address.toLowerCase() !== w)
-          .map(p => p.pair as `0x${string}`);
+        for (const grp of chunk(pairs, 200)) {
+          console.log("[usePairsVolume1D] fetch logs chunk", { size: grp.length });
+          const logs = await pc.getLogs({
+            address: grp,
+            event: swapEvent,
+            fromBlock,
+            toBlock: latest.number,
+          });
+          console.log("[usePairsVolume1D] logs received", logs.length);
 
-        const out: Record<string, number> = {};
-        async function processPairs(pairs: `0x${string}`[]) {
-          let i = 0;
-          async function worker() {
-            while (!cancelled && i < pairs.length) {
-              const pair = pairs[i++];
-              const addrLower = pair.toLowerCase();
-              const ck = key(addrLower, fromBlock, toBlock);
+          for (const lg of logs) {
+            const key = lg.address.toLowerCase();
+            const p = items.find(x => (x.pair as string).toLowerCase() === key);
+            if (!p) continue;
 
-              if (volCache.has(ck)) {
-                out[addrLower] = (out[addrLower] || 0) + (volCache.get(ck) as number);
-                // update progressif
-                setVolMap({ ...out });
-                continue;
-              }
+            const a0i = BigInt(lg.args?.amount0In ?? 0n);
+            const a1i = BigInt(lg.args?.amount1In ?? 0n);
+            const a0o = BigInt(lg.args?.amount0Out ?? 0n);
+            const a1o = BigInt(lg.args?.amount1Out ?? 0n);
 
-              try {
-                const logs = await pc.getLogs({
-                  address: pair,
-                  event: swapEvent,
-                  fromBlock,
-                  toBlock,
-                });
-                let volWT = 0;
-                const m = meta[addrLower];
+            const a0Addr = p.token0.address.toLowerCase();
+            const a1Addr = p.token1.address.toLowerCase();
 
-                for (const lg of logs) {
-                  const a0i = (lg.args?.amount0In ?? 0n) as bigint;
-                  const a1i = (lg.args?.amount1In ?? 0n) as bigint;
-                  const a0o = (lg.args?.amount0Out ?? 0n) as bigint;
-                  const a1o = (lg.args?.amount1Out ?? 0n) as bigint;
+            let tradeWT = 0;
+            const wIs0 = a0Addr === w ? true : a1Addr === w ? false : undefined;
 
-                  if (m.wIs0 !== undefined) {
-                    const wt = m.wIs0 ? a0i + a0o : a1i + a1o;
-                    volWT += Number(formatUnits(wt, 18));
-                  } else {
-                    if (a0i > 0n) volWT += Number(formatUnits(a0i, m.dec0)) * (m.p0 || 0);
-                    else if (a1i > 0n) volWT += Number(formatUnits(a1i, m.dec1)) * (m.p1 || 0);
-                    else {
-                      if (a0o > 0n) volWT += Number(formatUnits(a0o, m.dec0)) * (m.p0 || 0);
-                      if (a1o > 0n) volWT += Number(formatUnits(a1o, m.dec1)) * (m.p1 || 0);
-                    }
-                  }
-                }
-
-                volCache.set(ck, volWT);
-                out[addrLower] = (out[addrLower] || 0) + volWT;
-                // update progressif
-                if (!cancelled) setVolMap({ ...out });
-              } catch {
-                // ignore unitaire si erreur RPC
-              }
+            if (wIs0 !== undefined) {
+              // Paire avec WNATIVE → montant côté WNATIVE
+              const wt = wIs0 ? (a0i + a0o) : (a1i + a1o);
+              // WNATIVE est 18 décimales en général; sinon adapter via token*.decimals
+              const wDecimals =
+                wIs0 ? p.token0.decimals : p.token1.decimals;
+              tradeWT = Number(formatUnits(wt, wDecimals));
+            } else {
+              // Paire sans WNATIVE → conversion via prix spot
+              const p0 = prices[a0Addr] ?? 0;
+              const p1 = prices[a1Addr] ?? 0;
+              const v0 = p0 ? Number(formatUnits(a0i + a0o, p.token0.decimals)) * p0 : 0;
+              const v1 = p1 ? Number(formatUnits(a1i + a1o, p.token1.decimals)) * p1 : 0;
+              tradeWT = (Number.isFinite(v0) ? v0 : 0) + (Number.isFinite(v1) ? v1 : 0);
             }
+
+            if (!Number.isFinite(tradeWT)) tradeWT = 0;
+            vol[key] = (vol[key] || 0) + tradeWT;
           }
-          await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
         }
 
-        await processPairs(wtPairs);
-        if (!cancelled) setVolMap(prev => ({ ...prev, ...out }));
-
-        await processPairs(otherPairs);
-        if (!cancelled) setVolMap(prev => ({ ...prev, ...out }));
+        if (!cancelled && runId === runIdRef.current) {
+          // dump debug: top paires par volume
+          const dump = Object.entries(vol)
+            .map(([addr, v]) => {
+              const it = items.find(x => (x.pair as string).toLowerCase() === addr);
+              const label = it ? `${it.token0.symbol}/${it.token1.symbol}` : addr;
+              return { addr, label, v };
+            })
+            .sort((a, b) => b.v - a.v)
+            .slice(0, 10);
+          console.log("[usePairsVolume1D] vol per pair (top)", dump);
+          console.log("[usePairsVolume1D] volMap size", Object.keys(vol).length);
+          setVolMap(vol);
+        }
       } catch (e) {
-        if (!cancelled) {
+        if (!cancelled && runId === runIdRef.current) {
           console.error("usePairsVolume1D error", e);
           setVolMap({});
         }
@@ -154,7 +139,6 @@ export function usePairsVolume1D(items: PoolItem[]) {
     })();
 
     return () => { cancelled = true; };
-  // 🔁 relance quand le client est prêt ou que la liste des paires change
   }, [pc, pairsKey]);
 
   return { volMap, priceMap };
