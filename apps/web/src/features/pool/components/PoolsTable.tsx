@@ -18,42 +18,71 @@ export function PoolsTable({
   query: string;
   onOpenLiquidity: (a: Address, b: Address) => void;
 }) {
-  const pageSize = 50;
+  const pageSize = 10;
   const { items, loading, error } = usePoolsData(pageSize, (page - 1) * pageSize);
 
-  // Skeleton pool factice pour afficher lors du loading
   const skeletonPool: PoolItem = {
-    pair: "",
-    token0: { symbol: "", address: "" as `0x${string}` },
-    token1: { symbol: "", address: "" as `0x${string}` },
+    pair: "0x0000000000000000000000000000000000000000",
+    token0: { symbol: "", address: "" as `0x${string}`, decimals: 18 },
+    token1: { symbol: "", address: "" as `0x${string}`, decimals: 18 },
     reserve0: 0n,
     reserve1: 0n,
     tvlNative: 0,
     vol1dNative: 0,
     poolAprPct: 0,
     epochAprPct: 0,
-    rewardToken: { symbol: "", address: "" as `0x${string}` },
-    earned: 0,
+    rewardToken: { symbol: "", address: "" as `0x${string}`, decimals: 18 },
+    earned: 0n,
   };
 
-  const rowsToRender = loading
-    ? Array.from({ length: pageSize }, () => skeletonPool)
-    : items;
-
   if (error) return <div style={{ color: "#f66" }}>Error: {error}</div>;
-  if (!items.length && !loading) return <div>Aucune pool</div>;
+
+  if (loading) {
+    return (
+      <div className={styles.tableauContainer}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead className={styles.poolFilters}>
+            <tr>
+              <th>#</th>
+              <th>Pool</th>
+              <th>TVL</th>
+              <th>1D Vol</th>
+              <th>Pool APR</th>
+              <th>Epoch APR</th>
+              <th>Reward</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: pageSize }).map((_, i) => (
+              <PoolRow
+                key={`loading-${i}`}
+                index={(page - 1) * pageSize + i + 1}
+                pool={skeletonPool}
+                loading={true}
+                onOpenLiquidity={onOpenLiquidity} 
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  if (!items.length) return <div>Aucune pool</div>;
 
   return (
     <PoolsTableInner
       page={page}
       query={query}
-      items={rowsToRender}
-      loading={loading}
+      items={items}
+      loading={false}
       onOpenLiquidity={onOpenLiquidity}
       pageSize={pageSize}
     />
   );
 }
+
 
 function PoolsTableInner({
   page,
@@ -70,20 +99,40 @@ function PoolsTableInner({
   onOpenLiquidity: (a: Address, b: Address) => void;
   pageSize: number;
 }) {
-  // Ces hooks ne se montent que quand `items` est non-vide
+
   const { volMap, priceMap } = usePairsVolume1D(items);
   const withMetrics = usePairMetrics(items, volMap, priceMap);
   const withStaking = useStakingData(withMetrics);
 
-  const filtered = useMemo(() => {
+  const view = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return withStaking;
-    return withStaking.filter(
-      (p) =>
-        p.token0.symbol.toLowerCase().includes(q) ||
-        p.token1.symbol.toLowerCase().includes(q)
-    );
+
+    const filtered = !q
+      ? withStaking
+      : withStaking.filter(
+          (p) =>
+            p.token0.symbol.toLowerCase().includes(q) ||
+            p.token1.symbol.toLowerCase().includes(q)
+        );
+
+    const hasPos = (p: typeof withStaking[number]) =>
+      (p.stakedBalance ?? 0n) > 0n || (p.walletLpBalance ?? 0n) > 0n;
+
+    return [...filtered].sort((a, b) => {
+      const aPos = hasPos(a) ? 1 : 0;
+      const bPos = hasPos(b) ? 1 : 0;
+      if (aPos !== bPos) return bPos - aPos;            
+
+      const at = a.tvlNative ?? 0;
+      const bt = b.tvlNative ?? 0;
+      if (bt !== at) return bt - at;                      
+
+      const aKey = String(a.pair).toLowerCase();
+      const bKey = String(b.pair).toLowerCase();
+      return aKey < bKey ? -1 : aKey > bKey ? 1 : 0;
+    });
   }, [withStaking, query]);
+
 
   return (
     <div className={styles.tableauContainer}>
@@ -101,7 +150,7 @@ function PoolsTableInner({
           </tr>
         </thead>
         <tbody>
-          {filtered.map((p, i) => (
+          {view.map((p, i) => (
             <PoolRow
               key={loading ? `loading-${i}` : p.pair}
               index={(page - 1) * pageSize + i + 1}
