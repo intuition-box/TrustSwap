@@ -45,7 +45,14 @@ export function PoolRow({
     >
       <IndexCell index={index} loading={loading} />
       <PoolCell token0={pool.token0} token1={pool.token1} pair={pool.pair} loading={loading} />
-      <TvlCell value={pool.tvlNative} loading={loading} />
+      <TvlCell
+        value={pool.tvlNative}
+        token0={pool.token0}
+        token1={pool.token1}
+        reserve0={pool.reserve0}
+        reserve1={pool.reserve1}
+        loading={loading}
+      />
       <Volume1DCell value={pool.vol1dNative} loading={loading} />
       <PoolAprCell value={pool.poolAprPct} loading={loading} />
       <EpochAprCell value={pool.epochAprPct} loading={loading} />

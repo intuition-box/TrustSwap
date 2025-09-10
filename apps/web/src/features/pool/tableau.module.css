@@ -71,3 +71,68 @@
     50% { opacity: 1; }
   }
   
+  /* Positionnement de base */
+.tvlCell { position: relative; }
+
+.tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+}
+
+/* Le panneau du tooltip */
+.tooltipContent {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%) translateY(4px);
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #181818;
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+  color: #e7ecf3;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s ease, transform .12s ease;
+}
+
+
+.tooltip:hover .tooltipContent {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.tokenLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.tokenLine img {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.skeletonLine {
+  height: 14px;
+  width: 80px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #4d4d4d, #3b3b3b, #1a1a1a);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

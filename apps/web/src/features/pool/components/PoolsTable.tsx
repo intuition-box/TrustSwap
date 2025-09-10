@@ -23,17 +23,17 @@ export function PoolsTable({
 
   // Skeleton pool factice pour afficher lors du loading
   const skeletonPool: PoolItem = {
-    pair: "",
-    token0: { symbol: "", address: "" as `0x${string}` },
-    token1: { symbol: "", address: "" as `0x${string}` },
+    pair: "0x0000000000000000000000000000000000000000",
+    token0: { symbol: "", address: "" as `0x${string}`, decimals: 18 },
+    token1: { symbol: "", address: "" as `0x${string}`, decimals: 18 },
     reserve0: 0n,
     reserve1: 0n,
     tvlNative: 0,
     vol1dNative: 0,
     poolAprPct: 0,
     epochAprPct: 0,
-    rewardToken: { symbol: "", address: "" as `0x${string}` },
-    earned: 0,
+    rewardToken: { symbol: "", address: "" as `0x${string}`, decimals: 18 },
+    earned: 0n,
   };
 
   const rowsToRender = loading
