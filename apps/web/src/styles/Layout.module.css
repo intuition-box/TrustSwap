@@ -130,10 +130,10 @@
     box-shadow: 
         0 0 60px 7px var(--orange),
         0 0 10px 1px var(--orange);
-    height: 0.7vh;
-    width: 0.7vh;
+    height: 0.9vh;
+    width: 1.4vh;
     border-radius: 50%;
-    margin-right: 0.4vh;
+    margin-right: 0.5vh;
 }
 
 .connectPage {
@@ -193,4 +193,40 @@
     .line {
         margin-left: 0.6vh;
     }
+}
+
+
+/* Tooltip wrapper (caché par défaut) */
+.comingTooltip {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  transform: translateX(-50%) translateY(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .16s ease, transform .16s ease, visibility .16s;
+  z-index: 50;
+}
+
+
+
+/* Affichage au survol/focus clavier */
+.linkBaseComing:hover .comingTooltip,
+.linkBaseComing:focus .comingTooltip,
+.linkBaseComing:focus-visible .comingTooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* (Optionnel) un petit badge "Coming" si tu veux garder l’élément existant */
+.comingMsg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
 }
