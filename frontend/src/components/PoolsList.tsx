@@ -39,7 +39,7 @@ function shouldShowPair(meta: PairMeta) {
   const t0 = meta.token0.toLowerCase()
   const t1 = meta.token1.toLowerCase()
   if (HIDE.includes(t0) || HIDE.includes(t1)) return false
-  if (meta.r0 === 0n && meta.r1 === 0n) return false // hide empty pools
+  //if (meta.r0 === 0n && meta.r1 === 0n) return false // hide empty pools
   if (ONLY.length > 0 && !(ONLY.includes(t0) || ONLY.includes(t1))) return false
   return true
 }

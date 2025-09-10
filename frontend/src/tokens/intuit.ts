@@ -1,6 +1,6 @@
 import type { Address } from 'viem'
-import { WNATIVE_ADDRESS, TSWP_ADDRESS } from '../config/protocol'
-
+import { WNATIVE_ADDRESS, TSWP_ADDRESS, PINTU_ADDRESS } from '../config/protocol'
+import tTrustIcon from "../assets/trust.png";
 
 export type Currency = {
 symbol: string
@@ -21,14 +21,14 @@ export const TOKENS: Currency[] = [
     name: 'Intuition Native',
     decimals: 18,
     isNative: true,
-  wrapped: WNATIVE_ADDRESS as Address,
-    logoURI: ''
+    wrapped: WNATIVE_ADDRESS as Address,
+    logoURI: tTrustIcon as string,
   },
   {
     symbol: 'WTTRUST',
     name: 'Wrapped tTRUST',
     decimals: 18,
-  address: WNATIVE_ADDRESS as Address,
+    address: WNATIVE_ADDRESS as Address,
     logoURI: ''
   },
   {
@@ -38,6 +38,13 @@ export const TOKENS: Currency[] = [
   address: TSWP_ADDRESS as Address,
     logoURI: ''
   },
+  {
+    symbol: 'PINTU',
+    name: 'PEPE INTU',
+    decimals: 18,
+    address: PINTU_ADDRESS as Address,
+    logoURI: ''
+  }
 
 ]
 
