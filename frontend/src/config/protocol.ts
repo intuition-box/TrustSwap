@@ -22,6 +22,7 @@ export const SHOW_WRAPPED_SYMBOL = false as const;
 export const TOKEN_A = "0x124C4E8470eD201Ae896C2DF6ee7152AB7438d80" as Address;
 export const TOKEN_B = "0x5Fdd4EdD250b9214D77103881bE0F09812d501D6" as Address;
 export const TSWP_ADDRESS = "0x7da120065e104C085fAc6f800d257a6296549cF3" as Address;
+export const PINTU_ADDRESS = "0xBC2B7FCab75987434D11f0EeBd8f47f72DFd2957" as Address;
 export const SHOW_ONLY_TOKENS = '' as const;
 
 /** ---------- Gas config ---------- */

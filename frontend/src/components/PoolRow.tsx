@@ -13,6 +13,7 @@ import {
   parseUnits,
   formatUnits,
   maxUint256,
+  erc20Abi,
 } from "viem"
 
 import { TOKENS } from "../tokens/intuit"
@@ -96,8 +97,8 @@ export default function PoolRow({ pair }: { pair: Address }) {
   const [balance1, setBalance1] = useState<bigint>(0n)
 
   // Form state
-  const [amountAdd0, setAmountAdd0] = useState("0")
-  const [amountAdd1, setAmountAdd1] = useState("0")
+  const [amountAdd0, setAmountAdd0] = useState("")
+  const [amountAdd1, setAmountAdd1] = useState("")
   const [slippage, setSlippage] = useState(0.5) // percent
   const [deadlineMins, setDeadlineMins] = useState(10)
   const [pendingAdd, setPendingAdd] = useState(false)
@@ -238,78 +239,112 @@ async function ensureApproval(token: Address, required: bigint) {
     setLpAllowance(maxUint256)
   }
 
-  const onAdd = async () => {
-    if (!walletClient || !address || !t0 || !t1 || !pc) return
-    setPendingAdd(true)
-    try {
-      const a = parseUnits(amountAdd0 || "0", dec0)
-      const b = parseUnits(amountAdd1 || "0", dec1)
-      const slippageBps = BigInt(Math.floor(slippage * 100))
-      const minA = a - (a * slippageBps / 10_000n)
-      const minB = b - (b * slippageBps / 10_000n)
-      const deadline = BigInt(Math.floor(Date.now() / 1000) + deadlineMins * 60)
+const onAdd = async () => {
+  if (!walletClient || !address || !t0 || !t1 || !pc) return
+  setPendingAdd(true)
 
-      const t0IsWN = isWNative(t0)
-      const t1IsWN = isWNative(t1)
+  try {
+    const a = parseUnits(amountAdd0 || "0", dec0)
+    const b = parseUnits(amountAdd1 || "0", dec1)
+    const slippageBps = BigInt(Math.floor(slippage * 100))
+    const minA = a - (a * slippageBps / 10_000n)
+    const minB = b - (b * slippageBps / 10_000n)
+    const deadline = BigInt(Math.floor(Date.now() / 1000) + deadlineMins * 60)
 
-      if (t0IsWN && t1IsWN) throw new Error("Deux côtés natifs non supportés")
+    const t0IsWN = isWNative(t0)
+    const t1IsWN = isWNative(t1)
 
-      if (t0IsWN) {
-        await ensureApproval(t1, b)
-        await pc.simulateContract({
-          account: address, address: router, abi: RouterABI as any,
-          functionName: "addLiquidityETH",
-          args: [t1, b, minB, minA, address, deadline],
-          value: a,
-        })
-        const data = encodeFunctionData({
-          abi: RouterABI as any,
-          functionName: "addLiquidityETH",
-          args: [t1, b, minB, minA, address, deadline],
-        })
-        const hash = await walletClient.sendTransaction({ account: address, to: router, data, gas: GAS_LIMIT_ADD, gasPrice: GAS_PRICE, value: a })
-        await pc.waitForTransactionReceipt({ hash })
-      } else if (t1IsWN) {
-        await ensureApproval(t0, a)
-        await pc.simulateContract({
-          account: address, address: router, abi: RouterABI as any,
-          functionName: "addLiquidityETH",
-          args: [t0, a, minA, minB, address, deadline],
-          value: b,
-        })
-        const data = encodeFunctionData({
-          abi: RouterABI as any,
-          functionName: "addLiquidityETH",
-          args: [t0, a, minA, minB, address, deadline],
-        })
-        const hash = await walletClient.sendTransaction({ account: address, to: router, data, gas: GAS_LIMIT_ADD, gasPrice: GAS_PRICE, value: b })
-        await pc.waitForTransactionReceipt({ hash })
-      } else {
-        // ERC20 ↔ ERC20
-        await ensureApproval(t0, a)
-        await ensureApproval(t1, b)
-        await pc.simulateContract({
-          account: address, address: router, abi: RouterABI as any,
-          functionName: "addLiquidity",
-          args: [t0, t1, a, b, minA, minB, address, deadline],
-        })
-        const data = encodeFunctionData({
-          abi: RouterABI as any,
-          functionName: "addLiquidity",
-          args: [t0, t1, a, b, minA, minB, address, deadline],
-        })
-        const hash = await walletClient.sendTransaction({ account: address, to: router, data, gas: GAS_LIMIT_ADD, gasPrice: GAS_PRICE })
-        await pc.waitForTransactionReceipt({ hash })
-      }
+    if (t0IsWN && t1IsWN) throw new Error("Deux côtés natifs non supportés")
 
-      alert("Liquidity added ✅")
-    } catch (e:any) {
-      console.error(e)
-      alert(e?.shortMessage || e?.message || "AddLiquidity failed")
-    } finally {
-      setPendingAdd(false)
+    const isETH = t0IsWN || t1IsWN
+    const token = t0IsWN ? t1 : t0
+    const tokenAmount = t0IsWN ? b : a
+    const ethAmount = t0IsWN ? a : b
+    const minToken = t0IsWN ? minB : minA
+    const minETH = t0IsWN ? minA : minB
+const currentAllowance = await pc.readContract({
+  address: token,
+  abi: erc20Abi,
+  functionName: "allowance",
+  args: [address, router],
+}) as bigint;
+
+console.log("⚠️ check allowance of", t1, "for router", router);
+const allowance = await pc.readContract({
+  address: t1,
+  abi: erc20Abi,
+  functionName: "allowance",
+  args: [address, router],
+});
+console.log("↪️  allowance on-chain:", allowance.toString());
+
+
+
+    if (isETH) {
+      await walletClient.writeContract({
+        address: token,
+        abi: erc20Abi,
+        functionName: 'approve',
+        args: [router, tokenAmount], // pas MAX_UINT !
+        account: address,
+      });
+      await pc.simulateContract({
+        account: address,
+        address: router,
+        abi: RouterABI as any,
+        functionName: "addLiquidityETH",
+        args: [token, tokenAmount, minToken, minETH, address, deadline],
+        value: ethAmount,
+      })
+      const data = encodeFunctionData({
+        abi: RouterABI as any,
+        functionName: "addLiquidityETH",
+        args: [token, tokenAmount, minToken, minETH, address, deadline],
+      })
+      const hash = await walletClient.sendTransaction({
+        account: address,
+        to: router,
+        data,
+        gas: GAS_LIMIT_ADD,
+        gasPrice: GAS_PRICE,
+        value: ethAmount,
+      })
+      await pc.waitForTransactionReceipt({ hash })
+    } else {
+      // ERC20 ↔ ERC20
+      await ensureApproval(t0, a)
+      await ensureApproval(t1, b)
+      await pc.simulateContract({
+        account: address,
+        address: router,
+        abi: RouterABI as any,
+        functionName: "addLiquidity",
+        args: [t0, t1, a, b, minA, minB, address, deadline],
+      })
+      const data = encodeFunctionData({
+        abi: RouterABI as any,
+        functionName: "addLiquidity",
+        args: [t0, t1, a, b, minA, minB, address, deadline],
+      })
+      const hash = await walletClient.sendTransaction({
+        account: address,
+        to: router,
+        data,
+        gas: GAS_LIMIT_ADD,
+        gasPrice: GAS_PRICE,
+      })
+      await pc.waitForTransactionReceipt({ hash })
     }
+
+    alert("Liquidity added ✅")
+  } catch (e: any) {
+    console.error(e)
+    alert(e?.shortMessage || e?.message || "AddLiquidity failed")
+  } finally {
+    setPendingAdd(false)
   }
+}
+
 
 
   const onRemove = async () => {
