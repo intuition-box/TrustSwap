@@ -1,6 +1,6 @@
 // src/hooks/useTokenBalance.ts
 import type { Address } from "viem";
-import { erc20Abi, formatUnits } from "viem";
+import { erc20Abi, formatUnits, zeroAddress } from "viem";
 import { useAccount, usePublicClient, useWatchBlocks } from "wagmi";
 import { useEffect, useState } from "react";
 import { getTokenByAddress, isNative } from "../../../lib/tokens";
@@ -18,14 +18,25 @@ type Result = {
 export function useTokenBalance(token?: Address, owner?: Address): Result {
   const { chain } = useAccount();
   const pc = usePublicClient();
+  const isUnsetToken = !token || token.toLowerCase() === zeroAddress;
+
   const [state, setState] = useState<Result>({
     isLoading: !!token && !!owner,
     refetch: async () => {},
   });
 
   async function fetchOnce() {
-    if (!pc || !owner || !token) {
-      setState(s => ({ ...s, isLoading: false }));
+    if (!pc || !owner || isUnsetToken) {
+      setState(s => ({ 
+        ...s,
+        raw: undefined,
+        formatted: undefined,
+        decimals: undefined,
+        symbol: undefined,
+        error: undefined,
+        isLoading: false,
+        refetch: fetchOnce,
+      }));
       return;
     }
     try {
@@ -60,12 +71,12 @@ export function useTokenBalance(token?: Address, owner?: Address): Result {
   }
 
   useEffect(() => {
-    setState(s => ({ ...s, isLoading: !!token && !!owner }));
+    setState(s => ({ ...s, isLoading: !!token && !!owner && !isUnsetToken, }));
     void fetchOnce();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pc, owner, token, chain?.id]);
 
-  useWatchBlocks({ onBlock() { void fetchOnce(); } });
+  useWatchBlocks({ onBlock() { if (owner && token && !isUnsetToken) void fetchOnce(); } });
 
   return state;
 }

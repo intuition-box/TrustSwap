@@ -26,7 +26,7 @@ import { addresses, abi } from "@trustswap/sdk";
 const isNative = (a?: Address) =>
   !!a && a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
 
-const norm = (a: string) => a.toLowerCase();
+const norm = (a?: string) => (a ? a.toLowerCase() : "");
 
 
 const normalizeAmountStr = (s: string) => String(s).replace(",", ".").trim();
@@ -68,7 +68,7 @@ export default function SwapForm() {
 
   const defaults = useMemo(() => getDefaultPair(), []);
   const [tokenIn, setTokenIn] = useState<Address>(defaults.tokenIn.address);
-  const [tokenOut, setTokenOut] = useState<Address>(defaults.tokenOut.address);
+  const [tokenOut, setTokenOut] = useState<Address | undefined>(undefined);
   const [amountIn, setAmountIn] = useState<string>("");
   const [amountOut, setAmountOut] = useState<string>("");
 
@@ -114,7 +114,15 @@ export default function SwapForm() {
     return m;
   }, [imported]);
 
-  function getMeta(addr: Address): Meta {
+  function getMeta(addr?: Address): Meta {
+    if (!addr) {
+      return {
+        address: "0x0000000000000000000000000000000000000000" as Address,
+        symbol: "—",
+        decimals: 18,
+        name: "No token",
+      };
+    }
     const hit = tokenMap.get(norm(addr));
     if (hit) return hit;
     return {
@@ -282,21 +290,21 @@ export default function SwapForm() {
 
   // Détails
   const ti = getMeta(tokenIn);
-  const to = getMeta(tokenOut);
+  const to = tokenOut ? getMeta(tokenOut) : undefined;
   const priceText =
     Number(amountIn) > 0 && Number(amountOut) > 0
       ? `1 ${ti.symbol} ≈ ${(Number(amountOut) / Number(amountIn)).toFixed(
           6
-        )} ${to.symbol}`
+        )} ${to?.symbol}`
       : undefined;
 
   const priceImpact = computePriceImpactPct(
     tokenIn,
-    tokenOut,
+    tokenOut ?? "0x0000000000000000000000000000000000000000",
     amountIn,
     amountOut,
     pairData
-  );
+  ); 
 
   async function onApproveAndSwap() {
     if (!address) return;
@@ -308,7 +316,11 @@ export default function SwapForm() {
     const outBn =
       lastOutBn ??
       (await (async () => {
-        const qd = await quoteDetails(tokenIn, tokenOut, String(v));
+        const qd = await quoteDetails(
+          tokenIn,
+          tokenOut ?? "0x0000000000000000000000000000000000000000",
+          String(v)
+        );
         if (!qd) throw new Error("No route/liquidity for this pair");
         return qd.amountOutBn;
       })());
@@ -333,7 +345,14 @@ export default function SwapForm() {
       }
     }
 
-    await doSwap(address, tokenIn, tokenOut, String(v), minOut, deadline);
+    await doSwap(
+      address,
+      tokenIn,
+      tokenOut ?? "0x0000000000000000000000000000000000000000",
+      String(v),
+      minOut,
+      deadline
+    );
   }
 
   // setters checksum
@@ -368,22 +387,17 @@ export default function SwapForm() {
       <div className={styles.inputSwapContainerTo}>
         <FlipButton
           onClick={() => {
-            const nextIn = (() => {
-              try {
-                return getAddress(tokenOut);
-              } catch {
-                return tokenOut;
-              }
-            })();
-            const nextOut = (() => {
-              try {
-                return getAddress(tokenIn);
-              } catch {
-                return tokenIn;
-              }
-            })();
-            setTokenIn(nextIn);
-            setTokenOut(nextOut);
+            if (!tokenOut) {
+              // juste remplir le To avec le From si To est vide
+              setTokenOut(tokenIn);
+              setAmountOut(amountIn);
+              return;
+            }
+            // flip classique
+            const nextIn  = (() => { try { return getAddress(tokenOut); } catch { return tokenOut; } })();
+            const nextOut = (() => { try { return getAddress(tokenIn);  } catch { return tokenIn;  } })();
+            setTokenIn(nextIn as Address);
+            setTokenOut(nextOut as Address);
             setAmountIn(amountOut);
             setAmountOut(amountIn);
             setBestPath(null);
@@ -393,7 +407,7 @@ export default function SwapForm() {
 
         <TokenField
           label="To"
-          token={tokenOut}
+          token={tokenOut ?? "0x0000000000000000000000000000000000000000"}
           onTokenChange={setTokenOutSafe}
           amount={amountOut}
           readOnly
