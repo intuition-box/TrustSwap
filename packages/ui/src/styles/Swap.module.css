@@ -18,6 +18,22 @@
     padding: 0.7vh;
     position: relative;
   }
+
+  .followHalo {
+    position: absolute;
+    pointer-events: none;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.106) 0%, rgba(255,255,255,0) 80%);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.2s ease, width 0.2s ease, height 0.2s ease;
+    z-index: 10000;
+    filter: blur(30px);
+  }
+  
+
   
   .swapCardLineTop {
     content: "";
@@ -34,7 +50,6 @@
       var(--border-shadow-anim),
       var(--border-grey)
     );
-    box-shadow: 0 -2vh 6vh 2vh var(--shadow-grey);
     z-index: 10;
     animation: slideTop 8s ease-in-out infinite alternate;
   }
@@ -83,9 +98,9 @@
   }
   
   .inputSwapContainer {
-
+    background-color: #0c0c0c;
+    box-shadow: 0 0 0.2vh 0.5vh black;
     border: 1px solid var(--border-btn);
-    
     border-radius: 2.5vh;
     padding-top: 1.3vh;
     color: var(--text-grey-input);
@@ -97,8 +112,9 @@
   }
   
   .inputSwapContainerTo {
+    background-color: #0c0c0c;
+    box-shadow: 0 0 0.2vh 0.5vh black;
     border: 1px solid var(--border-btn);
-
     border-radius: 2.5vh;
     padding-top: 1.3vh;
     color: var(--text-grey-input);
@@ -107,10 +123,6 @@
     font-size: 1.6vh;
     padding-bottom: 2vh;
     margin-top: 0.6vh;
-  }
-
-  .inputSwapContainer:hover, .inputSwapContainerTo:hover {
-    background-color: rgb(19, 19, 19);
   }
   
   .headerInput {
@@ -166,9 +178,9 @@
   }
   
   .flipBtn {
-    background-color: var(--bg-btn);
+    background-color: #0c0c0c;
+    box-shadow: 0 0 0.2vh 0.2vh black;
     border: 1px solid var(--border-btn);
-    box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
     margin-left: auto;
     margin-right: auto;
     height: 5.4vh;
@@ -188,10 +200,7 @@
   .flipBtn:active {
     transform: translate(-50%, -100%) scale(0.96);
   }
-  
-  .flipBtn:hover {
-    box-shadow: inset 0 0 0.7vh 0.3vh var(--shadow-grey);
-  }
+
   
   .flipIcone {
     width: 100%;

@@ -132,7 +132,6 @@ export default function TokenSelector({
         className={styles.btnTokenSelector}
         onClick={() => setOpen((prev) => !prev)}
       >
-        <div className={styles.lineSelectorTop}></div>
 
         {selectedToken && (
           <img
@@ -144,7 +143,6 @@ export default function TokenSelector({
         {selectedToken ? selectedToken.symbol : "Select token"}
 
         <img src={arrowIcone} alt="toggle" className={styles.arrowIcone} />
-        <div className={styles.lineSelectorBottom}></div>
       </button>
 
       {open && (
