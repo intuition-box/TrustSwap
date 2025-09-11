@@ -170,7 +170,6 @@
   width: 100%;
   z-index: 10;
 
-  /* Points visibles seulement sur le haut */
   background-image:
     radial-gradient(#000000 2px, transparent 2px),
     linear-gradient(to bottom, #1e1e1e 0%, #080808 0%, #080808 100%);

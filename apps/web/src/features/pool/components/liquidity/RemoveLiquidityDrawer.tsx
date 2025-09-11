@@ -5,7 +5,7 @@ import styles from "../../modal.module.css";
 
 import { TOKENLIST } from "../../../../lib/tokens";
 import { getTokenIcon } from "../../../../lib/getTokenIcon";
-import { useLpPosition } from "../../hooks/useLpPosition"; // ⬅️ le hook qu’on a fait
+import { useLpPosition } from "../../hooks/useLpPosition";
 
 export function RemoveLiquidityDrawer({
   tokenA,
@@ -29,16 +29,14 @@ export function RemoveLiquidityDrawer({
     [tokenB]
   );
 
-  // 🔑 récupère la position LP réelle
   const { loading, lpBalance, totalSupply, sharePct, pooledA, pooledB } = useLpPosition(
     tokenA,
     tokenB
   );
 
-  // helper pour appliquer un % de balance LP
   const setPercentage = (percent: number) => {
     if (!lpBalance) return;
-    const raw = (lpBalance * BigInt(Math.floor(percent * 10000))) / 10000n; // pour précision
+    const raw = (lpBalance * BigInt(Math.floor(percent * 10000))) / 10000n;
     setLpAmount(raw.toString());
   };
 
@@ -70,26 +68,21 @@ export function RemoveLiquidityDrawer({
           <div className={styles.tokenNameContainer}>
             {tokenInfoA && <span>{tokenInfoA.symbol}</span>}/{tokenInfoB && <span>{tokenInfoB.symbol}</span>}
           </div>
-        </div>
-
-        {/* Affichage position LP */}
-        <div style={{ fontSize: 12, marginTop: 8, marginBottom: 8 }}>
+          <div className={styles.balanceLpData}>
           {loading ? (
-            <div>Loading your LP…</div>
+            <div className={styles.skeleton}></div>
           ) : lpBalance && lpBalance > 0n ? (
             <>
-              <div>Your LP tokens: {lpBalance.toString()}</div>
-              <div>Share: {sharePct?.toFixed(4)}%</div>
-              <div>
-                Underlying ≈ {pooledA} {tokenInfoA?.symbol} + {pooledB} {tokenInfoB?.symbol}
-              </div>
+              <div>Balance LP: {lpBalance.toString()}</div>
             </>
           ) : (
             <div>No LP tokens for this pool.</div>
           )}
         </div>
+        </div>
 
-        {/* Input + boutons % */}
+
+
         <div className={styles.inputContainerLp}>
           <div className={styles.btnContainerLp}>
             <button onClick={() => setPercentage(0.25)}>25%</button>
@@ -97,7 +90,6 @@ export function RemoveLiquidityDrawer({
             <button onClick={() => setPercentage(0.75)}>75%</button>
             <button onClick={() => setPercentage(1)}>Max</button>
           </div>
-
           <input
             placeholder="0.00000"
             value={lpAmount}
@@ -108,8 +100,28 @@ export function RemoveLiquidityDrawer({
       </div>
 
       <div className={styles.wormholeContainerRemove}>
-        <div className={styles.dataRemoveTokenA}></div>
-        <div className={styles.dataRemoveTokenB}></div>
+        <div className={styles.dataRemoveTokenA}>
+          {tokenInfoA && (
+            <img
+              src={getTokenIcon(tokenInfoA.address)}
+              alt={tokenInfoA.symbol}
+              className={styles.tokenIconSmall}
+            />
+          )}
+          + {pooledA ? Number(pooledA).toFixed(6) : "0.00000000"}
+        </div>
+
+        <div className={styles.dataRemoveTokenB}>
+          {tokenInfoB && (
+            <img
+              src={getTokenIcon(tokenInfoB.address)}
+              alt={tokenInfoB.symbol}
+              className={styles.tokenIconSmall}
+            />
+          )}
+          + {pooledB ? Number(pooledB).toFixed(6) : "0.00000000"}
+        </div>
+
         <button onClick={handleRemove} className={styles.btnRemoveLiquidity}>
           Remove
         </button>
