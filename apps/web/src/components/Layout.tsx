@@ -50,10 +50,7 @@ export default function Layout() {
             <div className={styles.line}></div>
               <div className={styles.linkBaseComing}>
                 Governance
-              <div className={styles.comingMsg}>
-                <div className={styles.point}></div>
-                <span className={styles.comingSoonLabel}>Coming</span>
-              </div>
+              
             </div>
           </nav>
           <div className={styles.connectPage}><ConnectButton /></div>

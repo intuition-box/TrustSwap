@@ -3,7 +3,7 @@
 :root {
   --secondary-color: #4ADAEA;
   --halo-bg: #4adaea57;
-  --bg-dark: #000000;
+  --bg-dark: #090909;
   --text-color: #D9D9D9;
   --swap-text-color: #686868;
   --border-grey: #212121;
@@ -22,7 +22,7 @@
 
   --bg-slippage: rgb(24, 24, 24);
 
-  --bg-btn: #0B0B0B;
+  --bg-btn: #101010;
   --border-btn: #1C1C1C;
   --line-bg: rgb(18, 18, 18);
 
