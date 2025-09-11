@@ -75,6 +75,18 @@ export function useStakingData(pools: PoolItem[]) {
         // --- reads SR ---
         let rewardRate = 0n, periodFinish = 0n, totalStakedLP = 0n;
         let earned = 0n, userStakedLP = 0n;
+        let walletLpBalance = 0n;
+
+        if (user) {
+          try {
+            walletLpBalance = await client.readContract({
+              address: p.pair as Address,
+              abi: erc20Abi,
+              functionName: "balanceOf",
+              args: [user],
+            }) as bigint;
+          } catch {}
+        }
 
         try {
           const reads: Promise<any>[] = [
@@ -87,8 +99,10 @@ export function useStakingData(pools: PoolItem[]) {
               client.readContract({ address: staking, abi: STAKING_ABI, functionName: "earned", args: [user] }),
               client.readContract({ address: staking, abi: STAKING_ABI, functionName: "balanceOf", args: [user] }),
             );
+            
           }
           const res = await Promise.all(reads);
+          
           rewardRate    = res[0] as bigint;
           periodFinish  = res[1] as bigint;
           totalStakedLP = res[2] as bigint;
@@ -104,6 +118,7 @@ export function useStakingData(pools: PoolItem[]) {
                 rewardRatePerSec: rewardRate,
                 earned,
                 stakedBalance: userStakedLP,
+                walletLpBalance, 
                 epochAprPct: 0,
               }
             }));
@@ -152,6 +167,7 @@ export function useStakingData(pools: PoolItem[]) {
                 rewardRatePerSec: rewardRate,
                 earned,
                 stakedBalance: userStakedLP,
+                walletLpBalance, 
                 epochAprPct,
               },
             };

@@ -104,10 +104,10 @@
     box-shadow: 
         0 0 60px 7px var(--orange),
         0 0 10px 1px var(--orange);
-    height: 0.7vh;
-    width: 0.7vh;
+    height: 0.9vh;
+    width: 1.4vh;
     border-radius: 50%;
-    margin-right: 0.4vh;
+    margin-right: 0.5vh;
 }
 
 .connectPage {
