@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
 import type { Address } from "viem";
-import { parseUnits } from "viem";
-import { useAccount } from "wagmi";
+import { formatUnits } from "viem";
 import styles from "../../modal.module.css";
 
 import { TOKENLIST } from "../../../../lib/tokens";
 import { getTokenIcon } from "../../../../lib/getTokenIcon";
+import { useLpPosition } from "../../hooks/useLpPosition"; // ⬅️ le hook qu’on a fait
 
 export function RemoveLiquidityDrawer({
   tokenA,
@@ -29,10 +29,17 @@ export function RemoveLiquidityDrawer({
     [tokenB]
   );
 
+  // 🔑 récupère la position LP réelle
+  const { loading, lpBalance, totalSupply, sharePct, pooledA, pooledB } = useLpPosition(
+    tokenA,
+    tokenB
+  );
+
+  // helper pour appliquer un % de balance LP
   const setPercentage = (percent: number) => {
-    // Si tu n’as pas la balance, tu peux mettre une valeur fixe pour test
-    const fakeBalance = 100;
-    setLpAmount((fakeBalance * percent).toString());
+    if (!lpBalance) return;
+    const raw = (lpBalance * BigInt(Math.floor(percent * 10000))) / 10000n; // pour précision
+    setLpAmount(raw.toString());
   };
 
   const handleRemove = async () => {
@@ -61,27 +68,42 @@ export function RemoveLiquidityDrawer({
             )}
           </div>
           <div className={styles.tokenNameContainer}>
-            {tokenInfoA && <span>{tokenInfoA.symbol}</span>}
-            /
-            {tokenInfoB && <span>{tokenInfoB.symbol}</span>}
+            {tokenInfoA && <span>{tokenInfoA.symbol}</span>}/{tokenInfoB && <span>{tokenInfoB.symbol}</span>}
           </div>
         </div>
 
+        {/* Affichage position LP */}
+        <div style={{ fontSize: 12, marginTop: 8, marginBottom: 8 }}>
+          {loading ? (
+            <div>Loading your LP…</div>
+          ) : lpBalance && lpBalance > 0n ? (
+            <>
+              <div>Your LP tokens: {lpBalance.toString()}</div>
+              <div>Share: {sharePct?.toFixed(4)}%</div>
+              <div>
+                Underlying ≈ {pooledA} {tokenInfoA?.symbol} + {pooledB} {tokenInfoB?.symbol}
+              </div>
+            </>
+          ) : (
+            <div>No LP tokens for this pool.</div>
+          )}
+        </div>
+
+        {/* Input + boutons % */}
         <div className={styles.inputContainerLp}>
           <div className={styles.btnContainerLp}>
-          <button onClick={() => setPercentage(0.25)}>25%</button>
-          <button onClick={() => setPercentage(0.5)}>50%</button>
-          <button onClick={() => setPercentage(0.75)}>75%</button>
-          <button onClick={() => setPercentage(1)}>Max</button>
-
+            <button onClick={() => setPercentage(0.25)}>25%</button>
+            <button onClick={() => setPercentage(0.5)}>50%</button>
+            <button onClick={() => setPercentage(0.75)}>75%</button>
+            <button onClick={() => setPercentage(1)}>Max</button>
           </div>
 
-        <input
-          placeholder="0.00000"
-          value={lpAmount}
-          onChange={(e) => setLpAmount(e.target.value)}
-          className={styles.inputRemoveLp}
-        />
+          <input
+            placeholder="0.00000"
+            value={lpAmount}
+            onChange={(e) => setLpAmount(e.target.value)}
+            className={styles.inputRemoveLp}
+          />
         </div>
       </div>
 

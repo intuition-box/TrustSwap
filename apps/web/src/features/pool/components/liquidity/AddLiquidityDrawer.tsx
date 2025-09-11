@@ -4,13 +4,13 @@ import type { Address } from "viem";
 import { parseUnits } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import { useLiquidityActions } from "../../hooks/useLiquidityActions";
-import { getTokenByAddress, NATIVE_PLACEHOLDER, WNATIVE_ADDRESS } from "../../../../lib/tokens";
+import { getTokenByAddress } from "../../../../lib/tokens";
 import { getTokenIcon } from "../../../../lib/getTokenIcon";
 import styles from "../../modal.module.css";
 import TokenField from "../../../swap/components/TokenField";
 import { quoteOutFromReserves } from "../../../../utils/quotes";
 import { abi, addresses } from "@trustswap/sdk";
-import { toERC20ForRead, isZeroAddress } from "../../../../lib/erc20Read"; // 👈 ajoute ce helper
+import { toERC20ForRead, isZeroAddress } from "../../../../lib/erc20Read";
 
 
 type PairData = {
@@ -36,8 +36,6 @@ export function AddLiquidityDrawer({ tokenA, tokenB, onClose }: {
   const [amountOut, setAmountOut] = useState("");
   const [pairData, setPairData] = useState<PairData | null>(null);
 
-
-  // ⚠️ Adresses utilisées pour les lectures on-chain (wrap si natif)
   const readA = toERC20ForRead(tokenIn);
   const readB = toERC20ForRead(tokenOut);
 
@@ -45,7 +43,7 @@ export function AddLiquidityDrawer({ tokenA, tokenB, onClose }: {
   const tB = readB ? getTokenByAddress(readB) : null;
   const decA = tA?.decimals ?? 18;
   const decB = tB?.decimals ?? 18;
-  
+
   function asBigInt(v: any): bigint | undefined {
     if (typeof v === "bigint") return v;
     if (typeof v === "number") return BigInt(v);

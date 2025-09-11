@@ -34,7 +34,7 @@ export const TOKENLIST: TokenInfo[] = [
     symbol: "WTTRUST",
     name: "Wrapped TRUST",
     decimals: 18,
-    hidden: true, // 👈 important : pas dans le selector
+    hidden: true, 
   },
 
   { address: "0x124C4E8470eD201Ae896C2DF6ee7152AB7438d80", symbol: "TKA", name: "Token A", decimals: 18 },
@@ -96,6 +96,6 @@ export async function getOrFetchToken(address: Address): Promise<TokenInfo> {
     decimals: Number(decimals),
   };
 
-  TOKEN_CACHE[address.toLowerCase()] = info; // ajoute au cache (pas au selector)
+  TOKEN_CACHE[address.toLowerCase()] = info; 
   return info;
 }
