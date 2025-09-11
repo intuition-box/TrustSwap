@@ -9,7 +9,7 @@ import TokenBalanceBadge from "./TokenBalanceBadge"
 
 type TokenFieldProps = {
   label: string
-  token: Address
+  token?: Address | ""   
   onTokenChange: (a: Address) => void
   amount?: string
   onAmountChange?: (v: string) => void
