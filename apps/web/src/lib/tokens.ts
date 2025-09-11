@@ -65,8 +65,10 @@ export const toWrapped = (addr: Address): Address =>
 export const buildPath = (path: Address[]): Address[] =>
   path.map(toWrapped) as Address[];
 
-export function getTokenByAddress(addr: string): TokenInfo {
-  const t = TOKENLIST.find(t => t.address.toLowerCase() === addr.toLowerCase());
+export function getTokenByAddress(addr: string | Address): TokenInfo {
+  const t = TOKENLIST.find(
+    t => t.address.toLowerCase() === addr.toLowerCase()
+  );
   if (!t) throw new Error(`Token not in tokenlist: ${addr}`);
   return t;
 }
