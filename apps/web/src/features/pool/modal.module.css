@@ -32,7 +32,7 @@
   }
   
 .popUpBody {
-    background-color: var(--bg-dark);
+    background-color: #000000;
     width: 100%;
     height: 100%;
 }
@@ -113,7 +113,24 @@
     justify-content: space-between;
   }
 
-  .btnAddLiquidity {
+  .inputRemoveContainer {
+    background-color: var(--bg-btn);
+    border: 1px solid var(--border-btn);
+    box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
+    border-radius: 2.5vh;
+    color: var(--text-grey-input);
+    font-weight: 500;
+    letter-spacing: -0.08vh;
+    font-size: 1.6vh;
+    padding-bottom: 3vh;
+    padding-top: 1vh;
+    margin-top: 4vh;
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .btnAddLiquidity, .btnRemoveLiquidity {
     background-color: var(--bg-white);
     border: none;
     height: 5vh;
@@ -129,7 +146,7 @@
     margin-bottom: 1vh;
   }
 
-  .btnAddLiquidity:hover {
+  .btnAddLiquidity:hover, .btnRemoveLiquidity:hover {
     box-shadow: 0 -1vh 40vh 1vh var(--bg-white);
     transition: 0.3s;
   }
@@ -222,4 +239,87 @@
       opacity: 0;
     }
   }
+
+  .tokenPairLogo {
+    display: flex;
+    align-items: center;
+  }
   
+  .tokenPairLogo {
+    display: flex;
+    align-items: center;
+    margin-left: 2vh;
+    margin-top: 1vh;
+  }
+  
+  .tokenIconContainer {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  .tokenIcon {
+    width: 3.3vh;
+    height: 3.3vh;
+    border-radius: 50%;
+    position: relative;
+  }
+  
+  .tokenIcon:first-child {
+    z-index: 2;
+  }
+  
+  .tokenIcon:not(:first-child) {
+    margin-left: -1vh;
+    z-index: 1;
+  }
+
+  .tokenNameContainer {
+    font-size: 2vh;
+    margin-left: 1vh;
+    color: #868686;
+  }
+  
+  .inputContainerLp {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-left: 2vh;
+    margin-right: 2vh;
+    margin-top: 2vh;
+  }
+
+  .btnContainerLp {
+    display: flex;
+    align-items: center;
+    gap: 0.6vh;
+  }
+
+  .btnContainerLp button {
+    background-color: #1B1B1B;
+    color: #636363;
+    font-size: 2vh;
+    border: none;
+    border-radius: 1.2vh;
+    padding: 0.8vh;
+    cursor: pointer;
+  }
+
+  .btnContainerLp button:hover {
+    background-color: #202020;
+  }
+  .inputRemoveLp {
+    width: 70%;
+    background-color: transparent;
+    border: none;
+    font-size: 5vh;
+    color: var(--text-color);
+    outline: none;
+    padding-left: 2vh;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: -0.2vh;
+    text-align: right;
+  }
