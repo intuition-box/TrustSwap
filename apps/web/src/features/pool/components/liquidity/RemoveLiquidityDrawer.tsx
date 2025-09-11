@@ -85,7 +85,9 @@ export function RemoveLiquidityDrawer({
         </div>
       </div>
 
-      <div className={styles.wormholeContainer}>
+      <div className={styles.wormholeContainerRemove}>
+        <div className={styles.dataRemoveTokenA}></div>
+        <div className={styles.dataRemoveTokenB}></div>
         <button onClick={handleRemove} className={styles.btnRemoveLiquidity}>
           Remove
         </button>

@@ -323,3 +323,84 @@
     letter-spacing: -0.2vh;
     text-align: right;
   }
+
+
+
+  .wormholeContainerRemove {
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    height: 60%;
+    width: 100%;
+    background: url("../../assets/wormhole.png") no-repeat center;
+    background-size: 50%;
+    position: relative;
+    overflow: visible;
+  }
+  
+  .dataRemoveTokenA {
+    left: 50%;
+    background-color: #0F0F0F;
+    border: 1px solid #212121;
+    height: 3.5vh;
+    position: absolute;
+    bottom: 0;
+    border-radius: 1vh;
+    opacity: 0.8;
+    animation: riseAndFloatA 1s ease forwards, floatUpDownA 2s ease-in-out infinite alternate;
+  }
+  
+  .dataRemoveTokenB {
+    left: 50%;
+    background-color: #0F0F0F;
+    border: 1px solid #212121;
+    height: 3.5vh;
+    position: absolute;
+    bottom: 0;
+    border-radius: 1vh;
+    opacity: 0.8;
+    animation: riseAndFloatB 1s ease forwards 0.2s, floatUpDownB 2s ease-in-out infinite alternate 0.2s;
+  }
+  
+  @keyframes riseAndFloatA {
+    0% {
+      left: 50%;
+      bottom: 0;
+      width: 0.1vh;
+      opacity: 0;
+    }
+    100% {
+      left: 35%;
+      bottom: 55%;
+      width: 12vh;
+      opacity: 1;
+    }
+  }
+  
+  @keyframes riseAndFloatB {
+    0% {
+      left: 50%;
+      bottom: 0;
+      width: 0.1vh;
+      opacity: 0;
+    }
+    100% {
+      left: 55%;
+      bottom: 45%;
+      width: 12vh;
+      opacity: 1;
+    }
+  }
+  
+  @keyframes floatUpDownA {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-1vh); }
+    100% { transform: translateY(0); }
+  }
+  
+  @keyframes floatUpDownB {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-1vh); }
+    100% { transform: translateY(0); }
+  }
+  
