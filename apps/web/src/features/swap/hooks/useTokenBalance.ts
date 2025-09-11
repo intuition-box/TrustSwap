@@ -40,7 +40,7 @@ export function useTokenBalance(token?: Address, owner?: Address): Result {
       return;
     }
     try {
-      const meta = getTokenByAddress(token); // ← source de vérité
+      const meta = getTokenByAddress(token); 
       console.log("[useTokenBalance] read", { token, symbol: meta.symbol, owner });
 
       let raw: bigint;

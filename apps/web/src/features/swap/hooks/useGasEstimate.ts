@@ -13,7 +13,6 @@ type Args = {
   to: Address;
   deadline: bigint;
   nativeSymbol?: string;
-  // NEW (optionnel) : indique si l'entrée/sortie est NATIVE (tTRUST)
   nativeIn?: boolean;
   nativeOut?: boolean;
 };
@@ -31,7 +30,6 @@ export function useGasEstimate() {
     const nativeIn = !!args.nativeIn;
     const nativeOut = !!args.nativeOut;
 
-    // Détermine la bonne fonction du router
     // - ETH -> Token : swapExactETHForTokens (value = amountIn)
     // - Token -> ETH : swapExactTokensForETH
     // - Token -> Token : swapExactTokensForTokens
@@ -42,11 +40,10 @@ export function useGasEstimate() {
         ? "swapExactTokensForETH"
         : !nativeIn && !nativeOut
         ? "swapExactTokensForTokens"
-        : null; // ETH -> ETH (non-sens)
+        : null; // ETH -> ETH not supported
 
     if (!fn) return null;
 
-    // Construit les args selon la fonction
     const argsByFn: Record<
       NonNullable<typeof fn>,
       readonly unknown[]
@@ -70,7 +67,7 @@ export function useGasEstimate() {
       const gasPrice = await pc.getGasPrice();
       return `${formatUnits(gas * gasPrice, 18)} ${symbol}`;
     } catch {
-      // Fallback avec montants minimaux
+      // Fallback with minimal amounts
       try {
         const fallbackArgs =
           fn === "swapExactETHForTokens"
