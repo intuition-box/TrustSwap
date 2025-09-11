@@ -50,7 +50,7 @@ export default function PoolsPage() {
 
   return (
     <div className={styles.sectionPool}>
-      <div className={styles.halo}></div>
+
 
       {/* Stats globales au-dessus du tableau */}
       <div className={styles.containerStat}>

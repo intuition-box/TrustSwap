@@ -5,37 +5,7 @@
     justify-content: center;
   }
   
-  .halo {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    height: 50%;
-    width: 50%;
-    border-radius: 50%;
-    background: radial-gradient(
-      circle,
-      var(--secondary-color) 0%,
-      rgba(116, 232, 255, 0.1) 50%,
-      transparent 100%
-    );
-    transform: translate(-50%, -50%);
-    filter: blur(120px);
-    animation: moveHalo 7s ease-in-out infinite alternate;
-    pointer-events: none;
-    z-index: 0;
-  }
-  
-  @keyframes moveHalo {
-    0% {
-      transform: translate(-60%, -60%) rotate(0deg);
-    }
-    50% {
-      transform: translate(-50%, -50%) rotate(10deg);
-    }
-    100% {
-      transform: translate(-40%, -40%) rotate(20deg);
-    }
-  }
+
   
   .swapCard {
     background-color: var(--bg-dark);
@@ -52,14 +22,14 @@
   .swapCardLineTop {
     content: "";
     position: absolute;
-    top: -1px;
-    right: 50%;
+    left: 0;
+    top: 10%;
     transform: translateX(-50%);
-    height: 0.05vh;
+    height: 50%;
     min-height: 1px;
-    width: 30%;
+    width: 0.05vh;
     background: linear-gradient(
-      90deg,
+      0deg,
       var(--border-grey),
       var(--border-shadow-anim),
       var(--border-grey)
@@ -81,14 +51,14 @@
   .swapCardLineBottom {
     content: "";
     position: absolute;
-    bottom: -1px;
-    left: 50%;
+    right: 0;
+    bottom: 10%;
     transform: translateX(-50%);
-    height: 0.05vh;
+    height: 50%;
     min-height: 1px;
-    width: 30%;
+    width: 0.05vh;
     background: linear-gradient(
-      90deg,
+      0deg,
       var(--border-grey),
       var(--border-shadow-anim),
       var(--border-grey)
@@ -106,15 +76,16 @@
     }
   }
   
+  
   .inputSwapBody {
     display: flex;
     flex-direction: column;
   }
   
   .inputSwapContainer {
-    background-color: var(--bg-btn);
+
     border: 1px solid var(--border-btn);
-    box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
+    
     border-radius: 2.5vh;
     padding-top: 1.3vh;
     color: var(--text-grey-input);
@@ -126,9 +97,8 @@
   }
   
   .inputSwapContainerTo {
-    background-color: var(--bg-btn);
     border: 1px solid var(--border-btn);
-    box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
+
     border-radius: 2.5vh;
     padding-top: 1.3vh;
     color: var(--text-grey-input);
@@ -137,6 +107,10 @@
     font-size: 1.6vh;
     padding-bottom: 2vh;
     margin-top: 0.6vh;
+  }
+
+  .inputSwapContainer:hover, .inputSwapContainerTo:hover {
+    background-color: rgb(19, 19, 19);
   }
   
   .headerInput {
@@ -227,7 +201,6 @@
   .swapBtn {
     background-color: var(--bg-btn);
     border: 1px solid var(--border-btn);
-    box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
     color: var(--text-color);
     height: 6vh;
     width: 100%;
