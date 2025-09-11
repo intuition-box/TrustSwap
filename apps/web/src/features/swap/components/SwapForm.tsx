@@ -198,7 +198,11 @@ export default function SwapForm() {
     const timer = setTimeout(async () => {
       try {
         const pHook = (async () => {
-          const qd = await quoteDetails(tokenIn, tokenOut, amtNorm);
+          const qd = await quoteDetails(
+            tokenIn, 
+            tokenOut ?? "0x0000000000000000000000000000000000000000", 
+            amtNorm
+          );
           if (!qd) throw new Error("hook-no-route");
           return {
             path: qd.path,
@@ -207,7 +211,11 @@ export default function SwapForm() {
           };
         })();
 
-        const pFast = fastRouterQuote(tokenIn, tokenOut, amtNorm);
+        const pFast = fastRouterQuote(
+          tokenIn,
+          tokenOut ?? "0x0000000000000000000000000000000000000000",
+          amtNorm
+        );
 
         const first = await firstSuccess([pHook, pFast]);
 
@@ -231,7 +239,7 @@ export default function SwapForm() {
   useEffect(() => {
     let alive = true;
     (async () => {
-      const pd = await fetchPair(tokenIn, tokenOut);
+      const pd = await fetchPair(tokenIn, tokenOut ?? "0x0000000000000000000000000000000000000000");
       if (alive) {
         setPairData(pd);
         if (!pd) console.warn("[pairData] no LP for", tokenIn, tokenOut);
@@ -267,6 +275,8 @@ export default function SwapForm() {
           to: address,
           deadline,
           nativeSymbol: "tTRUST",
+          nativeIn: isNative(tokenIn),
+          nativeOut: !!tokenOut && isNative(tokenOut as Address),
         });
 
         if (alive) setNetworkFeeText(feeText);
