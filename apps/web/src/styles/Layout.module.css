@@ -80,13 +80,6 @@
     cursor: not-allowed;
 }
 
-.comingMsg {
-    display: flex;
-    align-items: center;
-    margin-top: 0.08vh;
-    margin-left: 0.6vh;
-}
-
 .comingSoonLabel {
     font-weight: 400;
     font-size: 1.2vh;
@@ -206,4 +199,40 @@
   filter: blur(100px);
   pointer-events: none;
   z-index: 0;
+}
+
+.comingTooltip {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  transform: translateX(-50%) translateY(8px);
+  visibility: hidden;
+  transition: opacity .16s ease, transform .16s ease, visibility .16s;
+  z-index: 50;
+}
+
+.linkBaseComing:hover .comingTooltip,
+.linkBaseComing:focus .comingTooltip,
+.linkBaseComing:focus-visible .comingTooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.comingMsg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.comingMsg {
+  display: flex;
+  align-items: center;
+  margin-top: 0.08vh;
+  margin-left: 0.6vh;
 }
