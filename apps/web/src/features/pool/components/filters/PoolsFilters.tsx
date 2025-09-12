@@ -1,11 +1,52 @@
-// apps/web/src/features/pools/components/filters/PoolsFilters.tsx
+import { useState, useRef, useEffect } from "react";
 import styles from "../../pools.module.css";
-export function PoolsFilters({ query, onQuery }:{ query: string; onQuery: (v:string)=>void }){
-return (
-<div className={styles.filters}>
-<input value={query} onChange={e=>onQuery(e.target.value)} placeholder="Search token / pair"/>
-</div>
-);
+import searchIcone from "../../../../assets/search.png";
+
+export function PoolsFilters({
+  query,
+  onQuery,
+}: {
+  query: string;
+  onQuery: (v: string) => void;
+}) {
+  const [showInput, setShowInput] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowInput(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div
+      className={styles.filters}
+      ref={containerRef}
+      onClick={() => setShowInput(true)} // clic dans le container ouvre l'input
+    >
+      <img
+        src={searchIcone}
+        alt="search"
+        className={styles.searchIconeFilters}
+      />
+      <input
+        value={query}
+        onChange={(e) => onQuery(e.target.value)}
+        placeholder="Search token / pair"
+        className={styles.searchInputFilters}
+        autoFocus
+        style={{
+          maxWidth: showInput ? "20ch" : "0",
+          opacity: showInput ? 1 : 0,
+          transition: "max-width 0.3s ease, opacity 0.3s ease",
+          marginLeft: "0.5vh",
+        }}
+        onClick={(e) => e.stopPropagation()} // empêche de fermer l'input en cliquant dedans
+      />
+    </div>
+  );
 }
-
-

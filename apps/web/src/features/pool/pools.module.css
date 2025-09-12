@@ -179,3 +179,37 @@
   font-size: 2.5vh;
   color: var(--text-color);
 }
+
+.filters {
+  background-color: var(--bg-filter);
+  height: 4.2vh;
+  width: auto;
+  display: flex;
+  align-items: center;
+  padding-left: 1.2vh;
+  padding-right: 0.5vh;
+  border-radius: 1vh;
+  border: 0.1vh solid var(--border-tableau);
+  cursor: pointer;
+
+}
+
+.filters:hover {
+  background-color: rgb(27, 27, 27);
+}
+
+
+
+
+.searchIconeFilters {
+  width: 2vh;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.searchInputFilters {
+  background-color: transparent;
+  border: none;
+  color: var(--text-color);
+  outline: none;
+}
