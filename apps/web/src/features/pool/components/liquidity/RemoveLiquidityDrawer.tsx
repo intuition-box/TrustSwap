@@ -1,11 +1,13 @@
 import { useState, useMemo } from "react";
 import type { Address } from "viem";
-import { formatUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 import styles from "../../modal.module.css";
+import { clampDecimalsForInput, tidyOnBlur } from "../../../../utils/number";
 
-import { TOKENLIST } from "../../../../lib/tokens";
+import { TOKENLIST, toWrapped } from "../../../../lib/tokens";
 import { getTokenIcon } from "../../../../lib/getTokenIcon";
 import { useLpPosition } from "../../hooks/useLpPosition";
+import { fmtUnits, formatAmountStr } from "../../utils";
 
 export function RemoveLiquidityDrawer({
   tokenA,
@@ -18,7 +20,13 @@ export function RemoveLiquidityDrawer({
   onClose: () => void;
   onRemoveLiquidity: (amount: string) => Promise<void>;
 }) {
+  const DECIMALS = 6;      // décimales visibles dans l'input
+  const lpDecimals = 18;   // LP UniswapV2 = 18
+
+  // valeur affichée (décimale clampée)
   const [lpAmount, setLpAmount] = useState("");
+  // override précis en wei (pour % et Max)
+  const [lpRawOverride, setLpRawOverride] = useState<bigint | null>(null);
 
   const tokenInfoA = useMemo(
     () => TOKENLIST.find((t) => t.address.toLowerCase() === tokenA?.toLowerCase()),
@@ -29,19 +37,86 @@ export function RemoveLiquidityDrawer({
     [tokenB]
   );
 
-  const { loading, lpBalance, totalSupply, sharePct, pooledA, pooledB } = useLpPosition(
-    tokenA,
-    tokenB
-  );
+  // Position LP réelle
+  const {
+    loading,
+    lpBalance,
+    totalSupply,
+    token0,
+    token1,
+    reserve0,
+    reserve1,
+  } = useLpPosition(tokenA, tokenB);
 
+  // Normalise les réserves selon l’ordre visuel A/B
+  const { reserveA, reserveB } = useMemo(() => {
+    if (!token0 || !token1) return { reserveA: 0n, reserveB: 0n };
+    const readA = tokenA ? toWrapped(tokenA) : undefined;
+    const readB = tokenB ? toWrapped(tokenB) : undefined;
+    if (!readA || !readB || reserve0 === undefined || reserve1 === undefined) {
+      return { reserveA: 0n, reserveB: 0n };
+    }
+    if (token0.toLowerCase() === readA.toLowerCase()) {
+      return { reserveA: reserve0 ?? 0n, reserveB: reserve1 ?? 0n };
+    }
+    if (token1.toLowerCase() === readA.toLowerCase()) {
+      return { reserveA: reserve1 ?? 0n, reserveB: reserve0 ?? 0n };
+    }
+    return { reserveA: 0n, reserveB: 0n };
+  }, [token0, token1, reserve0, reserve1, tokenA, tokenB]);
+
+  // valeur raw utilisée partout (previews + tx)
+  const lpAmountRaw = useMemo(() => {
+    if (lpRawOverride != null) return lpRawOverride; // % / Max exacts
+    const s = tidyOnBlur(lpAmount, DECIMALS) || "0";
+    try {
+      return parseUnits(s, lpDecimals);
+    } catch {
+      return 0n;
+    }
+  }, [lpAmount, lpRawOverride]);
+
+  // Previews (pro-rata)
+  const previewA = useMemo(() => {
+    if (!totalSupply || totalSupply === 0n) return "0";
+    const raw = (reserveA * lpAmountRaw) / totalSupply;
+    const dec = tokenInfoA?.decimals ?? 18;
+    return formatUnits(raw, dec);
+  }, [reserveA, totalSupply, lpAmountRaw, tokenInfoA?.decimals]);
+
+  const previewB = useMemo(() => {
+    if (!totalSupply || totalSupply === 0n) return "0";
+    const raw = (reserveB * lpAmountRaw) / totalSupply;
+    const dec = tokenInfoB?.decimals ?? 18;
+    return formatUnits(raw, dec);
+  }, [reserveB, totalSupply, lpAmountRaw, tokenInfoB?.decimals]);
+
+  // Input change → reset override & clamp l'affichage
+  function onInputChange(val: string) {
+    setLpRawOverride(null);
+    setLpAmount(clampDecimalsForInput(val, DECIMALS));
+  }
+
+  // Boutons %
   const setPercentage = (percent: number) => {
     if (!lpBalance) return;
     const raw = (lpBalance * BigInt(Math.floor(percent * 10000))) / 10000n;
-    setLpAmount(raw.toString());
+    setLpRawOverride(raw); // précision parfaite
+    const s = formatUnits(raw, lpDecimals);
+    setLpAmount(clampDecimalsForInput(s, DECIMALS));
   };
 
+  // Max exact
+  const setMax = () => {
+    if (!lpBalance) return;
+    setLpRawOverride(lpBalance);
+    const s = formatUnits(lpBalance, lpDecimals);
+    setLpAmount(clampDecimalsForInput(s, DECIMALS));
+  };
+
+  // Submit → envoie la valeur raw exacte (wei)
   const handleRemove = async () => {
-    await onRemoveLiquidity(lpAmount);
+    await onRemoveLiquidity(lpAmountRaw.toString());
     onClose();
   };
 
@@ -68,37 +143,39 @@ export function RemoveLiquidityDrawer({
           <div className={styles.tokenNameContainer}>
             {tokenInfoA && <span>{tokenInfoA.symbol}</span>}/{tokenInfoB && <span>{tokenInfoB.symbol}</span>}
           </div>
+
+          {/* Balance LP actuelle */}
           <div className={styles.balanceLpData}>
-          {loading ? (
-            <div className={styles.skeleton}></div>
-          ) : lpBalance && lpBalance > 0n ? (
-            <>
-              <div>Balance LP: {lpBalance.toString()}</div>
-            </>
-          ) : (
-            <div>No LP tokens for this pool.</div>
-          )}
-        </div>
+            {loading ? (
+              <div className={styles.skeleton}></div>
+            ) : lpBalance && lpBalance > 0n ? (
+              <div>Balance LP: {fmtUnits(lpBalance, lpDecimals, DECIMALS)}</div>
+            ) : (
+              <div>No LP tokens for this pool.</div>
+            )}
+          </div>
         </div>
 
-
-
+        {/* Input + boutons % */}
         <div className={styles.inputContainerLp}>
           <div className={styles.btnContainerLp}>
             <button onClick={() => setPercentage(0.25)}>25%</button>
             <button onClick={() => setPercentage(0.5)}>50%</button>
             <button onClick={() => setPercentage(0.75)}>75%</button>
-            <button onClick={() => setPercentage(1)}>Max</button>
+            <button onClick={setMax}>Max</button>
           </div>
           <input
-            placeholder="0.00000"
+            inputMode="decimal"
+            placeholder={"0." + "0".repeat(DECIMALS)}
             value={lpAmount}
-            onChange={(e) => setLpAmount(e.target.value)}
+            onChange={(e) => onInputChange(e.target.value)}
+            onBlur={() => setLpAmount(tidyOnBlur(lpAmount, DECIMALS))}
             className={styles.inputRemoveLp}
           />
         </div>
       </div>
 
+      {/* Aperçu des montants récupérés pour la quantité saisie */}
       <div className={styles.wormholeContainerRemove}>
         <div className={styles.dataRemoveTokenA}>
           {tokenInfoA && (
@@ -108,7 +185,7 @@ export function RemoveLiquidityDrawer({
               className={styles.tokenIconSmall}
             />
           )}
-          + {pooledA ? Number(pooledA).toFixed(6) : "0.00000000"}
+          + {formatAmountStr(previewA || "0", DECIMALS)}
         </div>
 
         <div className={styles.dataRemoveTokenB}>
@@ -119,7 +196,7 @@ export function RemoveLiquidityDrawer({
               className={styles.tokenIconSmall}
             />
           )}
-          + {pooledB ? Number(pooledB).toFixed(6) : "0.00000000"}
+          + {formatAmountStr(previewB || "0", DECIMALS)}
         </div>
 
         <button onClick={handleRemove} className={styles.btnRemoveLiquidity}>

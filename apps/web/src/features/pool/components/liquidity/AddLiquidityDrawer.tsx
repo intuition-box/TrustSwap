@@ -10,7 +10,7 @@ import styles from "../../modal.module.css";
 import TokenField from "../../../swap/components/TokenField";
 import { quoteOutFromReserves } from "../../../../utils/quotes";
 import { abi, addresses } from "@trustswap/sdk";
-import { toERC20ForRead, isZeroAddress } from "../../../../lib/erc20Read";
+import { isZeroAddress } from "../../../../lib/erc20Read";
 
 
 type PairData = {

@@ -18,12 +18,15 @@ export function fmt(n?: number | null, digits = 2) {
   return new Intl.NumberFormat(undefined, {minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
 }
 
-export function fmtUnits(x?: bigint, decimals = 18, digits = 4) {
-if (x == null) return "0";
-const s = Number(formatUnits(x, decimals));
-return s.toFixed(digits);
+export function fmtUnits(x?: bigint, decimals = 18, digits = 6) {
+  if (x == null) return "0";
+  return formatAmountStr(formatUnits(x, decimals), digits);
 }
 
+export function fmtBig(x?: bigint, decimals = 18, dp = 6) {
+  if (x == null) return "0";
+  return formatAmountStr(formatUnits(x, decimals), dp);
+}
 
 export const FEE_BPS_TO_LPS = 25; // 0.3%
 
@@ -47,4 +50,24 @@ return (yearlyRewards / tvlStakedNative) * 100;
 
 export function formatNetworkFeeWei(feeWei: bigint, decimals = 18) {
   try { return `${formatUnits(feeWei, decimals)} tTRUST`; } catch { return "—"; }
+}
+
+
+export function formatAmountStr(s: string, dp = 6): string {
+  if (!s) return "0";
+  const [rawInt, rawFrac = ""] = s.split(".");
+
+  // séparateurs milliers (option: espace fine)
+  const int = rawInt.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+  const frac = rawFrac.slice(0, dp);
+  const fracTrimmed = frac.replace(/0+$/, "");
+
+  // si on a coupé et qu'il reste des non-zéros après dp → afficher "< 0.00..1"
+  const hasMoreNonZero = rawFrac.slice(dp).replace(/0/g, "").length > 0;
+
+  if (int === "0" && !fracTrimmed && hasMoreNonZero && dp > 0) {
+    return `< 0.${"0".repeat(dp - 1)}1`;
+  }
+  return fracTrimmed ? `${int}.${fracTrimmed}` : int;
 }
