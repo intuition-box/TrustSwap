@@ -26,7 +26,7 @@ export function PoolsFilters({
     <div
       className={styles.filters}
       ref={containerRef}
-      onClick={() => setShowInput(true)} // clic dans le container ouvre l'input
+      onClick={() => setShowInput(true)}
     >
       <img
         src={searchIcone}
@@ -36,16 +36,17 @@ export function PoolsFilters({
       <input
         value={query}
         onChange={(e) => onQuery(e.target.value)}
-        placeholder="Search token / pair"
+        placeholder="Search token / pair..."
         className={styles.searchInputFilters}
         autoFocus
         style={{
-          maxWidth: showInput ? "20ch" : "0",
+          width: showInput ? "20ch" : "0",
           opacity: showInput ? 1 : 0,
-          transition: "max-width 0.3s ease, opacity 0.3s ease",
+          pointerEvents: showInput ? "auto" : "none",
+          transition: "width 0.3s ease, opacity 0.3s ease",
           marginLeft: "0.5vh",
         }}
-        onClick={(e) => e.stopPropagation()} // empêche de fermer l'input en cliquant dedans
+        onClick={(e) => e.stopPropagation()}
       />
     </div>
   );

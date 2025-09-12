@@ -187,7 +187,7 @@
   display: flex;
   align-items: center;
   padding-left: 1.2vh;
-  padding-right: 0.5vh;
+  padding-right: 0.3vh;
   border-radius: 1vh;
   border: 0.1vh solid var(--border-tableau);
   cursor: pointer;
