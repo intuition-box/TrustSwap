@@ -1,5 +1,5 @@
 // apps/web/src/features/pools/components/PoolsPage.tsx
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { Address } from "viem";
 import { usePublicClient } from "wagmi";
 
@@ -8,7 +8,7 @@ import { PoolsTable } from "./PoolsTable";
 import { PoolsFilters } from "./filters/PoolsFilters";
 import { PoolsPagination } from "./filters/PoolsPagination";
 import { LiquidityModal } from "./liquidity/LiquidityModal";
-import { getDefaultPair, toUIAddress } from "../../../lib/tokens";
+import { toUIAddress } from "../../../lib/tokens";
 
 import styles from "../pools.module.css";
 
@@ -30,9 +30,8 @@ export default function PoolsPage() {
   );
 
   function openEmptyModal() {
-    const { tokenIn, tokenOut } = getDefaultPair();
-    setTokenA(tokenIn.address);
-    setTokenB(tokenOut.address);
+    setTokenA(undefined);
+    setTokenB(undefined);
     setIsOpen(true);
   }
 
@@ -62,7 +61,13 @@ export default function PoolsPage() {
       <div className={styles.containerPool}>
         {/* Filtres + bouton Add Liquidity */}
         <div className={styles.filterPoolContainer}>
-          <button onClick={openEmptyModal} className={styles.addLiquidityBtn}>
+          <button
+            onClick={openEmptyModal}
+            className={styles.addLiquidityBtn}
+            style={{ visibility: isOpen ? "hidden" : "visible", pointerEvents: isOpen ? "none" : "auto" }}
+            aria-hidden={isOpen}
+            tabIndex={isOpen ? -1 : 0}
+          >
             + Add Liquidity
           </button>
           <PoolsFilters query={query} onQuery={setQuery} />
@@ -72,7 +77,7 @@ export default function PoolsPage() {
         <div className={styles.tableauContainer}>
           <div className={styles.tableauContainerLineTop}></div>
 
-          {/* ⛳️ On ne monte la table que quand le client réseau est prêt */}
+          {/*  On ne monte la table que quand le client réseau est prêt */}
           {!pc ? (
             <div className={styles.loadingBox}>Initialisation du réseau…</div>
           ) : (
