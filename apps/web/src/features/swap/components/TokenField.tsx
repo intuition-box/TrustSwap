@@ -110,7 +110,7 @@ export default function TokenField({
           placeholder={readOnly ? "-" : "0.00000"}
         />
 
-        <TokenSelector value={token} onChange={onTokenChange} />
+        <TokenSelector value={token ?? ""} onChange={onTokenChange} />
       </div>
 
       <div className={styles.bodyBalance}>

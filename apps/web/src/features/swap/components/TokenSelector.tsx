@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import type { Address } from "viem";
 import { isAddress, getAddress, erc20Abi } from "viem";
 import { usePublicClient } from "wagmi";
-import { TOKENLIST } from "../../../lib/tokens";
+import { TOKENLIST, UI_TOKENLIST } from "../../../lib/tokens";
 import styles from "@ui/styles/TokenSelector.module.css";
 import arrowIcone from "../../../assets/arrow-selector.png";
 import volIcone from "../../../assets/vol.png";
@@ -19,26 +19,80 @@ type Token = {
   hidden?: boolean;
 };
 
-const norm = (a: string) => a.toLowerCase();
+const norm = (a?: string) => (typeof a === "string" ? a.toLowerCase() : "");
+const eq = (a?: string, b?: string) => norm(a) === norm(b);
 const checksum = (a: string): Address => {
-  try { return getAddress(a as Address); } catch { return a as Address; }
+  try {
+    return getAddress(a as Address);
+  } catch {
+    return a as Address;
+  }
 };
 
 export default function TokenSelector({
   value,
   onChange,
 }: {
-  value: Address;
+  value?: Address | "";            // ⬅️ accepte vide
   onChange: (a: Address) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [importing, setImporting] = useState(false);
+
   const ref = useRef<HTMLDivElement>(null);
   const pc = usePublicClient();
 
+  // Base tokens (UI only: WTTRUST masqué)
+  const baseTokens: Token[] = useMemo(() => UI_TOKENLIST, []);
+
+  // Imported tokens
   const { tokens: imported, add: addImported, remove: removeImported, byAddress } =
     useImportedTokens();
+
+  // Merge base + imported (dedupe)
+  const allTokens: Token[] = useMemo(() => {
+    const map = new Map<string, Token>();
+    for (const t of baseTokens) map.set(norm(t.address), t);
+    for (const t of imported) {
+      const key = norm(t.address);
+      if (!map.has(key)) map.set(key, t as Token);
+    }
+    return Array.from(map.values());
+  }, [baseTokens, imported]);
+
+  // sélection courante
+  const selectedToken = useMemo(
+    () => (value ? allTokens.find((t) => eq(t.address, value)) ?? null : null),
+    [allTokens, value]
+  );
+
+  // Filtrage par recherche (safe)
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return allTokens;
+    return allTokens.filter((t) => {
+      const symbol = t.symbol?.toLowerCase() || "";
+      const name = t.name?.toLowerCase() || "";
+      const addr = (t.address || "").toLowerCase();
+      return symbol.includes(q) || name.includes(q) || addr.includes(q);
+    });
+  }, [allTokens, query]);
+
+  // Import possible ?
+  const canShowImport = useMemo(() => {
+    if (!query) return false;
+    if (!isAddress(query as Address)) return false;
+    const exists = allTokens.some((t) => eq(t.address, query));
+    return !exists && !importing;
+  }, [query, allTokens, importing]);
+
+  // Pick
+  const onPick = (addr: Address) => {
+    onChange(addr);
+    setOpen(false);
+    setQuery("");
+  };
 
   // Close on outside click
   useEffect(() => {
@@ -51,48 +105,7 @@ export default function TokenSelector({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Base tokens (visible only)
-  const baseTokens: Token[] = useMemo(
-    () => TOKENLIST.filter((t) => !t.hidden),
-    []
-  );
-
-  // Merge base + imported (dedupe by address)
-  const allTokens: Token[] = useMemo(() => {
-    const map = new Map<string, Token>();
-    for (const t of baseTokens) map.set(norm(t.address), t);
-    for (const t of imported) {
-      const key = norm(t.address);
-      if (!map.has(key)) map.set(key, t as Token);
-    }
-    return Array.from(map.values());
-  }, [baseTokens, imported]);
-
-  const selectedToken = useMemo(
-    () => allTokens.find((t) => norm(t.address) === norm(value)),
-    [allTokens, value]
-  );
-
-  // Filtering by query (symbol | name | address)
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return allTokens;
-    return allTokens.filter((t) => {
-      const symbol = t.symbol?.toLowerCase() || "";
-      const name = t.name?.toLowerCase() || "";
-      const addr = t.address.toLowerCase();
-      return symbol.includes(q) || name.includes(q) || addr.includes(q);
-    });
-  }, [allTokens, query]);
-
-  // Valid ERC-20 address not already listed?
-  const canShowImport = useMemo(() => {
-    if (!isAddress(query as Address)) return false;
-    const exists = allTokens.some((t) => norm(t.address) === norm(query));
-    return !exists && !importing;
-  }, [query, allTokens, importing]);
-
-  
+  // Importer un token par adresse
   async function resolveAndImport(addr: Address) {
     const ca = checksum(addr);
     setImporting(true);
@@ -112,13 +125,12 @@ export default function TokenSelector({
           if (typeof n === "string" && n) name = n;
           if (typeof d === "number") decimals = d;
         } catch {
-          // keep fallbacks
+
         }
       }
 
       addImported({ address: ca, symbol, name, decimals });
-      // Select immediately
-      onChange(ca);
+      onChange(ca);         
       setOpen(false);
       setQuery("");
     } finally {
@@ -129,10 +141,10 @@ export default function TokenSelector({
   return (
     <div ref={ref} className={styles.container}>
       <button
+        type="button"
         className={styles.btnTokenSelector}
         onClick={() => setOpen((prev) => !prev)}
       >
-
         {selectedToken && (
           <img
             src={getTokenIcon(selectedToken.address)}
@@ -141,7 +153,6 @@ export default function TokenSelector({
           />
         )}
         {selectedToken ? selectedToken.symbol : "Select token"}
-
         <img src={arrowIcone} alt="toggle" className={styles.arrowIcone} />
       </button>
 
@@ -166,19 +177,17 @@ export default function TokenSelector({
 
           <div className={styles.list}>
             {filtered.map((t) => {
-              const isImported = !!byAddress.get(norm(t.address));
+              const isImported = !!byAddress?.get?.(norm(t.address));
+              const isSelected = value ? eq(t.address, value) : false;
+
               return (
                 <div
                   key={t.address}
                   onMouseDown={(e) => {
-                    e.preventDefault(); 
-                    onChange(checksum(t.address));
-                    setOpen(false);
-                    setQuery("");
+                    e.preventDefault();
+                    onPick(checksum(t.address));
                   }}
-                  className={`${styles.item} ${
-                    norm(t.address) === norm(value) ? styles.selected : ""
-                  }`}
+                  className={`${styles.item} ${isSelected ? styles.selected : ""}`}
                 >
                   <img
                     src={getTokenIcon(t.address)}

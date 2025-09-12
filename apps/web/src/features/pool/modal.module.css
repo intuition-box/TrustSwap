@@ -283,7 +283,9 @@
   .inputContainerLp {
     display: flex;
     align-items: center;
+    flex-direction: column-reverse;
     justify-content: space-between;
+    gap: 1vh;
     margin-left: 2vh;
     margin-right: 2vh;
     margin-top: 2vh;
@@ -298,10 +300,10 @@
   .btnContainerLp button {
     background-color: #1B1B1B;
     color: #636363;
-    font-size: 2vh;
+    font-size: 1.5vh;
     border: none;
     border-radius: 1.2vh;
-    padding: 0.8vh;
+    padding: 0.6vh;
     cursor: pointer;
   }
 
@@ -309,10 +311,10 @@
     background-color: #202020;
   }
   .inputRemoveLp {
-    width: 70%;
+    width: 90%;
     background-color: transparent;
     border: none;
-    font-size: 5vh;
+    font-size: 4vh;
     color: var(--text-color);
     outline: none;
     padding-left: 2vh;
