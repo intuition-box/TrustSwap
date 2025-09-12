@@ -99,3 +99,21 @@ export async function getOrFetchToken(address: Address): Promise<TokenInfo> {
   TOKEN_CACHE[address.toLowerCase()] = info; 
   return info;
 }
+
+export const isWrapped = (addr?: string) =>
+  !!addr && addr.toLowerCase() === WNATIVE_ADDRESS.toLowerCase();
+
+/** Adresse à afficher en UI: WTTRUST → tTRUST (placeholder) */
+export const toUIAddress = (addr?: Address): Address | undefined =>
+  !addr ? undefined : isWrapped(addr) ? NATIVE_PLACEHOLDER : addr;
+
+/** Liste de tokens pour l'UI (on masque les hidden = WTTRUST) */
+export const UI_TOKENLIST: TokenInfo[] = TOKENLIST.filter(t => !t.hidden);
+
+/** Récupérer un TokenInfo pour affichage, en tenant compte du mapping UI */
+export function getTokenForUI(addr?: Address): TokenInfo | null {
+  if (!addr) return null;
+  const uiAddr = toUIAddress(addr)!;
+  const t = UI_TOKENLIST.find(x => x.address.toLowerCase() === uiAddr.toLowerCase());
+  return t ?? null;
+}

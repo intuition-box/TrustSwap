@@ -8,9 +8,11 @@ import { PoolsTable } from "./PoolsTable";
 import { PoolsFilters } from "./filters/PoolsFilters";
 import { PoolsPagination } from "./filters/PoolsPagination";
 import { LiquidityModal } from "./liquidity/LiquidityModal";
-import { getDefaultPair } from "../../../lib/tokens";
+import { getDefaultPair, toUIAddress } from "../../../lib/tokens";
 
 import styles from "../pools.module.css";
+
+
 
 export default function PoolsPage() {
   const [page, setPage] = useState(1);
@@ -35,8 +37,8 @@ export default function PoolsPage() {
   }
 
   function openWithPair(a: Address, b: Address) {
-    setTokenA(a);
-    setTokenB(b);
+    setTokenA(toUIAddress(a)!); // WTTRUST → tTRUST
+    setTokenB(toUIAddress(b)!);
     setIsOpen(true);
   }
 

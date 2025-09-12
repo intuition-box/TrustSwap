@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import type { Address } from "viem";
 import { isAddress, getAddress, erc20Abi } from "viem";
 import { usePublicClient } from "wagmi";
-import { TOKENLIST } from "../../../lib/tokens";
+import { TOKENLIST, UI_TOKENLIST } from "../../../lib/tokens";
 import styles from "@ui/styles/TokenSelector.module.css";
 import arrowIcone from "../../../assets/arrow-selector.png";
 import volIcone from "../../../assets/vol.png";
@@ -36,7 +36,8 @@ export default function TokenSelector({
   const [importing, setImporting] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const pc = usePublicClient();
-
+  const options = useMemo(() => UI_TOKENLIST, []);
+  
   const { tokens: imported, add: addImported, remove: removeImported, byAddress } =
     useImportedTokens();
 

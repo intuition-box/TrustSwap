@@ -4,7 +4,7 @@ import type { Address } from "viem";
 import { parseUnits } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import { useLiquidityActions } from "../../hooks/useLiquidityActions";
-import { getTokenByAddress } from "../../../../lib/tokens";
+import { getTokenByAddress, toWrapped  } from "../../../../lib/tokens";
 import { getTokenIcon } from "../../../../lib/getTokenIcon";
 import styles from "../../modal.module.css";
 import TokenField from "../../../swap/components/TokenField";
@@ -36,8 +36,8 @@ export function AddLiquidityDrawer({ tokenA, tokenB, onClose }: {
   const [amountOut, setAmountOut] = useState("");
   const [pairData, setPairData] = useState<PairData | null>(null);
 
-  const readA = toERC20ForRead(tokenIn);
-  const readB = toERC20ForRead(tokenOut);
+const readA = tokenIn ? toWrapped(tokenIn) : undefined;  // tTRUST → WTTRUST
+const readB = tokenOut ? toWrapped(tokenOut) : undefined;
 
   const tA = readA ? getTokenByAddress(readA) : null;
   const tB = readB ? getTokenByAddress(readB) : null;
