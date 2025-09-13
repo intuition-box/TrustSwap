@@ -1,10 +1,10 @@
-// apps/web/src/features/pools/components/cells/StakeClaimCell.tsx
+// StakeClaimCell.tsx
 import { useState } from "react";
 import type { PoolItem } from "../../types";
 import { useStakeActions } from "../../hooks/useStakeActions";
 import styles from "../../pools.module.css";
 
-export function StakeClaimCell({
+export function StakeClaimCellContent({
   pool,
   loading = false,
 }: {
@@ -12,57 +12,49 @@ export function StakeClaimCell({
   loading?: boolean;
 }) {
   const [amt, setAmt] = useState("");
-  const { stake, withdraw, claim } = useStakeActions(pool.staking || undefined);
+  const { stake, withdraw } = useStakeActions(pool.staking || undefined);
 
   if (loading) {
-    return (
-      <td>
-        <div className={styles.skeletonLine}></div>
-      </td>
-    );
+    return <div className={styles.skeletonLine}></div>;
   }
 
   return (
+    <div className={styles.stakeCell}>
+      <input
+        className={styles.amountInput}
+        value={amt}
+        onChange={(e) => setAmt(e.target.value)}
+        onClick={(e) => e.stopPropagation()}
+        placeholder="Amount LP"
+      />
+      <button
+        className={styles.btn}
+        onClick={(e) => {
+          e.stopPropagation();
+          stake?.(parseUnitsSafe(amt));
+        }}
+        disabled={!pool.staking}
+      >
+        Stake
+      </button>
+      <button
+        className={styles.btn}
+        onClick={(e) => {
+          e.stopPropagation();
+          withdraw?.(parseUnitsSafe(amt));
+        }}
+        disabled={!pool.staking}
+      >
+        Unstake
+      </button>
+    </div>
+  );
+}
+
+export function StakeClaimCell(props: { pool: PoolItem; loading?: boolean }) {
+  return (
     <td>
-      <div className={styles.stakeCell}>
-        <input
-          className={styles.amountInput}
-          value={amt}
-          onChange={(e) => setAmt(e.target.value)}
-          onClick={(e) => e.stopPropagation()} // 🔒 empêche ouverture modal
-          placeholder="Amount LP"
-        />
-        <button
-          className={styles.btn}
-          onClick={(e) => {
-            e.stopPropagation(); // 🔒
-            stake?.(parseUnitsSafe(amt));
-          }}
-          disabled={!pool.staking}
-        >
-          Stake
-        </button>
-        <button
-          className={styles.btn}
-          onClick={(e) => {
-            e.stopPropagation(); // 🔒
-            withdraw?.(parseUnitsSafe(amt));
-          }}
-          disabled={!pool.staking}
-        >
-          Unstake
-        </button>
-        <button
-          className={styles.btnGhost}
-          onClick={(e) => {
-            e.stopPropagation(); // 🔒
-            claim?.();
-          }}
-          disabled={!pool.staking}
-        >
-          Claim
-        </button>
-      </div>
+      <StakeClaimCellContent {...props} />
     </td>
   );
 }
