@@ -40,7 +40,7 @@ export function PoolsTable({
   if (loading) {
     return (
       <div className={styles.tableauContainer}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table>
           <thead className={styles.poolFilters}>
             <tr>
               <th>#</th>
@@ -144,8 +144,7 @@ function PoolsTableInner({
             <th>TVL</th>
             <th>1D Vol</th>
             <th>Pool APR</th>
-            <th>Epoch APR</th>
-            <th>Reward</th>
+            <th>Epoch APR Reward</th>
             <th></th>
           </tr>
         </thead>

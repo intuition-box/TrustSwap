@@ -1,9 +1,9 @@
-// apps/web/src/features/pools/components/cells/RewardCell.tsx
+// RewardCell.tsx
 import type { TokenInfo } from "../../types";
 import { fmtUnits } from "../../utils";
 import styles from "../../tableau.module.css";
 
-export function RewardCell({
+export function RewardCellContent({
   rewardToken,
   earned,
   loading = false,
@@ -12,20 +12,28 @@ export function RewardCell({
   earned?: bigint;
   loading?: boolean;
 }) {
-  if (!rewardToken) return <td>—</td>;
+  if (!rewardToken) return <>—</>;
 
   if (loading) {
-    return (
-      <td>
-        <div className={styles.skeletonLine}></div>
-      </td>
-    );
+    return <div className={styles.skeletonLine}></div>;
   }
 
   const v = earned ?? 0n;
   return (
-    <td>
+    <>
       {fmtUnits(v, rewardToken.decimals, 4)} {rewardToken.symbol}
+    </>
+  );
+}
+
+export function RewardCell(props: {
+  rewardToken?: TokenInfo;
+  earned?: bigint;
+  loading?: boolean;
+}) {
+  return (
+    <td>
+      <RewardCellContent {...props} />
     </td>
   );
 }

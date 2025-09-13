@@ -7,11 +7,10 @@ import { PoolCell } from "./cells/PoolCell";
 import { TvlCell } from "./cells/TvlCell";
 import { Volume1DCell } from "./cells/Volume1DCell";
 import { PoolAprCell } from "./cells/PoolAprCell";
-import { EpochAprCell } from "./cells/EpochAprCell";
-import { RewardCell } from "./cells/RewardCell";
-import { StakeClaimCell } from "./cells/StakeClaimCell";
+import { PoolActionsCell } from "./cells/PoolActionsCell"; // ✅ nouvelle cellule groupée
 import styles from "../tableau.module.css";
 
+// memo pour éviter rerenders inutiles
 export default React.memo(PoolRow, (prev, next) => {
   const a = prev.pool,
     b = next.pool;
@@ -44,7 +43,12 @@ export function PoolRow({
       }
     >
       <IndexCell index={index} loading={loading} />
-      <PoolCell token0={pool.token0} token1={pool.token1} pair={pool.pair} loading={loading} />
+      <PoolCell
+        token0={pool.token0}
+        token1={pool.token1}
+        pair={pool.pair}
+        loading={loading}
+      />
       <TvlCell
         value={pool.tvlNative}
         token0={pool.token0}
@@ -55,9 +59,8 @@ export function PoolRow({
       />
       <Volume1DCell value={pool.vol1dNative} loading={loading} />
       <PoolAprCell value={pool.poolAprPct} loading={loading} />
-      <EpochAprCell value={pool.epochAprPct} loading={loading} />
-      <RewardCell rewardToken={pool.rewardToken} earned={pool.earned} loading={loading} />
-      <StakeClaimCell pool={pool} loading={loading} />
+
+      <PoolActionsCell pool={pool} loading={loading} />
     </tr>
   );
 }
