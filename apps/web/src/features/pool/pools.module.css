@@ -82,6 +82,7 @@
   border-radius: 2.5vh;
   min-height: 60vh;
   width: 100%;
+  position: relative;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -284,14 +285,15 @@
   transform: scale(0.97);
 }
 
-@media (max-width: 1008px) {
+@media (max-width: 900px) {
   .tableauContainer {
-    max-width: 95vw;
+    max-width: 90vw;
     margin-left: auto;
     margin-right: auto;
     overflow: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    position: initial;
   }
   .tableauContainer::-webkit-scrollbar {
     display: none;

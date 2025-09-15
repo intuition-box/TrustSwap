@@ -8,28 +8,9 @@
   .popUpLiquidity.closing {
 
   }
+
   
-  @keyframes slideUp {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-  
-  @keyframes slideDown {
-    from {
-      transform: translateY(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-  }
+
   
 .popUpBody {
     background-color: #000000;
@@ -446,3 +427,103 @@
     }
   }
   
+
+  @media (max-width: 900px) {
+    .popUpLiquidity {
+      position: absolute;
+      top: auto;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 80%;
+      border-top-left-radius: 4vh;
+      border-top-right-radius: 4vh;
+      overflow: hidden;
+      box-shadow: 0 -10vh 10vh 3vh var(--bg-dark);
+      border: 0.1vh solid var(--border-grey);
+      background-color: #000000;
+      opacity: 1;
+    }
+
+    .inputAddLiquidityContainer {
+      flex-direction: column;
+    }
+
+    .inputAddContainer, .inputRemoveContainer {
+      width: 95%;
+    }
+
+    .popUpBody {
+      height: 90%;
+    }
+
+    .wormholeContainer {
+      height: 80%;
+      width: 100%;
+      background-size: 80%;
+    }
+
+    .wormholeContainerRemove {
+      height: 80%;
+      width: 100%;
+      background-size: 80%;
+      background-position: bottom;
+    }
+
+    @keyframes slideLeftDown {
+      0% {
+        top: 12vh;
+        right: 20%;
+        width: 10vh;
+        opacity: 1;
+      }
+      60% {
+        top: 70%;
+        right: 50%;
+        width: 4vh;
+        opacity: 1;
+        z-index: 0;
+      }
+  
+      99% {
+        width: 0vh;
+      }
+  
+      100% {
+        top: 85%;
+        right: 50%;
+        width: 0vh;
+        opacity: 0;
+      }
+    }
+    
+    @keyframes slideRightDown {
+      0% {
+        top: 12vh;
+        left: 20%;
+        width: 10vh;
+        opacity: 1;
+      }
+      60% {
+        top: 70%;
+        left: 50%;
+        width: 4vh;
+        opacity: 1;
+        z-index: 0;
+      }
+  
+      99% {
+        width: 0vh;
+      }
+  
+      100% {
+        top: 85%;
+        left: 50%;
+        width: 0vh;
+        opacity: 0;
+      }
+    }
+    .btnAddLiquidity, .btnRemoveLiquidity {
+      width: 50%;
+    }
+  }

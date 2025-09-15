@@ -38,6 +38,7 @@ export const TOKENLIST: TokenInfo[] = [
   },
 
   { address: "0x124C4E8470eD201Ae896C2DF6ee7152AB7438d80", symbol: "TKA", name: "Token A", decimals: 18 },
+  { address: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c", symbol: "INTUIT", name: "INTUIT", decimals: 18 },
   { address: "0x5Fdd4EdD250b9214D77103881bE0F09812d501D6", symbol: "TKB", name: "Token B", decimals: 18 },
   { address: "0x51379Cc2C942EE2AE2fF0BD67a7b475F0be39Dcf", symbol: "WETH", name: "Wrapped Ether", decimals: 18 },
 
