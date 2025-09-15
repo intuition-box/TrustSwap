@@ -247,8 +247,9 @@ export function useSwap() {
         message: pretty,
         asModal: true,
         sticky: true,
-        retry: () =>
-          swap(owner, tokenIn, tokenOut, amountInStr, minOut, deadlineSec),
+        retry: async () => {
+          await swap(owner, tokenIn, tokenOut, amountInStr, minOut, deadlineSec);
+        },
         dedupeKey: `swapErr:${tokenIn}:${tokenOut}:${amountInStr}:${minOut}`,
       });
       throw e;

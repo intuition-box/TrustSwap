@@ -1,5 +1,5 @@
 // features/pools/hooks/useLpPosition.ts
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Address } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import { erc20Abi, formatUnits } from "viem";
