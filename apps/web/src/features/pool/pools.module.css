@@ -77,13 +77,14 @@
 }
 
 .tableauContainer {
-    background-color: var(--bg-dark);
-    border: clamp(1px, 0.1vh, 2px) solid var(--border-tableau);
-    border-radius: 2.5vh;
-    min-height: 60vh;
-    position: relative;
-    overflow: hidden;
+  background-color: var(--bg-dark);
+  border: clamp(1px, 0.1vh, 2px) solid var(--border-tableau);
+  border-radius: 2.5vh;
+  min-height: 60vh;
+  position: relative;
+  overflow: hidden;
 }
+
 
 .tableauContainerLineTop {
     content: "";
