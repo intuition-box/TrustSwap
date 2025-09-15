@@ -3,7 +3,6 @@ import { erc20Abi, parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { getTokenByAddress } from "../../../lib/tokens";
 import { abi, addresses } from "@trustswap/sdk";
-import { useLiveTriggerAll } from "../../../live/LiveRefetchProvider";
 
 // Placeholder “native” (tTRUST)
 const NATIVE_PLACEHOLDER = addresses.NATIVE_PLACEHOLDER as Address;
@@ -32,7 +31,6 @@ function getDecimals(addr: Address): number {
 export function useSwap() {
   const { data: wallet } = useWalletClient();
   const publicClient = usePublicClient();
-  const triggerAll = useLiveTriggerAll();
 
   const approveIfNeeded = async (token: Address, owner: Address, amount: bigint) => {
     if (isNative(token)) return; 
@@ -52,7 +50,6 @@ export function useSwap() {
         functionName: "approve",
         args: [ROUTER, amount], 
       });
-      await publicClient!.waitForTransactionReceipt({ hash: tx });
     }
   };
 
@@ -112,10 +109,5 @@ export function useSwap() {
       functionName: "swapExactTokensForTokens",
       args: [amountIn, minOut, path, owner, deadline],
     });
-
-    await publicClient!.waitForTransactionReceipt({ hash });
-    triggerAll();
-
-    return hash;
   };
 }
