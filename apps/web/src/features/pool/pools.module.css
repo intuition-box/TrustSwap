@@ -212,3 +212,73 @@
   color: var(--text-color);
   outline: none;
 }
+
+.stakeRow {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  width: 92%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 1.5vh;
+}
+
+.labelStakePopup {
+  color: var(--text-color);
+  font-size: 2vh;
+  font-weight: 500;
+}
+
+.containerStake, .containerUnstake {
+  margin-top: 1vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ligne {
+  margin-top: 3vh;
+  margin-bottom: 2vh;
+  background-color: var(--border-grey);
+  height: 0.1vh;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.amountInputUnstake, .amountInputStake {
+  background-color: var(--bg-btn);
+  border: 1px solid var(--border-btn);
+  box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
+  border-radius: 1.6vh;
+  color: var(--text-color);
+  font-weight: 500;
+  letter-spacing: -0.08vh;
+  font-size: 1.8vh;
+  padding-bottom: 1.4vh;
+  padding-top: 1.4vh;
+  padding-left: 1vh;
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  margin-right: 2vh;
+  outline: none;
+}
+
+.btnAction {
+  width: 10vh;
+  height: 4vh;
+  border: none;
+  border-radius: 1vh;
+  background-color: var(--bg-white);
+  color: var(--bg-dark);
+  cursor: pointer;
+  font-size: 1.7vh;
+  font-weight: 500;
+}
+
+.btnAction:active {
+  transform: scale(0.97);
+}
+

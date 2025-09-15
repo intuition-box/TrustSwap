@@ -21,7 +21,7 @@ export function RewardCellContent({
   const v = earned ?? 0n;
   return (
     <>
-      {fmtUnits(v, rewardToken.decimals, 4)} {rewardToken.symbol}
+       {fmtUnits(v, rewardToken.decimals, 4)} {rewardToken.symbol}
     </>
   );
 }

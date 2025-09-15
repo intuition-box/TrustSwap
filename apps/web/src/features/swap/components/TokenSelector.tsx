@@ -6,6 +6,7 @@ import { TOKENLIST, UI_TOKENLIST } from "../../../lib/tokens";
 import styles from "@ui/styles/TokenSelector.module.css";
 import arrowIcone from "../../../assets/arrow-selector.png";
 import volIcone from "../../../assets/vol.png";
+import deleteIcone from "../../../assets/delete.png";
 import { getTokenIcon } from "../../../lib/getTokenIcon";
 import { SearchBar } from "./SearchBar";
 import { ImportTokenRow } from "./ImportTokenRow";
@@ -33,7 +34,7 @@ export default function TokenSelector({
   value,
   onChange,
 }: {
-  value?: Address | "";            // ⬅️ accepte vide
+  value?: Address | "";
   onChange: (a: Address) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -43,12 +44,16 @@ export default function TokenSelector({
   const ref = useRef<HTMLDivElement>(null);
   const pc = usePublicClient();
 
-  // Base tokens (UI only: WTTRUST masqué)
+  // Base tokens
   const baseTokens: Token[] = useMemo(() => UI_TOKENLIST, []);
 
   // Imported tokens
-  const { tokens: imported, add: addImported, remove: removeImported, byAddress } =
-    useImportedTokens();
+  const {
+    tokens: imported,
+    add: addImported,
+    remove: removeImported,
+    byAddress,
+  } = useImportedTokens();
 
   // Merge base + imported (dedupe)
   const allTokens: Token[] = useMemo(() => {
@@ -67,7 +72,7 @@ export default function TokenSelector({
     [allTokens, value]
   );
 
-  // Filtrage par recherche (safe)
+  // Filtrage par recherche
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return allTokens;
@@ -125,12 +130,12 @@ export default function TokenSelector({
           if (typeof n === "string" && n) name = n;
           if (typeof d === "number") decimals = d;
         } catch {
-
+          // ignore read errors
         }
       }
 
       addImported({ address: ca, symbol, name, decimals });
-      onChange(ca);         
+      onChange(ca);
       setOpen(false);
       setQuery("");
     } finally {
@@ -152,7 +157,13 @@ export default function TokenSelector({
             className={styles.tokenIcon}
           />
         )}
-        {selectedToken ? selectedToken.symbol : "Select token"}
+{selectedToken ? (
+  selectedToken.symbol
+) : (
+  <span className={styles.tokenPlaceholder}>Select token</span>
+)}
+
+
         <img src={arrowIcone} alt="toggle" className={styles.arrowIcone} />
       </button>
 
@@ -162,6 +173,11 @@ export default function TokenSelector({
 
           <SearchBar value={query} onChange={setQuery} />
 
+          <span className={styles.titleSearchToken}>
+            <img src={volIcone} alt="volume" className={styles.volIcone} />
+            Tokens by 24h Volume
+          </span>
+
           {canShowImport && (
             <ImportTokenRow
               query={query}
@@ -169,11 +185,6 @@ export default function TokenSelector({
               disabled={importing}
             />
           )}
-
-          <span className={styles.titleSearchToken}>
-            <img src={volIcone} alt="volume" className={styles.volIcone} />
-            Tokens by 24h Volume
-          </span>
 
           <div className={styles.list}>
             {filtered.map((t) => {
@@ -194,14 +205,27 @@ export default function TokenSelector({
                     alt={t.symbol}
                     className={styles.tokenIcon}
                   />
+
+                  <span className={styles.nameTokenDropdown}>
+                  {t.name && (
+                      <span className={styles.tokenName}> {t.name}</span>
+                    )}
+                  <div className={styles.infoTokenSwap}>
                   <span className={styles.tokenSymbol}>{t.symbol}</span>
+                  
                   <span className={styles.addr}>
                     {t.address.slice(0, 6)}…{t.address.slice(-4)}
                   </span>
+                  </div>
+                  </span>
+
+                  {isImported && (
+                    <span className={styles.labelImported}>Imported</span>
+                  )}
 
                   {isImported && (
                     <button
-                      className={styles.removeBtn}
+                      className={styles.removeBtnSelected}
                       title="Remove imported token"
                       onMouseDown={(e) => {
                         e.stopPropagation();
@@ -209,7 +233,11 @@ export default function TokenSelector({
                         removeImported(t.address as Address);
                       }}
                     >
-                      Remove
+                      <img
+                        src={deleteIcone}
+                        className={styles.deleteIcon}
+                        alt="remove"
+                      />
                     </button>
                   )}
                 </div>

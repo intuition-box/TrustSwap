@@ -11,7 +11,8 @@ export function StakeClaimCellContent({
   pool: PoolItem;
   loading?: boolean;
 }) {
-  const [amt, setAmt] = useState("");
+  const [stakeAmt, setStakeAmt] = useState("");
+  const [unstakeAmt, setUnstakeAmt] = useState("");
   const { stake, withdraw } = useStakeActions(pool.staking || undefined);
 
   if (loading) {
@@ -20,33 +21,54 @@ export function StakeClaimCellContent({
 
   return (
     <div className={styles.stakeCell}>
-      <input
-        className={styles.amountInput}
-        value={amt}
-        onChange={(e) => setAmt(e.target.value)}
-        onClick={(e) => e.stopPropagation()}
-        placeholder="Amount LP"
-      />
-      <button
-        className={styles.btn}
-        onClick={(e) => {
-          e.stopPropagation();
-          stake?.(parseUnitsSafe(amt));
-        }}
-        disabled={!pool.staking}
-      >
-        Stake
-      </button>
-      <button
-        className={styles.btn}
-        onClick={(e) => {
-          e.stopPropagation();
-          withdraw?.(parseUnitsSafe(amt));
-        }}
-        disabled={!pool.staking}
-      >
-        Unstake
-      </button>
+      <div className={styles.stakeRow}>
+        <span className={styles.labelStakePopup}>Stake LP</span>
+        <div className={styles.containerStake}>
+        <input
+          className={styles.amountInputStake}
+          value={stakeAmt}
+          onChange={(e) => setStakeAmt(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          placeholder="Amount to Stake"
+        />
+        <button
+          className={styles.btnAction}
+          onClick={(e) => {
+            e.stopPropagation();
+            stake?.(parseUnitsSafe(stakeAmt));
+            setStakeAmt(""); // reset input après action
+          }}
+          disabled={!pool.staking}
+        >
+          Stake
+        </button>
+        </div>
+      </div>
+      <div className={styles.ligne}></div>
+      {/* Input + bouton pour le unstake */}
+      <div className={styles.stakeRow}>
+      <span className={styles.labelStakePopup}>Unstake LP</span>
+      <div className={styles.containerUnstake}>
+        <input
+          className={styles.amountInputUnstake}
+          value={unstakeAmt}
+          onChange={(e) => setUnstakeAmt(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          placeholder="Amount to Unstake"
+        />
+        <button
+          className={styles.btnAction}
+          onClick={(e) => {
+            e.stopPropagation();
+            withdraw?.(parseUnitsSafe(unstakeAmt));
+            setUnstakeAmt(""); // reset input après action
+          }}
+          disabled={!pool.staking}
+        >
+          Unstake
+        </button>
+      </div>
+      </div>
     </div>
   );
 }
