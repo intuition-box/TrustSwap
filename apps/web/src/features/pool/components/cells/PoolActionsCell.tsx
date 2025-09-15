@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useAccount } from "wagmi";  
 import { EpochAprCellContent } from "../cells/EpochAprCell";
 import { RewardCellContent } from "../cells/RewardCell";
 import { StakeClaimCellContent } from "../cells/StakeClaimCell";
@@ -23,10 +24,19 @@ export function PoolActionsCell({
   pool: PoolItem;
   loading?: boolean;
 }) {
+  const { isConnected } = useAccount(); 
   const staking: any = pool?.staking;
   const { claim } = useStakeActions(staking || undefined);
   const [showPopup, setShowPopup] = useState(false);
   const [showClaimTip, setShowClaimTip] = useState(false); 
+
+  if (!isConnected) {
+    return (
+      <td className={styles.tdStake}>
+        <span className={styles.placeholderDash ?? ""}>—</span>
+      </td>
+    );
+  }
 
   const isExpired = useMemo(() => {
     if (!staking) return false;
