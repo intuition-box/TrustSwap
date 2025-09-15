@@ -67,6 +67,8 @@ export function PoolActionsCell({
               >
                 <StakeClaimCellContent pool={pool} loading={loading} />
 
+                <div className={styles.ligne}></div>
+                <div className={styles.bottomStake}>
                 <RewardCellContent
                   rewardToken={pool.rewardToken}
                   earned={pool.earned}
@@ -74,7 +76,7 @@ export function PoolActionsCell({
                 />
 
                 <button
-                  className={styles.btnGhost}
+                  className={styles.btnClaimPopUp}
                   onClick={(e) => {
                     e.stopPropagation();
                     claim?.();
@@ -83,12 +85,12 @@ export function PoolActionsCell({
                 >
                   Claim
                 </button>
-
+                </div>
                 <button
-                  className={styles.btnGhost}
+                  className={styles.btnCloseStake}
                   onClick={() => setShowPopup(false)}
                 >
-                  Close
+                  x
                 </button>
               </div>
             </>
