@@ -1,6 +1,8 @@
 import { useState, useMemo } from "react"
 import type { Address } from "viem"
 import { useAccount } from "wagmi"
+import { usePoolsData } from "../../pool/hooks/usePoolsData";
+import { useDynamicTokenList } from "../hooks/useDynamicTokenList";
 import TokenSelector from "./TokenSelector"
 import AmountInput from "./AmountInput"
 import styles from "@ui/styles/Swap.module.css"
@@ -50,6 +52,10 @@ export default function TokenField({
   // ← DynamicWagmiConnector alimente wagmi : on récupère juste l'adresse connectée
   const { address: accountAddress, isConnected } = useAccount()
   const [copied, setCopied] = useState(false)
+  
+  const pools = usePoolsData(); 
+  const dynTokens = useDynamicTokenList(pools);
+  const uiTokens  = dynTokens.filter(t => !t.hidden);  
 
   // Validation d'adresse (0x + 40 hex) avant cast en Address
   const owner: Address | undefined = useMemo(() => {
@@ -110,7 +116,7 @@ export default function TokenField({
           placeholder={readOnly ? "-" : "0.00000"}
         />
 
-        <TokenSelector value={token ?? ""} onChange={onTokenChange} />
+        <TokenSelector value={token ?? ""} onChange={onTokenChange} tokens={uiTokens} />
       </div>
 
       <div className={styles.bodyBalance}>
