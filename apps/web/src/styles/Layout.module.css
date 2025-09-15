@@ -147,6 +147,7 @@
     .navbar {
         top: auto;
         bottom: 2vh;
+        z-index: 10000;
     }
 
     .comingMsg {

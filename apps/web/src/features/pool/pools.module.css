@@ -81,8 +81,9 @@
   border: clamp(1px, 0.1vh, 2px) solid var(--border-tableau);
   border-radius: 2.5vh;
   min-height: 60vh;
-  position: relative;
-  overflow: hidden;
+  width: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 
@@ -283,10 +284,16 @@
   transform: scale(0.97);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1008px) {
   .tableauContainer {
-    width: 95%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    max-width: 95vw;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .tableauContainer::-webkit-scrollbar {
+    display: none;
   }
 }
