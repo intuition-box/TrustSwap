@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { RootProviders } from "./lib/dynamic"
+import { LiveRefetchProvider } from "./live/LiveRefetchProvider";
 
 import styles from "../../web/src/styles/Layout.module.css"
 
@@ -11,10 +12,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <RootProviders>
       <BrowserRouter>
-      <div className={styles.containerBody}>
-        <div className={styles.halo}></div>
-        <App />
-        </div>
+        <LiveRefetchProvider>
+          <div className={styles.containerBody}>
+            <div className={styles.halo}></div>
+            <App />
+            </div>
+        </LiveRefetchProvider>  
       </BrowserRouter>
     </RootProviders>
   </React.StrictMode>

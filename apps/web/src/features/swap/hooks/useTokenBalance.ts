@@ -1,9 +1,9 @@
-// src/hooks/useTokenBalance.ts
 import type { Address } from "viem";
 import { erc20Abi, formatUnits, zeroAddress } from "viem";
-import { useAccount, usePublicClient, useWatchBlocks } from "wagmi";
-import { useEffect, useState } from "react";
+import { useAccount, usePublicClient } from "wagmi";
+import { useCallback, useEffect, useState } from "react";
 import { getTokenByAddress, isNative } from "../../../lib/tokens";
+import { useLiveRegister } from "../../../live/LiveRefetchProvider";
 
 type Result = {
   raw?: bigint;
@@ -25,9 +25,9 @@ export function useTokenBalance(token?: Address, owner?: Address): Result {
     refetch: async () => {},
   });
 
-  async function fetchOnce() {
+  const fetchOnce = useCallback(async () => {
     if (!pc || !owner || isUnsetToken) {
-      setState(s => ({ 
+      setState((s) => ({
         ...s,
         raw: undefined,
         formatted: undefined,
@@ -39,16 +39,17 @@ export function useTokenBalance(token?: Address, owner?: Address): Result {
       }));
       return;
     }
+
     try {
-      const meta = getTokenByAddress(token); 
-      console.log("[useTokenBalance] read", { token, symbol: meta.symbol, owner });
+      const meta = getTokenByAddress(token!);
+      // console.log("[useTokenBalance] read", { token, symbol: meta.symbol, owner });
 
       let raw: bigint;
       if (meta.isNative || isNative(token)) {
         raw = await pc.getBalance({ address: owner });
       } else {
         raw = (await pc.readContract({
-          address: token,
+          address: token!,
           abi: erc20Abi,
           functionName: "balanceOf",
           args: [owner],
@@ -66,17 +67,19 @@ export function useTokenBalance(token?: Address, owner?: Address): Result {
       });
     } catch (error) {
       console.error("[useTokenBalance] error", { token, owner, error });
-      setState(s => ({ ...s, error, isLoading: false, refetch: fetchOnce }));
+      setState((s) => ({ ...s, error, isLoading: false, refetch: fetchOnce }));
     }
-  }
+  }, [pc, owner, token, isUnsetToken]);
 
   useEffect(() => {
-    setState(s => ({ ...s, isLoading: !!token && !!owner && !isUnsetToken, }));
+    setState((s) => ({
+      ...s,
+      isLoading: !!token && !!owner && !isUnsetToken,
+    }));
     void fetchOnce();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pc, owner, token, chain?.id]);
+  }, [pc, owner, token, chain?.id, isUnsetToken, fetchOnce]);
 
-  useWatchBlocks({ onBlock() { if (owner && token && !isUnsetToken) void fetchOnce(); } });
+  useLiveRegister(fetchOnce);
 
   return state;
 }
