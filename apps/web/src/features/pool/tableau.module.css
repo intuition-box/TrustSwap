@@ -1,3 +1,11 @@
+table {
+  border-collapse: collapse;
+}
+
+table {
+  width: 100%;
+}
+
 .poolFilters {
     background-color: var(--bg-filter);
     border-bottom: clamp(1px, 0.1vh, 2px) solid var(--border-tableau);
@@ -12,8 +20,7 @@
   }
   
   .poolFilters tr th:nth-child(1){
-    padding: 0 2vh;
-    
+    padding: 0 2vh;    
   }
 
   .ligneTableau td {
@@ -24,6 +31,10 @@
     font-size: 1.6vh;
     text-align: center;
   }
+
+
+
+
 
   .ligneTableau:hover td {
     background-color: var(--bg-filter);

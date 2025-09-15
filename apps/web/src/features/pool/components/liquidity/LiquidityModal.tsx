@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Address } from "viem";
 import { AddLiquidityDrawer } from "./AddLiquidityDrawer";
 import { RemoveLiquidityDrawer } from "./RemoveLiquidityDrawer";
@@ -16,10 +16,23 @@ export function LiquidityModal({
   const [tab, setTab] = useState<"add" | "remove">("add");
   const [closing, setClosing] = useState(false);
 
+  const addRef = useRef<HTMLButtonElement>(null);
+  const removeRef = useRef<HTMLButtonElement>(null);
+  const [bgStyle, setBgStyle] = useState({ width: 0, left: 0 });
+
   const handleClose = () => {
     setClosing(true);
     setTimeout(onClose, 400);
   };
+
+  useEffect(() => {
+    const activeEl = tab === "add" ? addRef.current : removeRef.current;
+    if (activeEl) {
+      const rect = activeEl.getBoundingClientRect();
+      const parentRect = activeEl.parentElement!.getBoundingClientRect();
+      setBgStyle({ width: rect.width, left: rect.left - parentRect.left });
+    }
+  }, [tab]);
 
   return (
     <div
@@ -32,13 +45,19 @@ export function LiquidityModal({
       >
         <div className={styles.headerLiquidityPopUp}>
           <div className={styles.headerChoiceLiquidity}>
+            <div
+              className={styles.activeBg}
+              style={{ width: bgStyle.width, left: bgStyle.left }}
+            />
             <button
+              ref={addRef}
               className={tab === "add" ? styles.activeTab : styles.inactiveTab}
               onClick={() => setTab("add")}
             >
               Add Liquidity
             </button>
             <button
+              ref={removeRef}
               className={tab === "remove" ? styles.activeTab : styles.inactiveTab}
               onClick={() => setTab("remove")}
             >
@@ -46,7 +65,7 @@ export function LiquidityModal({
             </button>
           </div>
 
-          <button onClick={handleClose}>✕</button>
+          <button onClick={handleClose} className={styles.btnCloseModal}>✕</button>
         </div>
 
         {tab === "add" ? (
