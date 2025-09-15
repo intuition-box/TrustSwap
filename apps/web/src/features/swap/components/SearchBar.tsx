@@ -12,7 +12,7 @@ export function SearchBar({
   placeholder?: string;
 }) {
   return (
-    <label className={styles.searchBarSelector}>
+    <div className={styles.searchBarSelector}>
       <img src={searchIcone} alt="search" className={styles.searchIcone} />
       <input
         className={styles.searchInput}
@@ -21,6 +21,6 @@ export function SearchBar({
         placeholder={placeholder}
         autoFocus
       />
-    </label>
+    </div>
   );
 }
