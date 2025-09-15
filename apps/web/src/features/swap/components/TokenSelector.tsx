@@ -173,10 +173,7 @@ export default function TokenSelector({
 
           <SearchBar value={query} onChange={setQuery} />
 
-          <span className={styles.titleSearchToken}>
-            <img src={volIcone} alt="volume" className={styles.volIcone} />
-            Tokens by 24h Volume
-          </span>
+      
 
           {canShowImport && (
             <ImportTokenRow

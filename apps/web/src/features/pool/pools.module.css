@@ -83,8 +83,7 @@
   min-height: 60vh;
   width: 100%;
   position: relative;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
 }
 
 
