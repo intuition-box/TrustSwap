@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
 import type { Address } from "viem";
+import { useAccount } from "wagmi";
 import { formatUnits, parseUnits } from "viem";
 import styles from "../../modal.module.css";
 import { clampDecimalsForInput, tidyOnBlur } from "../../../../utils/number";
-
+import { useLiquidityActions } from "../../hooks/useLiquidityActions";
 import { TOKENLIST, toWrapped } from "../../../../lib/tokens";
 import { getTokenIcon } from "../../../../lib/getTokenIcon";
 import { useLpPosition } from "../../hooks/useLpPosition";
@@ -12,8 +13,6 @@ import { fmtUnits, formatAmountStr } from "../../utils";
 export function RemoveLiquidityDrawer({
   tokenA,
   tokenB,
-  onClose,
-  onRemoveLiquidity,
 }: {
   tokenA?: Address;
   tokenB?: Address;
@@ -22,7 +21,7 @@ export function RemoveLiquidityDrawer({
 }) {
   const DECIMALS = 6;      // décimales visibles dans l'input
   const lpDecimals = 18;   // LP UniswapV2 = 18
-
+  const { address: to } = useAccount();
   // valeur affichée (décimale clampée)
   const [lpAmount, setLpAmount] = useState("");
   // override précis en wei (pour % et Max)
@@ -114,12 +113,32 @@ export function RemoveLiquidityDrawer({
     setLpAmount(clampDecimalsForInput(s, DECIMALS));
   };
 
-  // Submit → envoie la valeur raw exacte (wei)
-  const handleRemove = async () => {
-    await onRemoveLiquidity(lpAmountRaw.toString());
-    onClose();
-  };
+  const { removeLiquidity } = useLiquidityActions();
 
+  async function handleRemoveLiquidity(amount: bigint) {
+    if (!tokenA || !tokenB || !to) return; // to = wallet address
+    const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
+  
+    // Slippage min (ici 0 pour exemple, tu peux calculer avec reserveA/reserveB)
+    const amtAMin = 0n;
+    const amtBMin = 0n;
+  
+    try {
+      await removeLiquidity(
+        tokenA,
+        tokenB,
+        amount,
+        amtAMin,
+        amtBMin,
+        to,       // adresse du wallet
+        deadline
+      );
+    } catch (err) {
+      console.error("Failed to remove liquidity:", err);
+    }
+  }
+  
+  
   return (
     <div className={styles.bodyAddModal}>
       <div className={styles.inputRemoveContainer}>
@@ -199,9 +218,8 @@ export function RemoveLiquidityDrawer({
           + {formatAmountStr(previewB || "0", DECIMALS)}
         </div>
 
-        <button onClick={handleRemove} className={styles.btnRemoveLiquidity}>
-          Remove
-        </button>
+        <button onClick={() => handleRemoveLiquidity(lpAmountRaw)} className={styles.btnRemoveLiquidity}>Remove</button>
+
       </div>
     </div>
   );
