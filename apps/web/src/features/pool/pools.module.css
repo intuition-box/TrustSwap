@@ -283,3 +283,10 @@
   transform: scale(0.97);
 }
 
+@media (max-width: 768px) {
+  .tableauContainer {
+    width: 95%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
