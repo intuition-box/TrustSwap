@@ -271,6 +271,7 @@
     align-items: center;
     gap: 0.3vh;
     font-size: 2vh;
+    opacity: 0;
   }
   
   .dollarFont {
