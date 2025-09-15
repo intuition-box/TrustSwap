@@ -1,9 +1,10 @@
 // apps/web/src/features/pools/hooks/useLiquidityActions.ts
-import { useWalletClient, usePublicClient } from "wagmi";
+import { useWalletClient, usePublicClient, useChainId } from "wagmi";
 import type { Address, Abi } from "viem";
 import { erc20Abi, maxUint256, parseGwei, zeroAddress } from "viem";
 import { addresses } from "@trustswap/sdk";
 import { toWrapped, WNATIVE_ADDRESS } from "../../../lib/tokens";
+import { useAlerts } from "../../../features/alerts/Alerts";
 
 // --- Réseau / addresses
 const ROUTER = addresses.UniswapV2Router02 as Address;
@@ -14,13 +15,7 @@ const GAS_PRICE = parseGwei("0.1");
 
 // --- ABIs minimales & typées -----------------------------------------------------------------
 const WETH9_DEPOSIT_ABI = [
-  {
-    type: "function",
-    name: "deposit",
-    stateMutability: "payable",
-    inputs: [],
-    outputs: [],
-  },
+  { type: "function", name: "deposit", stateMutability: "payable", inputs: [], outputs: [] },
 ] as const satisfies Abi;
 
 const ROUTER_ABI = [
@@ -76,12 +71,58 @@ const FACTORY_ABI = [
     outputs: [{ name: "pair", type: "address" }],
   },
 ] as const satisfies Abi;
-
 // --------------------------------------------------------------------------------------------
+
+// Explorer URL (complète avec tes réseaux)
+function explorerTx(chainId: number | undefined, hash?: `0x${string}`) {
+  if (!hash) return undefined;
+  const map: Record<number, string> = {
+    13579: "https://testnet.explorer.intuition.systems/tx/",
+  };
+  const base = map[chainId ?? 0];
+  return base ? `${base}${hash}` : undefined;
+}
+
+// Messages d’erreur (EN)
+function prettifyLiquidityError(err: any): string {
+  const raw =
+    String(err?.shortMessage || "") + " | " +
+    String(err?.message || "") + " | " +
+    String(err?.cause?.shortMessage || "") + " | " +
+    String(err?.cause?.message || "");
+  const msg = raw.toLowerCase();
+
+  if (
+    msg.includes("user rejected") ||
+    msg.includes("user denied") ||
+    msg.includes("request rejected") ||
+    msg.includes("action rejected") ||
+    String(err?.code) === "4001"
+  ) return "Transaction rejected by user.";
+
+  if (msg.includes("insufficient funds for gas"))
+    return "Insufficient funds for gas.";
+
+  if (raw.includes("TransferHelper::transferFrom: transferFrom failed"))
+    return "Insufficient allowance or balance.";
+
+  if (msg.includes("deadline") || msg.includes("expired"))
+    return "Transaction deadline exceeded.";
+
+  if (msg.includes("pair") && msg.includes("not found"))
+    return "Pair not found for provided tokens.";
+
+  if (msg.includes("lp") && msg.includes("balance") && msg.includes("zero"))
+    return "You do not hold LP tokens for this pool.";
+
+  return (err?.shortMessage || err?.message || "Transaction failed").toString();
+}
 
 export function useLiquidityActions() {
   const { data: wallet } = useWalletClient();
   const publicClient = usePublicClient();
+  const chainId = useChainId();
+  const alerts = useAlerts();
 
   async function estimateOverrides(base: {
     address: Address;
@@ -106,6 +147,7 @@ export function useLiquidityActions() {
     }) as unknown) as bigint;
   }
 
+  // Approval avec alertes
   async function ensureAllowance(
     token: Address,
     owner: Address,
@@ -121,29 +163,94 @@ export function useLiquidityActions() {
 
     if (current >= needed) return;
 
-    const base = {
-      address: token,
-      abi: erc20Abi,
-      functionName: "approve",
-      args: [spender, maxUint256],
-    } as const;
-    const overrides = await estimateOverrides(base);
-    const hash = await wallet!.writeContract({ ...base, ...overrides });
-    await publicClient!.waitForTransactionReceipt({ hash });
+    try {
+      const base = {
+        address: token,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [spender, maxUint256],
+      } as const;
+      const overrides = await estimateOverrides(base);
+      const hash = await wallet!.writeContract({ ...base, ...overrides });
+
+      alerts.push({
+        kind: "approve:pending",
+        txHash: hash,
+        severity: "info",
+        explorer: { url: explorerTx(chainId, hash) ?? "" },
+        dedupeKey: `approve:${hash}`,
+        message: "Approval sent…",
+      });
+
+      await publicClient!.waitForTransactionReceipt({ hash });
+
+      alerts.push({
+        kind: "approve:confirmed",
+        txHash: hash,
+        severity: "success",
+        explorer: { url: explorerTx(chainId, hash) ?? "" },
+        dedupeKey: `approve:${hash}`,
+        message: "Approval confirmed ✅",
+      });
+    } catch (e: any) {
+      const pretty = prettifyLiquidityError(e);
+      alerts.push({
+        kind: "approve:failed",
+        severity: "error",
+        message: pretty,
+        asModal: true,
+        sticky: true,
+        retry: () => ensureAllowance(token, owner, spender, needed),
+        dedupeKey: `approveErr:${token}:${owner}:${String(needed)}`,
+      });
+      throw e;
+    }
   }
 
-  // WTTRUST = vrai wrapped natif
+  // WTTRUST = vrai wrapped natif (avec alertes)
   async function wrapNative(amount: bigint) {
-    const base = {
-      address: WNATIVE_ADDRESS,
-      abi: WETH9_DEPOSIT_ABI,
-      functionName: "deposit",
-      // payable
-      value: amount,
-    } as const;
-    const overrides = await estimateOverrides(base);
-    const hash = await wallet!.writeContract({ ...base, ...overrides });
-    await publicClient!.waitForTransactionReceipt({ hash });
+    try {
+      const base = {
+        address: WNATIVE_ADDRESS,
+        abi: WETH9_DEPOSIT_ABI,
+        functionName: "deposit",
+        value: amount,
+      } as const;
+      const overrides = await estimateOverrides(base);
+      const hash = await wallet!.writeContract({ ...base, ...overrides });
+
+      alerts.push({
+        kind: "tx:pending",
+        txHash: hash,
+        severity: "info",
+        explorer: { url: explorerTx(chainId, hash) ?? "" },
+        dedupeKey: `wrap:${hash}`,
+        message: "Wrapping native…",
+      });
+
+      await publicClient!.waitForTransactionReceipt({ hash });
+
+      alerts.push({
+        kind: "tx:confirmed",
+        txHash: hash,
+        severity: "success",
+        explorer: { url: explorerTx(chainId, hash) ?? "" },
+        dedupeKey: `wrap:${hash}`,
+        message: "Wrapped native ✅",
+      });
+    } catch (e: any) {
+      const pretty = prettifyLiquidityError(e);
+      alerts.push({
+        kind: "tx:failed",
+        severity: "error",
+        message: pretty,
+        asModal: true,
+        sticky: true,
+        retry: () => wrapNative(amount),
+        dedupeKey: `wrapErr:${String(amount)}`,
+      });
+      throw e;
+    }
   }
 
   async function addLiquidity(
@@ -156,38 +263,76 @@ export function useLiquidityActions() {
     to: Address,
     deadlineSec: number
   ) {
-    if (!wallet) throw new Error("Wallet not connected");
+    if (!wallet) {
+      alerts.error("Wallet not connected");
+      throw new Error("Wallet not connected");
+    }
 
     // Toujours travailler en wrapped (WTTRUST)
     const A = toWrapped(tokenA);
     const B = toWrapped(tokenB);
     const owner = wallet.account!.address as Address;
 
-    // Balances & wrap auto si besoin
-    const [balA, balB] = await Promise.all([
-      readBalance(A, owner),
-      readBalance(B, owner),
-    ]);
-    if (A.toLowerCase() === WNATIVE_ADDRESS.toLowerCase() && balA < amtADesired) {
-      await wrapNative(amtADesired - balA);
-    }
-    if (B.toLowerCase() === WNATIVE_ADDRESS.toLowerCase() && balB < amtBDesired) {
-      await wrapNative(amtBDesired - balB);
-    }
+    try {
+      // Balances & wrap auto si besoin
+      const [balA, balB] = await Promise.all([readBalance(A, owner), readBalance(B, owner)]);
+      if (A.toLowerCase() === WNATIVE_ADDRESS.toLowerCase() && balA < amtADesired) {
+        await wrapNative(amtADesired - balA);
+      }
+      if (B.toLowerCase() === WNATIVE_ADDRESS.toLowerCase() && balB < amtBDesired) {
+        await wrapNative(amtBDesired - balB);
+      }
 
-    // Approvals ERC20 vers le Router
-    await ensureAllowance(A, owner, ROUTER, amtADesired);
-    await ensureAllowance(B, owner, ROUTER, amtBDesired);
+      // Approvals ERC20 vers le Router
+      await ensureAllowance(A, owner, ROUTER, amtADesired);
+      await ensureAllowance(B, owner, ROUTER, amtBDesired);
 
-    // Appel Router
-    const base = {
-      address: ROUTER,
-      abi: ROUTER_ABI,
-      functionName: "addLiquidity",
-      args: [A, B, amtADesired, amtBDesired, amtAMin, amtBMin, to, BigInt(deadlineSec)],
-    } as const;
-    const overrides = await estimateOverrides(base);
-    return wallet!.writeContract({ ...base, ...overrides });
+      // Appel Router
+      const base = {
+        address: ROUTER,
+        abi: ROUTER_ABI,
+        functionName: "addLiquidity",
+        args: [A, B, amtADesired, amtBDesired, amtAMin, amtBMin, to, BigInt(deadlineSec)],
+      } as const;
+      const overrides = await estimateOverrides(base);
+      const hash = await wallet!.writeContract({ ...base, ...overrides });
+
+      alerts.push({
+        kind: "tx:pending",
+        txHash: hash,
+        severity: "info",
+        explorer: { url: explorerTx(chainId, hash) ?? "" },
+        dedupeKey: `addliq:${hash}`,
+        message: "Add liquidity sent…",
+      });
+
+      const receipt = await publicClient!.waitForTransactionReceipt({ hash });
+
+      alerts.push({
+        kind: "tx:confirmed",
+        txHash: hash,
+        severity: "success",
+        explorer: { url: explorerTx(chainId, hash) ?? "" },
+        dedupeKey: `addliq:${hash}`,
+        message: "Liquidity added ✅",
+      });
+
+      return receipt;
+    } catch (e: any) {
+      const pretty = prettifyLiquidityError(e);
+      alerts.push({
+        kind: "tx:failed",
+        severity: "error",
+        message: pretty,
+        asModal: true,
+        sticky: true,
+        retry: async () => {
+          await addLiquidity(tokenA, tokenB, amtADesired, amtBDesired, amtAMin, amtBMin, to, deadlineSec);
+        },
+        dedupeKey: `addliqErr:${tokenA}:${tokenB}:${String(amtADesired)}:${String(amtBDesired)}`,
+      });
+      throw e;
+    }
   }
 
   async function removeLiquidity(
@@ -199,47 +344,91 @@ export function useLiquidityActions() {
     to: Address,
     deadlineSec: number
   ) {
-    if (!wallet) throw new Error("Wallet not connected");
+    if (!wallet) {
+      alerts.error("Wallet not connected");
+      throw new Error("Wallet not connected");
+    }
     const owner = wallet.account!.address as Address;
 
-    // Wrapped + pair address
-    const A = toWrapped(tokenA);
-    const B = toWrapped(tokenB);
+    try {
+      const A = toWrapped(tokenA);
+      const B = toWrapped(tokenB);
 
-    const pair = (await publicClient!.readContract({
-      address: FACTORY,
-      abi: FACTORY_ABI,
-      functionName: "getPair",
-      args: [A, B],
-    })) as Address;
+      const pair = (await publicClient!.readContract({
+        address: FACTORY,
+        abi: FACTORY_ABI,
+        functionName: "getPair",
+        args: [A, B],
+      })) as Address;
 
-    if (!pair || pair === zeroAddress) {
-      throw new Error("Pair not found for provided tokens.");
+      if (!pair || pair === zeroAddress) {
+        const msg = "Pair not found for provided tokens.";
+        alerts.error(msg);
+        throw new Error(msg);
+      }
+
+      // Solde LP & approval du LP vers le Router
+      const lpBalance = (await publicClient!.readContract({
+        address: pair,
+        abi: erc20Abi,
+        functionName: "balanceOf",
+        args: [owner],
+      })) as unknown as bigint;
+
+      if (lpBalance === 0n) {
+        const msg = "You do not hold LP tokens for this pool.";
+        alerts.error(msg);
+        throw new Error(msg);
+      }
+
+      const liq = liquidity > lpBalance ? lpBalance : liquidity;
+      await ensureAllowance(pair, owner, ROUTER, liq);
+
+      const base = {
+        address: ROUTER,
+        abi: ROUTER_ABI,
+        functionName: "removeLiquidity",
+        args: [A, B, liq, amtAMin, amtBMin, to, BigInt(deadlineSec)],
+      } as const;
+      const overrides = await estimateOverrides(base);
+      const hash = await wallet!.writeContract({ ...base, ...overrides });
+
+      alerts.push({
+        kind: "tx:pending",
+        txHash: hash,
+        severity: "info",
+        explorer: { url: explorerTx(chainId, hash) ?? "" },
+        dedupeKey: `remlig:${hash}`,
+        message: "Remove liquidity sent…",
+      });
+
+      const receipt = await publicClient!.waitForTransactionReceipt({ hash });
+
+      alerts.push({
+        kind: "tx:confirmed",
+        txHash: hash,
+        severity: "success",
+        explorer: { url: explorerTx(chainId, hash) ?? "" },
+        dedupeKey: `remlig:${hash}`,
+        message: "Liquidity removed ✅",
+      });
+
+      return receipt;
+    } catch (e: any) {
+      const pretty = prettifyLiquidityError(e);
+      alerts.push({
+        kind: "tx:failed",
+        severity: "error",
+        message: pretty,
+        asModal: true,
+        sticky: true,
+        retry: async () => {
+          await removeLiquidity(tokenA, tokenB, liquidity, amtAMin, amtBMin, to, deadlineSec);
+        },
+        dedupeKey: `remligErr:${tokenA}:${tokenB}:${String(liquidity)}`,
+      });
+      throw e;
     }
-
-    // Solde LP & approval du LP vers le Router
-    const lpBalance = (await publicClient!.readContract({
-      address: pair,
-      abi: erc20Abi,
-      functionName: "balanceOf",
-      args: [owner],
-    })) as unknown as bigint;
-
-    if (lpBalance === 0n) {
-      throw new Error("You do not hold LP tokens for this pool.");
-    }
-
-    const liq = liquidity > lpBalance ? lpBalance : liquidity;
-    await ensureAllowance(pair, owner, ROUTER, liq);
-
-    const base = {
-      address: ROUTER,
-      abi: ROUTER_ABI,
-      functionName: "removeLiquidity",
-      args: [A, B, liq, amtAMin, amtBMin, to, BigInt(deadlineSec)],
-    } as const;
-    const overrides = await estimateOverrides(base);
-    return wallet!.writeContract({ ...base, ...overrides });
   }
 
   return { addLiquidity, removeLiquidity, wrapNative };
