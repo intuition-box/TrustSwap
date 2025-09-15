@@ -83,14 +83,6 @@ export function PoolActionsCell({
     );
   }
 
-  // Farm existante mais expirée ET aucun LP/reward → afficher "Expired"
-  if (isExpired && !showActions) {
-    return (
-      <td className={styles.tdStake}>
-        <span className={styles.expiredBadge}>Expired</span>
-      </td>
-    );
-  }
 
   // Sinon, afficher la cellule complète (et passer expired pour le badge APR)
   return (
