@@ -25,6 +25,15 @@ export function LiquidityModal({
     setTimeout(onClose, 400);
   };
 
+  const handleRemoveLiquidity = async (amount: string) => {
+    try {
+      console.log("Removing liquidity:", amount);
+      // TODO: call smart contract ici
+    } catch (err) {
+      console.error("Erreur removeLiquidity:", err);
+    }
+  };
+
   useEffect(() => {
     const activeEl = tab === "add" ? addRef.current : removeRef.current;
     if (activeEl) {
@@ -65,13 +74,19 @@ export function LiquidityModal({
             </button>
           </div>
 
-          <button onClick={handleClose} className={styles.btnCloseModal}>✕</button>
+          <button onClick={handleClose} className={styles.btnCloseModal}>
+            ✕
+          </button>
         </div>
 
         {tab === "add" ? (
-          <AddLiquidityDrawer tokenA={tokenA} tokenB={tokenB} onClose={handleClose} />
+          <AddLiquidityDrawer tokenA={tokenA} tokenB={tokenB} />
         ) : (
-          <RemoveLiquidityDrawer tokenA={tokenA} tokenB={tokenB} onClose={handleClose} />
+          <RemoveLiquidityDrawer
+            tokenA={tokenA}
+            tokenB={tokenB}
+            onRemoveLiquidity={handleRemoveLiquidity}
+          />
         )}
       </div>
     </div>

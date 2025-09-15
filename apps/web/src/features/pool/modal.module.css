@@ -171,14 +171,16 @@
     letter-spacing: -0.07vh;
     cursor: pointer;
     box-shadow: 0 -1vh 30vh 0.05vh var(--bg-white);
-    transition: 0.3s;
     z-index: 1;
     margin-bottom: 1vh;
   }
 
   .btnAddLiquidity:hover, .btnRemoveLiquidity:hover {
     box-shadow: 0 -1vh 40vh 1vh var(--bg-white);
-    transition: 0.3s;
+  }
+
+  .btnAddLiquidity:active, .btnRemoveLiquidity:active {
+    transform: scale(0.97);
   }
 
   .wormholeContainer {
