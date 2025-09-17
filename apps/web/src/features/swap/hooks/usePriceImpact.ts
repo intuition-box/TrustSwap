@@ -1,7 +1,10 @@
+// usePriceImpact.ts
 import type { Address } from "viem";
-import { getTokenByAddress, toWrapped } from "../../../lib/tokens";
 import type { PairData } from "./usePairData";
-import { formatUnits } from "viem";
+import { getTokenByAddressOrFallback, NATIVE_PLACEHOLDER, WNATIVE_ADDRESS } from "../../../lib/tokens";
+
+const toPairAddr = (a: Address) =>
+  a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase() ? (WNATIVE_ADDRESS as Address) : a;
 
 export function computePriceImpactPct(
   tokenIn: Address,
@@ -14,32 +17,28 @@ export function computePriceImpactPct(
   const aout = Number(amountOutStr || "0");
   if (!pair || ain <= 0 || aout <= 0) return null;
 
-  const tIn = getTokenByAddress(tokenIn);
-  const tOut = getTokenByAddress(tokenOut);
+  // ⚠️ ne jamais throw: on prend un fallback à 18 décimales si inconnu
+  const tIn  = getTokenByAddressOrFallback(tokenIn);
+  const tOut = getTokenByAddressOrFallback(tokenOut);
 
-  const wIn = toWrapped(tokenIn);
-  const wOut = toWrapped(tokenOut);
+  // map aux adresses de la pair (token0/token1 sont des ERC-20 réels, pas le placeholder natif)
+  const inAsPair  = toPairAddr(tokenIn);
+  const outAsPair = toPairAddr(tokenOut);
 
-  let reserveIn: bigint | undefined, reserveOut: bigint | undefined;
-  if (wIn.toLowerCase() === pair.token0.toLowerCase()) {
-    reserveIn = pair.reserve0; reserveOut = pair.reserve1;
-  } else if (wIn.toLowerCase() === pair.token1.toLowerCase()) {
-    reserveIn = pair.reserve1; reserveOut = pair.reserve0;
-  } else {
-    return null;
-  }
+  const isInToken0 = pair.token0.toLowerCase() === inAsPair.toLowerCase();
+  const r0 = Number(pair.reserve0) / 10 ** (isInToken0 ? tIn.decimals : tOut.decimals);
+  const r1 = Number(pair.reserve1) / 10 ** (isInToken0 ? tOut.decimals : tIn.decimals);
 
-  if (!reserveIn || !reserveOut) return null;
+  const rIn  = isInToken0 ? r0 : r1;
+  const rOut = isInToken0 ? r1 : r0;
 
-  const ri = Number(formatUnits(reserveIn, tIn.decimals));
-  const ro = Number(formatUnits(reserveOut, tOut.decimals));
-  if (!(ri > 0) || !(ro > 0)) return null;
+  if (rIn <= 0 || rOut <= 0) return null;
 
-  const mid = ro / ri;    
-  const exec = aout / ain; 
-  if (!(mid > 0) || !(exec > 0)) return null;
+  // spot avant trade et prix exec issus de la quote
+  const spot = rOut / rIn;
+  const exec = aout / ain;
 
-  const impact = ((mid - exec) / mid) * 100;
-  const clamped = Math.max(0, Math.min(100, impact));
-  return Math.round(clamped * 100) / 100; 
+  const impact = ((spot - exec) / spot) * 100;
+  if (!isFinite(impact)) return null;
+  return Math.max(0, impact);
 }

@@ -1,7 +1,9 @@
 import type { Address } from "viem";
 import { erc20Abi, parseUnits, formatUnits } from "viem";
 import { usePublicClient, useWalletClient, useChainId } from "wagmi";
-import { getTokenByAddress } from "../../../lib/tokens";
+import {
+  getOrFetchToken,
+} from "../../../lib/tokens";
 import { abi, addresses } from "@trustswap/sdk";
 import { useAlerts } from "../../../features/alerts/Alerts";
 
@@ -18,16 +20,6 @@ const isNative = (addr?: Address) =>
 const toWrapped = (addr: Address) => (isNative(addr) ? WNATIVE : addr);
 const buildPath = (path: Address[]) => path.map(toWrapped) as Address[];
 
-// lire les décimales (18 si natif)
-function getDecimals(addr: Address): number {
-  if (isNative(addr)) return 18;
-  try {
-    return getTokenByAddress(addr).decimals ?? 18;
-  } catch {
-    return 18;
-  }
-}
-
 // URL explorer (complète la map si nécessaire)
 function explorerTx(chainId: number | undefined, hash?: `0x${string}`) {
   if (!hash) return undefined;
@@ -40,7 +32,6 @@ function explorerTx(chainId: number | undefined, hash?: `0x${string}`) {
 
 // Messages d’erreur plus parlants
 function prettifySwapError(err: any): string {
-  // Try to gather as much context as possible
   const raw =
     String(err?.shortMessage || "") + " | " +
     String(err?.message || "") + " | " +
@@ -48,7 +39,6 @@ function prettifySwapError(err: any): string {
     String(err?.cause?.message || "");
   const msg = raw.toLowerCase();
 
-  // User rejected
   if (
     msg.includes("user rejected") ||
     msg.includes("user denied") ||
@@ -57,36 +47,29 @@ function prettifySwapError(err: any): string {
     String(err?.code) === "4001"
   ) return "Transaction rejected by user.";
 
-  // ERC20 transferFrom / allowance
   if (raw.includes("TransferHelper::transferFrom: transferFrom failed"))
     return "Insufficient allowance or balance for the input token.";
 
-  // Slippage / output amount
   if (
     raw.includes("INSUFFICIENT_OUTPUT_AMOUNT") ||
     raw.includes("ExcessiveInputAmount") ||
     msg.includes("insufficient output")
   ) return "Slippage too low (insufficient output).";
 
-  // Deadline
   if (msg.includes("deadline") || msg.includes("expired"))
     return "Transaction deadline exceeded.";
 
-  // Transfer restrictions / blacklist / fees
   if (raw.includes("Transfers restricted") || msg.includes("transfer restricted"))
     return "Token has transfer restrictions.";
 
-  // Gas / funds
   if (msg.includes("insufficient funds for gas"))
     return "Insufficient funds for gas.";
 
-  // Nonce / replacement
   if (msg.includes("nonce too low"))
     return "Nonce too low.";
   if (msg.includes("replacement transaction underpriced") || msg.includes("fee too low"))
     return "Replacement transaction underpriced.";
 
-  // Fallback
   return (err?.shortMessage || err?.message || "Swap failed").toString();
 }
 
@@ -170,10 +153,13 @@ export function useSwap() {
       throw new Error("Native-to-native swap is not supported");
     }
 
-    const tIn = getTokenByAddress(toWrapped(tokenIn));
-    const tOut = getTokenByAddress(toWrapped(tokenOut));
+    const [tIn, tOut] = await Promise.all([
+      getOrFetchToken(toWrapped(tokenIn)),
+      getOrFetchToken(toWrapped(tokenOut)),
+    ]);
 
-    const decimalsIn = getDecimals(tokenIn);
+    // décimales d'entrée
+    const decimalsIn = isNative(tokenIn) ? 18 : Number(tIn.decimals ?? 18);
     const amountIn = parseUnits(amountInStr || "0", decimalsIn);
     if (amountIn <= 0n) throw new Error("Amount must be > 0");
 

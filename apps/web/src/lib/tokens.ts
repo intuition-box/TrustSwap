@@ -115,3 +115,36 @@ export function getTokenForUI(addr?: Address): TokenInfo | null {
   const t = TOKENLIST.find(x => x.address.toLowerCase() === uiAddr.toLowerCase());
   return t ?? null;
 }
+
+
+export async function getTokenMetaSafe(addr: Address): Promise<TokenInfo> {
+  // natif
+  if (isNative(addr)) {
+    return {
+      address: NATIVE_PLACEHOLDER,
+      symbol: INTUITION?.nativeCurrency?.symbol ?? "tTRUST",
+      name:   INTUITION?.nativeCurrency?.name   ?? "Native TRUST",
+      decimals: 18,
+      isNative: true,
+    };
+  }
+  // cache/local list
+  const cached = TOKEN_CACHE[addr.toLowerCase()];
+  if (cached) return cached;
+
+  // on-chain (ne throw pas — a déjà des catchs)
+  return await getOrFetchToken(addr);
+}
+
+export function getTokenByAddressOrFallback(addr: Address): TokenInfo {
+  const hit = TOKENLIST.find(t => t.address.toLowerCase() === addr.toLowerCase());
+  if (hit) return hit;
+
+  // fallback neutre: ne JAMAIS throw côté UI
+  return {
+    address: addr,
+    symbol: "UNK",
+    name: "Unknown",
+    decimals: 18,
+  };
+}
