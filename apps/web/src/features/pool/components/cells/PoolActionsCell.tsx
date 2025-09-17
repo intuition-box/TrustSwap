@@ -74,8 +74,8 @@ export function PoolActionsCell({
 
   const showActions = hasRewards || hasStaked;
 
-  // Pas de farm du tout → tiret
-  if (!staking) {
+  // ⛔️ Aucun staking défini OU aucun état utilisateur (pas staké / pas de rewards) → affiche juste "—"
+  if (!staking || !showActions) {
     return (
       <td className={styles.tdStake}>
         <span className={styles.placeholderDash ?? ""}>—</span>
@@ -83,8 +83,7 @@ export function PoolActionsCell({
     );
   }
 
-
-  // Sinon, afficher la cellule complète (et passer expired pour le badge APR)
+  // Sinon, afficher la cellule complète
   return (
     <td className={styles.tdStake}>
       <div className={styles.containerStakeTD}>
@@ -114,14 +113,12 @@ export function PoolActionsCell({
               Claim
             </button>
 
-            {/* Tooltip au survol */}
             <div
               id="claim-tooltip"
               role="tooltip"
               className={`${styles.claimTooltip} ${showClaimTip ? styles.visible : ""}`}
             >
               <div className={styles.claimHint}>Reward</div>
-
               <RewardCellContent
                 rewardToken={pool.rewardToken}
                 earned={pool.earned}
@@ -150,22 +147,21 @@ export function PoolActionsCell({
 
                 <div className={styles.ligne}></div>
                 <div className={styles.bottomStake}>
-                <RewardCellContent
-                  rewardToken={pool.rewardToken}
-                  earned={pool.earned}
-                  loading={loading}
-                />
-
-                <button
-                  className={styles.btnClaimPopUp}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    claim?.();
-                  }}
-                  disabled={!pool.staking}
-                >
-                  Claim
-                </button>
+                  <RewardCellContent
+                    rewardToken={pool.rewardToken}
+                    earned={pool.earned}
+                    loading={loading}
+                  />
+                  <button
+                    className={styles.btnClaimPopUp}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      claim?.();
+                    }}
+                    disabled={!pool.staking}
+                  >
+                    Claim
+                  </button>
                 </div>
                 <button
                   className={styles.btnCloseStake}

@@ -23,8 +23,8 @@ export function RemoveLiquidityDrawer({
   metaB?: { address: Address; symbol: string; name?: string; decimals: number; isNative?: boolean };
   onPendingChange?: (p: boolean) => void;
 }) {
-  const DECIMALS = 6;      // pour l'input
-  const lpDecimals = 18;   // LP UniswapV2 = 18
+  const DECIMALS = 6;
+  const lpDecimals = 18;   
   const { address: to } = useAccount();
 
   const [lpAmount, setLpAmount] = useState("");
@@ -103,7 +103,7 @@ export function RemoveLiquidityDrawer({
   async function handleRemoveLiquidity() {
     if (!tokenA || !tokenB || !to) return;
     const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
-    const amtAMin = 0n; // TODO: calcule à partir de slippage si besoin
+    const amtAMin = 0n; 
     const amtBMin = 0n;
 
     onPendingChange?.(true);
