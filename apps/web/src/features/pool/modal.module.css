@@ -599,3 +599,18 @@
       width: 50%;
     }
   }
+
+  @media (max-width: 660px) {
+    .wormholeContainer {
+      height: 80%;
+      width: 100%;
+      background-size: 70%;
+    }
+
+    .wormholeContainerRemove {
+      height: 80%;
+      width: 100%;
+      background-size: 70%;
+      background-position: bottom;
+    }
+  }

@@ -278,3 +278,9 @@
     color: var(--placeholder);
   }
   
+  @media (max-width: 900px) {
+    .swapCard {
+      margin-right: 1vh;
+      margin-left: 1vh;
+    }
+  }

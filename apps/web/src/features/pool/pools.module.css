@@ -285,6 +285,10 @@
 }
 
 @media (max-width: 900px) {
+  .sectionPool {
+    padding-top: 6vh;
+  }
+
   .tableauContainer {
     max-width: 90vw;
     margin-left: auto;
@@ -294,7 +298,35 @@
     -ms-overflow-style: none;
     position: initial;
   }
+
+
   .tableauContainer::-webkit-scrollbar {
     display: none;
+  }
+
+  .filterPoolContainer {
+    max-width: 90vw;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .statGlobalPool {
+    gap: 1vh;
+    justify-content: start;
+    align-items: start;
+    font-size: 1.5vh;
+    margin-left: 1vh;
+  }
+
+  .titleStat {
+    color: var(--stat-text);
+    letter-spacing: -0.05vh;
+    margin-bottom: 0vh;
+    height: auto;
+  }
+  
+  .valueStat {
+    font-size: 2.5vh;
+    color: var(--text-color);
   }
 }

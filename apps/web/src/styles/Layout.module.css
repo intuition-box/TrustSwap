@@ -143,7 +143,7 @@
     letter-spacing: -0.08vh;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
     .navbar {
         top: auto;
         bottom: 2vh;
