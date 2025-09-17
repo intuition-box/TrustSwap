@@ -1,10 +1,9 @@
-// AddLiquidityDrawer.tsx
 import { useEffect, useMemo, useState } from "react";
 import type { Address } from "viem";
 import { parseUnits } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import { useLiquidityActions } from "../../hooks/useLiquidityActions";
-import { getTokenByAddress, toWrapped } from "../../../../lib/tokens";
+import { toWrapped } from "../../../../lib/tokens";
 import { getTokenIcon } from "../../../../lib/getTokenIcon";
 import styles from "../../modal.module.css";
 import TokenField from "../../../swap/components/TokenField";
@@ -23,9 +22,15 @@ type PairData = {
 export function AddLiquidityDrawer({
   tokenA,
   tokenB,
+  metaA,
+  metaB,
+  onPendingChange,
 }: {
   tokenA?: Address;
   tokenB?: Address;
+  metaA?: { address: Address; symbol: string; decimals: number; isNative?: boolean };
+  metaB?: { address: Address; symbol: string; decimals: number; isNative?: boolean };
+  onPendingChange?: (p: boolean) => void;
 }) {
   const { address: to } = useAccount();
   const pc = usePublicClient();
@@ -40,10 +45,9 @@ export function AddLiquidityDrawer({
   const readA = tokenIn ? toWrapped(tokenIn) : undefined;
   const readB = tokenOut ? toWrapped(tokenOut) : undefined;
 
-  const tA = readA ? getTokenByAddress(readA) : null;
-  const tB = readB ? getTokenByAddress(readB) : null;
-  const decA = tA?.decimals ?? 18;
-  const decB = tB?.decimals ?? 18;
+  // décimales (fallback 18 si meta absente)
+  const decA = metaA?.decimals ?? 18;
+  const decB = metaB?.decimals ?? 18;
 
   function asBigInt(v: any): bigint | undefined {
     if (typeof v === "bigint") return v;
@@ -52,13 +56,12 @@ export function AddLiquidityDrawer({
     return undefined;
   }
 
-  // Charger la pair si A/B définis
+  // charge la paire (token0/1, reserves) dès que readA/readB changent
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setPairData(null);
       if (!pc || !readA || !readB) return;
-
       try {
         const pair = await pc.readContract({
           address: addresses.UniswapV2Factory as Address,
@@ -66,8 +69,6 @@ export function AddLiquidityDrawer({
           functionName: "getPair",
           args: [readA, readB],
         }) as Address;
-
-        console.log("[ADD-LIQ] factory.getPair →", pair);
 
         if (!pair || isZeroAddress(pair)) return;
 
@@ -83,28 +84,12 @@ export function AddLiquidityDrawer({
         }) as any;
 
         const reserve0 =
-          asBigInt(raw?._reserve0) ??
-          asBigInt(raw?.reserve0) ??
-          (Array.isArray(raw) ? asBigInt(raw[0]) : undefined) ??
-          0n;
-
+          asBigInt(raw?._reserve0) ?? asBigInt(raw?.reserve0) ?? (Array.isArray(raw) ? asBigInt(raw[0]) : undefined) ?? 0n;
         const reserve1 =
-          asBigInt(raw?._reserve1) ??
-          asBigInt(raw?.reserve1) ??
-          (Array.isArray(raw) ? asBigInt(raw[1]) : undefined) ??
-          0n;
+          asBigInt(raw?._reserve1) ?? asBigInt(raw?.reserve1) ?? (Array.isArray(raw) ? asBigInt(raw[1]) : undefined) ?? 0n;
 
-        console.log("[ADD-LIQ] reserves loaded:", reserve0, reserve1);
-
-        setPairData({
-          pair,
-          token0: t0,
-          token1: t1,
-          reserve0,
-          reserve1,
-        });
+        if (!cancelled) setPairData({ pair, token0: t0, token1: t1, reserve0, reserve1 });
       } catch (e) {
-        console.warn("[ADD-LIQ] load pair error:", e);
         if (!cancelled) setPairData(null);
       }
     })();
@@ -120,10 +105,6 @@ export function AddLiquidityDrawer({
     }
     return null;
   }, [pairData, readA]);
-
-  useEffect(() => {
-    console.log("RESERVES typeof:", typeof reserves?.reserveA, typeof reserves?.reserveB, "values:", reserves);
-  }, [reserves]);
 
   function onChangeAmountIn(v: string) {
     setAmountIn(v);
@@ -141,16 +122,20 @@ export function AddLiquidityDrawer({
 
   async function onSubmit() {
     if (!tokenIn || !tokenOut || !to) return;
-    await addLiquidity(
-      tokenIn,
-      tokenOut,
-      parseUnits(amountIn || "0", decA),
-      parseUnits(amountOut || "0", decB),
-      0n, 0n,
-      to,
-      Math.floor(Date.now() / 1000) + 60 * 15
-    );
-    // onClose() supprimé
+    onPendingChange?.(true);
+    try {
+      await addLiquidity(
+        tokenIn,                 // UI addr (peut être natif placeholder)
+        tokenOut,
+        parseUnits(amountIn || "0", decA),
+        parseUnits(amountOut || "0", decB),
+        0n, 0n,                  // slippage mins (à calculer si besoin)
+        to,
+        Math.floor(Date.now() / 1000) + 60 * 15
+      );
+    } finally {
+      onPendingChange?.(false);
+    }
   }
 
   return (
@@ -178,23 +163,17 @@ export function AddLiquidityDrawer({
         </div>
       </div>
 
-      {tB && (
-        <img
-          src={getTokenIcon(tB.address)}
-          alt={tB.symbol}
-          className={styles.tokenImgWorLeft}
-        />
+      {metaB && tokenOut && (
+        <img src={getTokenIcon(tokenOut)} alt={metaB.symbol} className={styles.tokenImgWorLeft} />
       )}
-      {tA && (
-        <img
-          src={getTokenIcon(tA.address)}
-          alt={tA.symbol}
-          className={styles.tokenImgWorRight}
-        />
+      {metaA && tokenIn && (
+        <img src={getTokenIcon(tokenIn)} alt={metaA.symbol} className={styles.tokenImgWorRight} />
       )}
 
       <div className={styles.wormholeContainer}>
-        <button onClick={onSubmit} className={styles.btnAddLiquidity}>Add Liquidity</button>
+        <button onClick={onSubmit} className={styles.btnAddLiquidity}>
+          Add Liquidity
+        </button>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import type { Address } from "viem";
 import { isAddress, getAddress, erc20Abi } from "viem";
 import { usePublicClient } from "wagmi";
-import { TOKENLIST, UI_TOKENLIST } from "../../../lib/tokens";
+import { TOKENLIST } from "../../../lib/tokens";
 import styles from "@ui/styles/TokenSelector.module.css";
 import arrowIcone from "../../../assets/arrow-selector.png";
 import volIcone from "../../../assets/vol.png";
@@ -33,9 +33,11 @@ const checksum = (a: string): Address => {
 export default function TokenSelector({
   value,
   onChange,
+  tokens
 }: {
   value?: Address | "";
   onChange: (a: Address) => void;
+  tokens?: { address: Address; symbol: string; name?: string; decimals?: number; hidden?: boolean }[];
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -45,7 +47,7 @@ export default function TokenSelector({
   const pc = usePublicClient();
 
   // Base tokens
-  const baseTokens: Token[] = useMemo(() => UI_TOKENLIST, []);
+  const baseTokens: Token[] = useMemo(() => (tokens && tokens.length ? tokens : TOKENLIST), [tokens]);
 
   // Imported tokens
   const {

@@ -34,15 +34,10 @@ export const TOKENLIST: TokenInfo[] = [
     symbol: "WTTRUST",
     name: "Wrapped TRUST",
     decimals: 18,
-    hidden: true, 
+    hidden: true,
   },
-
-  { address: "0x124C4E8470eD201Ae896C2DF6ee7152AB7438d80", symbol: "TKA", name: "Token A", decimals: 18 },
-  { address: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c", symbol: "INTUIT", name: "INTUIT", decimals: 18 },
-  { address: "0x5Fdd4EdD250b9214D77103881bE0F09812d501D6", symbol: "TKB", name: "Token B", decimals: 18 },
-  { address: "0x51379Cc2C942EE2AE2fF0BD67a7b475F0be39Dcf", symbol: "WETH", name: "Wrapped Ether", decimals: 18 },
-
 ];
+
 
 const TOKEN_CACHE: Record<string, TokenInfo> = {};
 for (const t of TOKENLIST) TOKEN_CACHE[t.address.toLowerCase()] = t;
@@ -109,12 +104,47 @@ export const toUIAddress = (addr?: Address): Address | undefined =>
   !addr ? undefined : isWrapped(addr) ? NATIVE_PLACEHOLDER : addr;
 
 /** Liste de tokens pour l'UI (on masque les hidden = WTTRUST) */
-export const UI_TOKENLIST: TokenInfo[] = TOKENLIST.filter(t => !t.hidden);
+export function toUIList(list: TokenInfo[]): TokenInfo[] {
+  return list.filter(t => !t.hidden);
+}
 
 /** Récupérer un TokenInfo pour affichage, en tenant compte du mapping UI */
 export function getTokenForUI(addr?: Address): TokenInfo | null {
   if (!addr) return null;
   const uiAddr = toUIAddress(addr)!;
-  const t = UI_TOKENLIST.find(x => x.address.toLowerCase() === uiAddr.toLowerCase());
+  const t = TOKENLIST.find(x => x.address.toLowerCase() === uiAddr.toLowerCase());
   return t ?? null;
+}
+
+
+export async function getTokenMetaSafe(addr: Address): Promise<TokenInfo> {
+  // natif
+  if (isNative(addr)) {
+    return {
+      address: NATIVE_PLACEHOLDER,
+      symbol: INTUITION?.nativeCurrency?.symbol ?? "tTRUST",
+      name:   INTUITION?.nativeCurrency?.name   ?? "Native TRUST",
+      decimals: 18,
+      isNative: true,
+    };
+  }
+  // cache/local list
+  const cached = TOKEN_CACHE[addr.toLowerCase()];
+  if (cached) return cached;
+
+  // on-chain (ne throw pas — a déjà des catchs)
+  return await getOrFetchToken(addr);
+}
+
+export function getTokenByAddressOrFallback(addr: Address): TokenInfo {
+  const hit = TOKENLIST.find(t => t.address.toLowerCase() === addr.toLowerCase());
+  if (hit) return hit;
+
+  // fallback neutre: ne JAMAIS throw côté UI
+  return {
+    address: addr,
+    symbol: "UNK",
+    name: "Unknown",
+    decimals: 18,
+  };
 }
