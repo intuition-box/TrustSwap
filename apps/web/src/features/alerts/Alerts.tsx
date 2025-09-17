@@ -1,6 +1,6 @@
 // apps/web/src/features/alerts/Alerts.tsx
 import React, { createContext, useContext, useEffect, useMemo, useReducer } from "react";
-
+import styles from "@ui/styles/Toast.module.css";
 /* ===========================
    Types (inline, pas d’import)
    =========================== */
@@ -250,23 +250,14 @@ export function AlertToaster() {
         display: "flex",
         flexDirection: "column",
         gap: 8,
-        pointerEvents: "none",
       }}
     >
       {toasts.map((a) => (
         <div
           key={a.id}
-          style={{
-            pointerEvents: "auto",
-            minWidth: 280,
-            padding: 12,
-            borderRadius: 12,
-            boxShadow: "0 10px 25px rgba(0,0,0,0.35)",
-            background: "rgba(20,20,20,0.95)",
-            color: "#fff",
-            border: "1px solid rgba(255,255,255,0.12)",
-          }}
+          className={styles.toastContainer}
         >
+          <div className={styles.haloToast}></div>
           <div style={{ fontSize: 14, fontWeight: 600 }}>
             {a.kind.startsWith("tx:") ? a.kind.replace("tx:", "Tx ") : a.severity}
           </div>
@@ -288,17 +279,7 @@ export function AlertToaster() {
             )}
             <button
               onClick={() => dismiss(a.id)}
-              style={{
-                marginLeft: "auto",
-                fontSize: 12,
-                opacity: 0.8,
-                background: "transparent",
-                color: "#fff",
-                border: "1px solid rgba(255,255,255,0.25)",
-                padding: "4px 8px",
-                borderRadius: 8,
-                cursor: "pointer",
-              }}
+              className={styles.closeToastBtn}
             >
               X
             </button>
@@ -330,7 +311,7 @@ export function AlertModalHost() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "rgba(0,0,0,0.5)",
+            background: "red",
           }}
         >
           <div
@@ -366,7 +347,7 @@ export function AlertModalHost() {
                   style={{
                     padding: "8px 12px",
                     borderRadius: 10,
-                    background: "rgba(255,255,255,0.12)",
+                    background: "red",
                     color: "#fff",
                     border: "1px solid rgba(255,255,255,0.2)",
                     cursor: "pointer",
