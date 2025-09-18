@@ -492,15 +492,23 @@
     border-radius: 1vh;
     cursor: pointer;
     margin-right: 2vh;
-    margin-top: -1vh;
+    margin-top: 1vh;
+    margin-left: auto;
   }
 
   .btnCloseModal:hover {
     background-color: #1B1B1B;
   }
 
+  .TextCreatePool {
+    font-size: 3vh;
+    margin-left: 2vh;
+    font-weight: 500;
+    letter-spacing: -0.13vh;
+  }
 
-  @media (max-width: 900px) {
+
+  @media (max-width: 700px) {
     .popUpLiquidity {
       position: absolute;
       top: auto;

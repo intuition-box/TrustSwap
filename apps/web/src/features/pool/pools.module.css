@@ -284,11 +284,7 @@
   transform: scale(0.97);
 }
 
-@media (max-width: 900px) {
-  .sectionPool {
-    padding-top: 6vh;
-  }
-
+@media (max-width: 700px) {
   .tableauContainer {
     max-width: 90vw;
     margin-left: auto;
@@ -297,6 +293,17 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
     position: initial;
+  }
+}
+
+
+@media (max-width: 1200px) {
+  .sectionPool {
+    padding-top: 6vh;
+  }
+
+  .tableauContainer {
+    min-width: 90vw;
   }
 
 

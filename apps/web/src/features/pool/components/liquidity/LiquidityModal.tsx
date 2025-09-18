@@ -52,28 +52,36 @@ export function LiquidityModal({
     <div onClick={handleClose} className={`${styles.popUpLiquidity} ${closing ? styles.closing : ""}`}>
       <div onClick={(e) => e.stopPropagation()} className={styles.popUpBody}>
         <div className={styles.headerLiquidityPopUp}>
-          {/* En simpleMode, on masque complètement les onglets */}
-          {!simpleMode && (
-            <div className={styles.headerChoiceLiquidity}>
-              <div className={styles.activeBg} style={{ width: bgStyle.width, left: bgStyle.left }} />
-              <button
-                ref={addRef}
-                className={tab === "add" ? styles.activeTab : styles.inactiveTab}
-                onClick={() => setTab("add")}
-                disabled={pending}
-              >
-                Add Liquidity
-              </button>
-              <button
-                ref={removeRef}
-                className={tab === "remove" ? styles.activeTab : styles.inactiveTab}
-                onClick={() => setTab("remove")}
-                disabled={pending}
-              >
-                Remove
-              </button>
-            </div>
-          )}
+         {/* En simpleMode, on masque complètement les onglets */}
+{!simpleMode ? (
+  <div className={styles.headerChoiceLiquidity}>
+    <div
+      className={styles.activeBg}
+      style={{ width: bgStyle.width, left: bgStyle.left }}
+    />
+    <button
+      ref={addRef}
+      className={tab === "add" ? styles.activeTab : styles.inactiveTab}
+      onClick={() => setTab("add")}
+      disabled={pending}
+    >
+      Add Liquidity
+    </button>
+    <button
+      ref={removeRef}
+      className={tab === "remove" ? styles.activeTab : styles.inactiveTab}
+      onClick={() => setTab("remove")}
+      disabled={pending}
+    >
+      Remove
+    </button>
+  </div>
+) : (
+  <p className={styles.TextCreatePool}>
+   Launch your liquidity pool
+  </p>
+)}
+
 
           <button onClick={handleClose} className={styles.btnCloseModal} disabled={pending}>✕</button>
         </div>
