@@ -3,14 +3,15 @@ import { useMemo } from "react";
 import type { Address } from "viem";
 
 import { usePoolsData } from "../hooks/usePoolsData";
-import { usePairsVolume1D } from "../hooks/usePairsVolume1D";
 import { usePairMetrics } from "../hooks/usePairMetrics";
-import { usePoolFeeApr } from "../hooks/usePoolFeeApr";
-import { useStakingData } from "../hooks/useStakingData"; 
-
+import { useStakingData } from "../hooks/useStakingData";
 import { PoolRow } from "./PoolRow";
+import { usePairsVolume1D } from "../hooks/usePairsVolume1D";
+import { usePoolFeeApr } from "../hooks/usePoolFeeApr";
 import styles from "../tableau.module.css";
 import type { PoolItem } from "../types";
+
+import { shouldHidePair } from "../../../lib/tokenFilters";
 
 export function PoolsTable({
   page,
@@ -22,9 +23,7 @@ export function PoolsTable({
   onOpenLiquidity: (a: Address, b: Address) => void;
 }) {
   const pageSize = 10;
-  const offset = (page - 1) * pageSize;
-
-  const { items, loading, error } = usePoolsData(pageSize, offset);
+  const { items, loading, error } = usePoolsData(pageSize, (page - 1) * pageSize);
 
   const skeletonPool: PoolItem = {
     pair: "0x0000000000000000000000000000000000000000",
@@ -61,7 +60,7 @@ export function PoolsTable({
             {Array.from({ length: pageSize }).map((_, i) => (
               <PoolRow
                 key={`loading-${i}`}
-                index={offset + i + 1}
+                index={(page - 1) * pageSize + i + 1}
                 pool={skeletonPool}
                 loading={true}
                 onOpenLiquidity={onOpenLiquidity}
@@ -102,12 +101,30 @@ function PoolsTableInner({
   onOpenLiquidity: (a: Address, b: Address) => void;
   pageSize: number;
 }) {
-  const { volMap, priceMap } = usePairsVolume1D(items);
+  // ⬇️ NEW: filtre les paires indésirables AVANT tout calcul (vol/TVL/APR)
+  const baseItems = useMemo(() => {
+    return items.filter((p) =>
+      !shouldHidePair(
+        { address: p.token0.address, symbol: p.token0.symbol, decimals: p.token0.decimals },
+        { address: p.token1.address, symbol: p.token1.symbol, decimals: p.token1.decimals },
+        {
+          includeTest: false,    // cache les tokens marqués test
+          allowImported: false,  // override importé non nécessaire côté pools
+        }
+      )
+    );
+  }, [items]);
 
-  const withMetrics = usePairMetrics(items, volMap, priceMap);
+  // 1) volumes/prices (alimente vol1dNative)
+  const { volMap, priceMap } = usePairsVolume1D(baseItems);
 
+  // 2) métriques (tvlNative, vol1dNative…)
+  const withMetrics = usePairMetrics(baseItems, volMap, priceMap);
+
+  // 3) Pool APR (fees) — basé uniquement sur tvlNative & vol1dNative
   const withPoolApr = usePoolFeeApr(withMetrics, /* feeBps= */ 30);
 
+  // 4) Farm APR (rewards) — ajoute epochAprPct & infos staking
   const withStaking = useStakingData(withPoolApr);
 
   const view = useMemo(() => {
@@ -117,14 +134,13 @@ function PoolsTableInner({
       ? withStaking
       : withStaking.filter(
           (p) =>
-            (p.token0?.symbol ?? "").toLowerCase().includes(q) ||
-            (p.token1?.symbol ?? "").toLowerCase().includes(q)
+            p.token0.symbol.toLowerCase().includes(q) ||
+            p.token1.symbol.toLowerCase().includes(q)
         );
 
-    const hasPos = (p: PoolItem) =>
+    const hasPos = (p: typeof withStaking[number]) =>
       (p.stakedBalance ?? 0n) > 0n || (p.walletLpBalance ?? 0n) > 0n;
 
-    // Tri: d'abord pools où user a une position, puis TVL décroissante, puis adresse
     return [...filtered].sort((a, b) => {
       const aPos = hasPos(a) ? 1 : 0;
       const bPos = hasPos(b) ? 1 : 0;
@@ -139,8 +155,6 @@ function PoolsTableInner({
       return aKey < bKey ? -1 : aKey > bKey ? 1 : 0;
     });
   }, [withStaking, query]);
-
-  const offset = (page - 1) * pageSize;
 
   return (
     <div className={styles.tableauContainer}>
@@ -160,7 +174,7 @@ function PoolsTableInner({
           {view.map((p, i) => (
             <PoolRow
               key={`${String(p.pair).toLowerCase()}-${i}`}
-              index={offset + i + 1}
+              index={(page - 1) * pageSize + i + 1}
               pool={p}
               loading={loading}
               onOpenLiquidity={onOpenLiquidity}
