@@ -90,7 +90,7 @@ export function PoolActionsCell({
     >
       <div className={styles.containerStakeTD}>
         {/* Always show APR/status if a farm exists */}
-        <EpochAprCellContent value={pool.poolAprPct ?? pool.epochAprPct} loading={loading} expired={isExpired} />
+        <EpochAprCellContent value={pool.epochAprPct} loading={loading} expired={isExpired} />
 
         {loading ? (
           <div className={styles.skeletonLine}></div>

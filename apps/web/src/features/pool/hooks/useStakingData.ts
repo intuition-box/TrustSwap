@@ -47,8 +47,9 @@ type StakingSlice = {
   totalSupplyLP?: bigint;       // supply totale du token LP
   poolReserves?: { token0: Address; token1: Address; reserve0: bigint; reserve1: bigint };
 
-  poolAprPct?: number;          // APR global du pool
-  epochAprPct?: number;         // APR perso (dépend de ce que l’utilisateur a staké)
+  poolAprPct?: number;          // fees APR (from trading fees -> LPs)
+  epochAprPct?: number;         // farming APR (global, rewards over staked TVL)
+  epochAprUserPct?: number;     // OPTIONAL: user-specific APR
 };
 
 export function useStakingData(pools: PoolItem[]) {
@@ -62,6 +63,8 @@ export function useStakingData(pools: PoolItem[]) {
     () => (pools.length ? pools.map(p => (p.pair as string).toLowerCase()).sort().join(",") : "none"),
     [pools]
   );
+
+  
 
   const reload = useCallback(async () => {
     if (!client || !pools.length) return;
@@ -166,36 +169,39 @@ export function useStakingData(pools: PoolItem[]) {
       // --- TVL en natif (via pricing token0/token1 -> WNATIVE)
       const tvlNative = await getPairTVLNative(client, token0, token1, reserve0, reserve1, WNATIVE_ADDRESS);
 
+      const FEE_TO_LPS = 0.003;
+      const vol1dNative = Number(p.vol1dNative ?? 0);
+      const tvlPoolNative = Number(tvlNative);
+      const poolAprFeesPct =
+        tvlPoolNative > 0 && vol1dNative > 0
+          ? (vol1dNative * FEE_TO_LPS * 365 / tvlPoolNative) * 100
+          : 0;
+
       const stakedShare =
         totalSupplyLP === 0n ? 0 : Number(totalStakedLP) / Number(totalSupplyLP);
       const stakedTvlNative = tvlNative * stakedShare;
 
+  const rewardRateTokensPerSec = Number(formatUnits(rewardRate, decRw));
+  const active = now < Number(periodFinish || 0n);
 
-      const rewardRateTokensPerSec = Number(formatUnits(rewardRate, decRw));
+  const epochAprFarmPct =
+    active && stakedTvlNative > 0 && rewardRateTokensPerSec > 0 && rewardPriceNative > 0
+      ? (rewardRateTokensPerSec * rewardPriceNative * SEC_PER_YEAR / stakedTvlNative) * 100
+      : 0;
 
+  // OPTIONAL: user-specific APR (kept if you need it later)
+  const userShareStaked =
+    totalStakedLP === 0n ? 0 : Number(userStakedLP) / Number(totalStakedLP);
+  const userSharePool =
+    totalSupplyLP === 0n ? 0 : Number(userStakedLP) / Number(totalSupplyLP);
 
-      // --- APR perso (en fonction de la part réellement stakée)
-      const active = now < Number(periodFinish || 0n);
+  const userStakeNative = tvlNative * userSharePool;
+  const userRewardPerSecNative = rewardRateTokensPerSec * rewardPriceNative * userShareStaked;
 
-      const poolAprPct =
-        active && stakedTvlNative > 0
-          ? (rewardRateTokensPerSec * rewardPriceNative * SEC_PER_YEAR / stakedTvlNative) * 100
-          : 0;
-      // part de l’utilisateur dans les LP stakés du farm
-      const userShareStaked =
-        totalStakedLP === 0n ? 0 : Number(userStakedLP) / Number(totalStakedLP);
-
-      // part de l’utilisateur par rapport à la supply totale LP (pour valoriser en TVL)
-      const userSharePool =
-        totalSupplyLP === 0n ? 0 : Number(userStakedLP) / Number(totalSupplyLP);
-
-      const userStakeNative = tvlNative * userSharePool;
-      const userRewardPerSecNative = rewardRateTokensPerSec * rewardPriceNative * userShareStaked;
-
-      const epochAprPct =
-        active && userStakeNative > 0 && userRewardPerSecNative > 0
-          ? (userRewardPerSecNative * SEC_PER_YEAR / userStakeNative) * 100
-          : 0;
+  const epochAprUserPct =
+    active && userStakeNative > 0 && userRewardPerSecNative > 0
+      ? (userRewardPerSecNative * SEC_PER_YEAR / userStakeNative) * 100
+      : 0;
 
       const fetchedRewardToken = await getOrFetchToken(rewardsToken);
 
@@ -211,8 +217,9 @@ export function useStakingData(pools: PoolItem[]) {
         totalStakedLP,
         totalSupplyLP,
         poolReserves: token0 && token1 ? { token0, token1, reserve0, reserve1 } : undefined,
-        poolAprPct,
-        epochAprPct,
+        poolAprPct: poolAprFeesPct,     // 👈 fees APR (LP earnings from volume)
+        epochAprPct: epochAprFarmPct,   // 👈 farming APR (global)
+        epochAprUserPct,                // 👈 optional, not used in UI
       };
     }
 

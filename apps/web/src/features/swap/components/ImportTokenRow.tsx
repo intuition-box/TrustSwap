@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Address } from "viem";
 import { isAddress, erc20Abi } from "viem";
 import { usePublicClient } from "wagmi";
