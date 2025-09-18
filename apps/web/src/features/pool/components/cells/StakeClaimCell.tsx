@@ -1,11 +1,12 @@
 // features/pools/components/StakeClaimCell.tsx
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { PoolItem } from "../../types";
 import { useStakeActions } from "../../hooks/useStakeActions";
-import { useLpPosition } from "../../hooks/useLpPosition";
-import { useStakedBalance } from "../../hooks/useStakedBalance";
-import { formatUnits } from "viem";
+import { useAccount, usePublicClient } from "wagmi";
+import { erc20Abi, formatUnits, parseUnits } from "viem";
 import styles from "../../pools.module.css";
+
+const LP_DECIMALS = 18; // Uniswap V2 LP tokens sont en 18 décimales
 
 export function StakeClaimCellContent({
   pool,
@@ -16,27 +17,25 @@ export function StakeClaimCellContent({
 }) {
   const [stakeAmt, setStakeAmt] = useState("");
   const [unstakeAmt, setUnstakeAmt] = useState("");
-  const { stake, withdraw } = useStakeActions(pool.staking || undefined);
 
-  // Infos LP (wallet + share + pooled tokens)
-  const lpPos = useLpPosition(pool.tokenA, pool.tokenB);
+  const stakingAddr = (pool.staking || undefined) as any;
+  const { stake, withdraw } = useStakeActions(stakingAddr);
 
-  // LP stakés
-  const stakedBalance = useStakedBalance(pool.staking);
+  const stakedLpBn = pool.stakedBalance ?? 0n;
 
-  if (loading) {
-    return <div className={styles.skeletonLine}></div>;
-  }
 
-  const walletLp =
-    lpPos.lpBalance !== undefined
-      ? Number(formatUnits(lpPos.lpBalance, 18)).toFixed(6)
-      : "0.000000";
+  const walletLpBn = useWalletLpFallback(pool.walletLpBalance, pool.pair);
 
-  const stakedLp =
-    stakedBalance !== null
-      ? Number(formatUnits(stakedBalance, 18)).toFixed(6)
-      : "0.000000";
+  const walletLpStr = useMemo(
+    () => safeFormat(walletLpBn, LP_DECIMALS),
+    [walletLpBn]
+  );
+  const stakedLpStr = useMemo(
+    () => safeFormat(stakedLpBn, LP_DECIMALS),
+    [stakedLpBn]
+  );
+
+  if (loading) return <div className={styles.skeletonLine}></div>;
 
   return (
     <div className={styles.stakeCell}>
@@ -48,14 +47,15 @@ export function StakeClaimCellContent({
             className={styles.lpStake}
             onClick={(e) => {
               e.stopPropagation();
-              setStakeAmt(walletLp); // remplir input
+              setStakeAmt(walletLpStr); // MAX
             }}
             style={{ cursor: "pointer" }}
             title="Click to use full balance"
           >
-            Balance: {walletLp}
+            Balance: {walletLpStr}
           </div>
         </span>
+
         <div className={styles.containerStake}>
           <input
             className={styles.amountInputStake}
@@ -63,12 +63,14 @@ export function StakeClaimCellContent({
             onChange={(e) => setStakeAmt(e.target.value)}
             onClick={(e) => e.stopPropagation()}
             placeholder="Amount to Stake"
+            inputMode="decimal"
           />
           <button
             className={styles.btnAction}
             onClick={(e) => {
               e.stopPropagation();
-              stake?.(parseUnitsSafe(stakeAmt));
+              const v = parseUnitsSafe(stakeAmt, LP_DECIMALS);
+              if (v > 0n) stake?.(v);
               setStakeAmt("");
             }}
             disabled={!pool.staking}
@@ -88,14 +90,15 @@ export function StakeClaimCellContent({
             className={styles.lpStake}
             onClick={(e) => {
               e.stopPropagation();
-              setUnstakeAmt(stakedLp); // remplir input
+              setUnstakeAmt(stakedLpStr); // MAX
             }}
             style={{ cursor: "pointer" }}
             title="Click to use full balance"
           >
-            Balance: {stakedLp}
+            Balance: {stakedLpStr}
           </div>
         </span>
+
         <div className={styles.containerUnstake}>
           <input
             className={styles.amountInputUnstake}
@@ -103,12 +106,14 @@ export function StakeClaimCellContent({
             onChange={(e) => setUnstakeAmt(e.target.value)}
             onClick={(e) => e.stopPropagation()}
             placeholder="Amount to Unstake"
+            inputMode="decimal"
           />
           <button
             className={styles.btnAction}
             onClick={(e) => {
               e.stopPropagation();
-              withdraw?.(parseUnitsSafe(unstakeAmt));
+              const v = parseUnitsSafe(unstakeAmt, LP_DECIMALS);
+              if (v > 0n) withdraw?.(v);
               setUnstakeAmt("");
             }}
             disabled={!pool.staking}
@@ -129,10 +134,60 @@ export function StakeClaimCell(props: { pool: PoolItem; loading?: boolean }) {
   );
 }
 
-function parseUnitsSafe(v: string): bigint {
+/* ---------------- helpers ---------------- */
+
+function safeFormat(v: bigint, decimals: number): string {
   try {
-    return BigInt(Math.floor(Number(v) * 1e18));
+    return Number(formatUnits(v, decimals)).toFixed(6);
+  } catch {
+    return "0.000000";
+  }
+}
+
+function parseUnitsSafe(v: string, decimals: number): bigint {
+  try {
+    if (!v || !isFinite(Number(v))) return 0n;
+    return parseUnits(v as `${number}`, decimals);
   } catch {
     return 0n;
   }
+}
+
+
+function useWalletLpFallback(
+  preloaded?: bigint,
+  pairAddr?: `0x${string}`
+): bigint {
+  const { address } = useAccount();
+  const pc = usePublicClient();
+  const [bal, setBal] = useState<bigint>(preloaded ?? 0n);
+
+  useEffect(() => {
+    setBal(preloaded ?? 0n);
+  }, [preloaded]);
+
+  useEffect(() => {
+    if (!pc || !address || !pairAddr) return;
+    if (preloaded != null) return; 
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const b = (await pc.readContract({
+          address: pairAddr,
+          abi: erc20Abi,
+          functionName: "balanceOf",
+          args: [address],
+        })) as bigint;
+        if (!cancelled) setBal(b);
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [pc, address, pairAddr, preloaded]);
+
+  return bal;
 }

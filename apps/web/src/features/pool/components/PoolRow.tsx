@@ -7,13 +7,19 @@ import { PoolCell } from "./cells/PoolCell";
 import { TvlCell } from "./cells/TvlCell";
 import { Volume1DCell } from "./cells/Volume1DCell";
 import { PoolAprCell } from "./cells/PoolAprCell";
-import { PoolActionsCell } from "./cells/PoolActionsCell"; // ✅ nouvelle cellule groupée
+import { PoolActionsCell } from "./cells/PoolActionsCell";
 import styles from "../tableau.module.css";
 
-// memo pour éviter rerenders inutiles
+import { WNATIVE_ADDRESS } from "../../../lib/tokens";
+
+function asUIToken<T extends { address: string; symbol: string; decimals?: number }>(t: T): T {
+  const isWNative = t?.address?.toLowerCase() === WNATIVE_ADDRESS.toLowerCase();
+  if (!isWNative) return t;
+  return { ...t, symbol: "tTRUST" } as T;
+}
+
 export default React.memo(PoolRow, (prev, next) => {
-  const a = prev.pool,
-    b = next.pool;
+  const a = prev.pool, b = next.pool;
   return (
     a.pair === b.pair &&
     a.tvlNative === b.tvlNative &&
@@ -34,32 +40,31 @@ export function PoolRow({
   loading?: boolean;
   onOpenLiquidity: (a: Address, b: Address) => void;
 }) {
+  const uiToken0 = asUIToken(pool.token0);
+  const uiToken1 = asUIToken(pool.token1);
+
   return (
     <tr
       className={styles.ligneTableau}
-      onClick={() =>
-        !loading &&
-        onOpenLiquidity(pool.token0.address, pool.token1.address)
-      }
+      onClick={() => !loading && onOpenLiquidity(pool.token0.address, pool.token1.address)}
     >
       <IndexCell index={index} loading={loading} />
-      <PoolCell
-        token0={pool.token0}
-        token1={pool.token1}
-        pair={pool.pair}
-        loading={loading}
-      />
+
+      {/* Display the tokens UI (symbol tTRUST if WTTRUST) */}
+      <PoolCell token0={uiToken0} token1={uiToken1} pair={pool.pair} loading={loading} />
+
+      {/* Pass also the UI tokens if needed (if TvlCell displays the symbols somewhere) */}
       <TvlCell
         value={pool.tvlNative}
-        token0={pool.token0}
-        token1={pool.token1}
+        token0={uiToken0}
+        token1={uiToken1}
         reserve0={pool.reserve0}
         reserve1={pool.reserve1}
         loading={loading}
       />
+
       <Volume1DCell value={pool.vol1dNative} loading={loading} />
       <PoolAprCell value={pool.poolAprPct} loading={loading} />
-
       <PoolActionsCell pool={pool} loading={loading} />
     </tr>
   );

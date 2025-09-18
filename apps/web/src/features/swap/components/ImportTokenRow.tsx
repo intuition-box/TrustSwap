@@ -51,17 +51,17 @@ export function ImportTokenRow({
         {/* Logo */}
 
         <div className={styles.metaWrapper}>
-          {/* Name si dispo */}
+          {/* Name if available */}
           {name && (
             <span className={styles.tokenMeta}>{name}</span>
           )}
          </div>
           <span className={styles.infoImport}>
-            {/* Symbol si dispo */}
+            {/* Symbol if available */}
             {symbol && (
               <span className={styles.symbolImport}>{symbol}</span>
             )}
-            {/* Adresse raccourcie */}
+            {/* Shortened address */}
             {query.slice(0, 6)}…{query.slice(-4)}
           </span>
      
