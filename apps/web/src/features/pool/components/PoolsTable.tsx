@@ -107,33 +107,35 @@ function PoolsTableInner({
         { address: p.token0.address, symbol: p.token0.symbol, decimals: p.token0.decimals },
         { address: p.token1.address, symbol: p.token1.symbol, decimals: p.token1.decimals },
         {
-          includeTest: false,    // cache les tokens marqués test
-          allowImported: false,  // override importé non nécessaire côté pools
+          includeTest: false,    // hide tokens flagged as test
+          allowImported: false,  // no imported override on pools page
         }
       )
     );
   }, [items]);
 
+  // Fetch volumes/prices and compute base metrics
   const { volMap, priceMap } = usePairsVolume1D(baseItems);
-
   const withMetrics = usePairMetrics(baseItems, volMap, priceMap);
 
-  const withPoolApr = usePoolFeeApr(withMetrics, /* feeBps= */ 30);
+  // Merge farming data (epoch APR etc.)
+  const withStaking = useStakingData(withMetrics);
 
-  const withStaking = useStakingData(withPoolApr);
+  // Compute Pool APR (fees) LAST so it is independent from connection state
+  const finalItems = usePoolFeeApr(withStaking, /* feeBps= */ 30);
 
   const view = useMemo(() => {
     const q = query.trim().toLowerCase();
 
     const filtered = !q
-      ? withStaking
-      : withStaking.filter(
+      ? finalItems
+      : finalItems.filter(
           (p) =>
             p.token0.symbol.toLowerCase().includes(q) ||
             p.token1.symbol.toLowerCase().includes(q)
         );
 
-    const hasPos = (p: typeof withStaking[number]) =>
+    const hasPos = (p: typeof finalItems[number]) =>
       (p.stakedBalance ?? 0n) > 0n || (p.walletLpBalance ?? 0n) > 0n;
 
     return [...filtered].sort((a, b) => {
@@ -149,7 +151,7 @@ function PoolsTableInner({
       const bKey = String(b.pair).toLowerCase();
       return aKey < bKey ? -1 : aKey > bKey ? 1 : 0;
     });
-  }, [withStaking, query]);
+  }, [finalItems, query]);
 
   return (
     <div className={styles.tableauContainer}>

@@ -10,6 +10,7 @@ import { FARMS } from "../../../lib/farms";
 import { useLiveRegister } from "../../../live/LiveRefetchProvider";
 
 const SEC_PER_YEAR = 31_536_000;
+const FEE_TO_LPS = 0.003; // 0.3% fees distributed to LPs
 
 // --- ABIs ---
 const STAKING_ABI = [
@@ -38,17 +39,17 @@ type StakingSlice = {
   rewardToken?: Awaited<ReturnType<typeof getOrFetchToken>>;
   rewardRatePerSec?: bigint;
   earned?: bigint;
-  stakedBalance?: bigint;       // LP stakés par l’utilisateur
-  walletLpBalance?: bigint;     // LP possédés en wallet (hors farm)
+  stakedBalance?: bigint;       // user staked LP
+  walletLpBalance?: bigint;     // user wallet LP (outside farm)
   periodFinish?: bigint;        // timestamp (sec)
   periodFinishDate?: Date;
 
-  totalStakedLP?: bigint;       // LP stakés dans le farm (tous users)
-  totalSupplyLP?: bigint;       // supply totale du token LP
+  totalStakedLP?: bigint;       // farm total staked LP (all users)
+  totalSupplyLP?: bigint;       // LP token total supply
   poolReserves?: { token0: Address; token1: Address; reserve0: bigint; reserve1: bigint };
 
-  poolAprPct?: number;          // fees APR (from trading fees -> LPs)
-  epochAprPct?: number;         // farming APR (global, rewards over staked TVL)
+  poolAprPct?: number;          // fees APR (trading fees -> LPs)
+  epochAprPct?: number;         // farming APR (global)
   epochAprUserPct?: number;     // OPTIONAL: user-specific APR
 };
 
@@ -58,13 +59,10 @@ export function useStakingData(pools: PoolItem[]) {
 
   const [stakingMap, setStakingMap] = useState<Record<string, StakingSlice>>({});
 
-  // Clé de rafraîchissement quand la liste de pools change
   const pairsKey = useMemo(
     () => (pools.length ? pools.map(p => (p.pair as string).toLowerCase()).sort().join(",") : "none"),
     [pools]
   );
-
-  
 
   const reload = useCallback(async () => {
     if (!client || !pools.length) return;
@@ -74,73 +72,8 @@ export function useStakingData(pools: PoolItem[]) {
 
     for (const p of pools) {
       const key = (p.pair as string).toLowerCase();
-      const farm = FARMS.find(f => f.stakingToken.toLowerCase() === key);
 
-      if (!farm) {
-        next[key] = { staking: null, epochAprPct: 0 };
-        continue;
-      }
-
-      const staking = farm.stakingRewards as Address;
-      const rewardsToken = farm.rewardsToken as Address;
-      const decRw = farm.decimalsRw ?? 18;
-
-      // --- Read user LP wallet balance (optionnel)
-      let walletLpBalance = 0n;
-      if (user) {
-        try {
-          walletLpBalance = await client.readContract({
-            address: p.pair as Address,
-            abi: erc20Abi,
-            functionName: "balanceOf",
-            args: [user],
-          }) as bigint;
-        } catch { /* ignore */ }
-      }
-
-      // --- Read StakingRewards core data
-      let rewardRate = 0n, periodFinish = 0n, totalStakedLP = 0n;
-      let earned = 0n, userStakedLP = 0n;
-
-      try {
-        const reads: Promise<any>[] = [
-          client.readContract({ address: staking, abi: STAKING_ABI, functionName: "rewardRate" }),
-          client.readContract({ address: staking, abi: STAKING_ABI, functionName: "periodFinish" }),
-          client.readContract({ address: staking, abi: STAKING_ABI, functionName: "totalSupply" }),
-        ];
-        if (user) {
-          reads.push(
-            client.readContract({ address: staking, abi: STAKING_ABI, functionName: "earned", args: [user] }),
-            client.readContract({ address: staking, abi: STAKING_ABI, functionName: "balanceOf", args: [user] }),
-          );
-        }
-        const res = await Promise.all(reads);
-        rewardRate    = res[0] as bigint;
-        periodFinish  = res[1] as bigint;
-        totalStakedLP = res[2] as bigint;
-        earned        = user ? (res[3] as bigint) : 0n;
-        userStakedLP  = user ? (res[4] as bigint) : 0n;
-      } catch {
-        next[key] = {
-          staking,
-          rewardToken: next[key]?.rewardToken,
-          rewardRatePerSec: rewardRate,
-          earned,
-          stakedBalance: userStakedLP,
-          walletLpBalance,
-          periodFinish,
-          periodFinishDate: new Date(Number(periodFinish) * 1000),
-          totalStakedLP,
-          totalSupplyLP: 0n,
-          epochAprPct: 0,
-        };
-        continue;
-      }
-
-      // --- Prix du token de reward en natif
-      const rewardPriceNative = await getNativePriceViaPair(client, rewardsToken, WNATIVE_ADDRESS);
-
-      // --- Lecture pair data (reserves + totalSupply LP)
+      // ---- Pair data (ALWAYS compute: required for Pool APR even without farm)
       let token0: Address | null = null;
       let token1: Address | null = null;
       let reserve0: bigint = 0n;
@@ -163,13 +96,13 @@ export function useStakingData(pools: PoolItem[]) {
         reserve1 = r1;
         totalSupplyLP = ts;
       } catch {
-        // si lecture échoue, on garde 0 et l’APR sera 0 (guard)
+        // keep defaults -> tvlNative will be 0 => poolAprPct will be 0
       }
 
-      // --- TVL en natif (via pricing token0/token1 -> WNATIVE)
+      // ---- Pool TVL (fees APR uses whole pool TVL)
       const tvlNative = await getPairTVLNative(client, token0, token1, reserve0, reserve1, WNATIVE_ADDRESS);
 
-      const FEE_TO_LPS = 0.003;
+      // ---- Pool APR (fees) computed for EVERY pool
       const vol1dNative = Number(p.vol1dNative ?? 0);
       const tvlPoolNative = Number(tvlNative);
       const poolAprFeesPct =
@@ -177,33 +110,104 @@ export function useStakingData(pools: PoolItem[]) {
           ? (vol1dNative * FEE_TO_LPS * 365 / tvlPoolNative) * 100
           : 0;
 
+      // ---- Optional farm
+      const farm = FARMS.find(f => f.stakingToken.toLowerCase() === key);
+
+      // If NO farm: still store Pool APR and basic data
+      if (!farm) {
+        next[key] = {
+          staking: null,
+          rewardRatePerSec: 0n,
+          earned: 0n,
+          stakedBalance: 0n,
+          walletLpBalance: 0n,
+          periodFinish: 0n,
+          periodFinishDate: undefined,
+          totalStakedLP: 0n,
+          totalSupplyLP,
+          poolReserves: token0 && token1 ? { token0, token1, reserve0, reserve1 } : undefined,
+          poolAprPct: poolAprFeesPct,
+          epochAprPct: 0,
+          epochAprUserPct: 0,
+        };
+        continue;
+      }
+
+      // ---- Farm exists: compute farming APR (global) + user metrics
+      const staking = farm.stakingRewards as Address;
+      const rewardsToken = farm.rewardsToken as Address;
+      const decRw = farm.decimalsRw ?? 18;
+
+      // Core farm reads (DO NOT include user reads here)
+      let rewardRate = 0n, periodFinish = 0n, totalStakedLP = 0n;
+      try {
+        const [rr, pf, ts] = await Promise.all([
+          client.readContract({ address: staking, abi: STAKING_ABI, functionName: "rewardRate" }) as Promise<bigint>,
+          client.readContract({ address: staking, abi: STAKING_ABI, functionName: "periodFinish" }) as Promise<bigint>,
+          client.readContract({ address: staking, abi: STAKING_ABI, functionName: "totalSupply" }) as Promise<bigint>,
+        ]);
+        rewardRate = rr;
+        periodFinish = pf;
+        totalStakedLP = ts;
+      } catch {
+        // Keep Pool APR visible even if farm reads fail
+        next[key] = {
+          staking,
+          rewardRatePerSec: rewardRate,
+          periodFinish,
+          periodFinishDate: periodFinish ? new Date(Number(periodFinish) * 1000) : undefined,
+          totalStakedLP,
+          totalSupplyLP,
+          poolReserves: token0 && token1 ? { token0, token1, reserve0, reserve1 } : undefined,
+          poolAprPct: poolAprFeesPct,
+          epochAprPct: 0,
+          epochAprUserPct: 0,
+        };
+        continue;
+      }
+
+      // Reward token price in native (0 if no direct route)
+      const rewardPriceNative = await getNativePriceViaPair(client, rewardsToken, WNATIVE_ADDRESS);
+      const rewardRateTokensPerSec = Number(formatUnits(rewardRate, decRw));
+
+      // Farming APR uses STAKED TVL (not the whole pool TVL)
       const stakedShare =
         totalSupplyLP === 0n ? 0 : Number(totalStakedLP) / Number(totalSupplyLP);
       const stakedTvlNative = tvlNative * stakedShare;
 
-  const rewardRateTokensPerSec = Number(formatUnits(rewardRate, decRw));
-  const active = now < Number(periodFinish || 0n);
+      const active = now < Number(periodFinish || 0n);
+      const epochAprFarmPct =
+        active && stakedTvlNative > 0 && rewardRateTokensPerSec > 0 && rewardPriceNative > 0
+          ? (rewardRateTokensPerSec * rewardPriceNative * SEC_PER_YEAR / stakedTvlNative) * 100
+          : 0;
 
-  const epochAprFarmPct =
-    active && stakedTvlNative > 0 && rewardRateTokensPerSec > 0 && rewardPriceNative > 0
-      ? (rewardRateTokensPerSec * rewardPriceNative * SEC_PER_YEAR / stakedTvlNative) * 100
-      : 0;
-
-  // OPTIONAL: user-specific APR (kept if you need it later)
-  const userShareStaked =
-    totalStakedLP === 0n ? 0 : Number(userStakedLP) / Number(totalStakedLP);
-  const userSharePool =
-    totalSupplyLP === 0n ? 0 : Number(userStakedLP) / Number(totalSupplyLP);
-
-  const userStakeNative = tvlNative * userSharePool;
-  const userRewardPerSecNative = rewardRateTokensPerSec * rewardPriceNative * userShareStaked;
-
-  const epochAprUserPct =
-    active && userStakeNative > 0 && userRewardPerSecNative > 0
-      ? (userRewardPerSecNative * SEC_PER_YEAR / userStakeNative) * 100
-      : 0;
+      // User reads isolated (must never hide Pool APR if they fail)
+      let earned = 0n, userStakedLP = 0n, walletLpBalance = 0n;
+      try {
+        if (user) {
+          [earned, userStakedLP, walletLpBalance] = await Promise.all([
+            client.readContract({ address: staking, abi: STAKING_ABI, functionName: "earned", args: [user] }) as Promise<bigint>,
+            client.readContract({ address: staking, abi: STAKING_ABI, functionName: "balanceOf", args: [user] }) as Promise<bigint>,
+            client.readContract({ address: p.pair as Address, abi: erc20Abi, functionName: "balanceOf", args: [user] }) as Promise<bigint>,
+          ]);
+        }
+      } catch {
+        // ignore user read failures
+      }
 
       const fetchedRewardToken = await getOrFetchToken(rewardsToken);
+
+      // Optional: user-specific APR
+      const userShareStaked =
+        totalStakedLP === 0n ? 0 : Number(userStakedLP) / Number(totalStakedLP);
+      const userSharePool =
+        totalSupplyLP === 0n ? 0 : Number(userStakedLP) / Number(totalSupplyLP);
+      const userStakeNative = Number(tvlNative) * userSharePool;
+      const userRewardPerSecNative = rewardRateTokensPerSec * rewardPriceNative * userShareStaked;
+      const epochAprUserPct =
+        active && userStakeNative > 0 && userRewardPerSecNative > 0
+          ? (userRewardPerSecNative * SEC_PER_YEAR / userStakeNative) * 100
+          : 0;
 
       next[key] = {
         staking,
@@ -217,9 +221,11 @@ export function useStakingData(pools: PoolItem[]) {
         totalStakedLP,
         totalSupplyLP,
         poolReserves: token0 && token1 ? { token0, token1, reserve0, reserve1 } : undefined,
-        poolAprPct: poolAprFeesPct,     // 👈 fees APR (LP earnings from volume)
-        epochAprPct: epochAprFarmPct,   // 👈 farming APR (global)
-        epochAprUserPct,                // 👈 optional, not used in UI
+
+        // Always present
+        poolAprPct: poolAprFeesPct,   // fees APR (pool)
+        epochAprPct: epochAprFarmPct, // farming APR (global)
+        epochAprUserPct,
       };
     }
 
@@ -229,17 +235,16 @@ export function useStakingData(pools: PoolItem[]) {
 
   useEffect(() => { void reload(); }, [reload]);
 
-  // 🔔 rafraîchissement live (nouveau bloc / trigger après tx)
   useLiveRegister(reload);
 
-  // Merge final dans la liste de pools
+  // IMPORTANT: do not override an existing pool.poolAprPct with 0 when there is no slice
   const merged = useMemo<PoolItem[]>(() => {
     return pools.map(p => {
       const key = (p.pair as string).toLowerCase();
       const s = stakingMap[key];
       return {
         ...p,
-        ...(s ?? { staking: null, poolAprPct: 0, epochAprPct: 0 }),
+        ...(s ?? { staking: null, epochAprPct: 0 }), // <-- do NOT default poolAprPct here
       } as PoolItem;
     });
   }, [pools, stakingMap]);
@@ -247,7 +252,7 @@ export function useStakingData(pools: PoolItem[]) {
   return merged;
 }
 
-/** Prix d’un token en natif via la pair (token, WNATIVE). Retourne 0 si pas de pair/liquidité. */
+/** Return token price in native via (token, WNATIVE) pair. Returns 0 if no pair/liquidity. */
 async function getNativePriceViaPair(client: any, token: Address, WNATIVE: Address): Promise<number> {
   try {
     if (token.toLowerCase() === WNATIVE.toLowerCase()) return 1;
@@ -270,8 +275,6 @@ async function getNativePriceViaPair(client: any, token: Address, WNATIVE: Addre
     const reserve0: bigint = Array.isArray(reserves) ? reserves[0] : (reserves?.reserve0 ?? 0n);
     const reserve1: bigint = Array.isArray(reserves) ? reserves[1] : (reserves?.reserve1 ?? 0n);
 
-    // Si token est token0: price = reserveWNATIVE / reserveTOKEN
-    // Sinon:               price = reserveWNATIVE / reserveTOKEN (avec les réserves inversées)
     if (token0.toLowerCase() === token.toLowerCase()) {
       const t = Number(formatUnits(reserve0, decT));
       const w = Number(formatUnits(reserve1, 18));
@@ -288,8 +291,7 @@ async function getNativePriceViaPair(client: any, token: Address, WNATIVE: Addre
   }
 }
 
-
-/** TVL (en natif) à partir des réserves du pair. Si token0/1 nulls, renvoie 0. */
+/** Pool TVL (in native) from pair reserves. Returns 0 if token0/1 missing. */
 async function getPairTVLNative(
   client: any,
   token0: Address | null,
@@ -326,4 +328,3 @@ async function getPairTVLNative(
     return 0;
   }
 }
-
