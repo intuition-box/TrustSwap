@@ -101,7 +101,7 @@ export function PoolActionsCell({
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              className={styles.btnClaim}
+              className={styles.btnClaim} 
               onClick={(e) => {
                 e.stopPropagation();
                 claim?.();

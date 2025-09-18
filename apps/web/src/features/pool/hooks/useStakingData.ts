@@ -7,8 +7,11 @@ import { addresses } from "@trustswap/sdk";
 import type { PoolItem } from "../types";
 import { getOrFetchToken, WNATIVE_ADDRESS } from "../../../lib/tokens";
 import { FARMS } from "../../../lib/farms";
-import { useLiveRegister } from "../../../live/LiveRefetchProvider"; 
+import { useLiveRegister } from "../../../live/LiveRefetchProvider";
 
+const SEC_PER_YEAR = 31_536_000;
+
+// --- ABIs ---
 const STAKING_ABI = [
   { type: "function", name: "rewardRate",   stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
   { type: "function", name: "periodFinish", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
@@ -24,6 +27,7 @@ const FACTORY_ABI = [
 
 const PAIR_ABI = [
   { type: "function", name: "token0",      stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
+  { type: "function", name: "token1",      stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
   { type: "function", name: "getReserves", stateMutability: "view", inputs: [], outputs: [
       { type: "uint112" }, { type: "uint112" }, { type: "uint32" }
   ] },
@@ -34,9 +38,16 @@ type StakingSlice = {
   rewardToken?: Awaited<ReturnType<typeof getOrFetchToken>>;
   rewardRatePerSec?: bigint;
   earned?: bigint;
-  stakedBalance?: bigint;
-  walletLpBalance?: bigint; 
-  epochAprPct?: number;
+  stakedBalance?: bigint;       // LP stakés par l’utilisateur
+  walletLpBalance?: bigint;     // LP possédés en wallet (hors farm)
+  periodFinish?: bigint;        // timestamp (sec)
+  periodFinishDate?: Date;
+
+  totalStakedLP?: bigint;       // LP stakés dans le farm (tous users)
+  totalSupplyLP?: bigint;       // supply totale du token LP
+  poolReserves?: { token0: Address; token1: Address; reserve0: bigint; reserve1: bigint };
+
+  epochAprPct?: number;         // APR perso (dépend de ce que l’utilisateur a staké)
 };
 
 export function useStakingData(pools: PoolItem[]) {
@@ -45,24 +56,22 @@ export function useStakingData(pools: PoolItem[]) {
 
   const [stakingMap, setStakingMap] = useState<Record<string, StakingSlice>>({});
 
-
+  // Clé de rafraîchissement quand la liste de pools change
   const pairsKey = useMemo(
     () => (pools.length ? pools.map(p => (p.pair as string).toLowerCase()).sort().join(",") : "none"),
     [pools]
   );
 
-
   const reload = useCallback(async () => {
     if (!client || !pools.length) return;
 
     const now = Math.floor(Date.now() / 1000);
-
-
     const next: Record<string, StakingSlice> = { ...stakingMap };
 
     for (const p of pools) {
       const key = (p.pair as string).toLowerCase();
       const farm = FARMS.find(f => f.stakingToken.toLowerCase() === key);
+
       if (!farm) {
         next[key] = { staking: null, epochAprPct: 0 };
         continue;
@@ -72,11 +81,8 @@ export function useStakingData(pools: PoolItem[]) {
       const rewardsToken = farm.rewardsToken as Address;
       const decRw = farm.decimalsRw ?? 18;
 
-      // --- reads SR / user ---
-      let rewardRate = 0n, periodFinish = 0n, totalStakedLP = 0n;
-      let earned = 0n, userStakedLP = 0n;
+      // --- Read user LP wallet balance (optionnel)
       let walletLpBalance = 0n;
-
       if (user) {
         try {
           walletLpBalance = await client.readContract({
@@ -85,8 +91,12 @@ export function useStakingData(pools: PoolItem[]) {
             functionName: "balanceOf",
             args: [user],
           }) as bigint;
-        } catch {}
+        } catch { /* ignore */ }
       }
+
+      // --- Read StakingRewards core data
+      let rewardRate = 0n, periodFinish = 0n, totalStakedLP = 0n;
+      let earned = 0n, userStakedLP = 0n;
 
       try {
         const reads: Promise<any>[] = [
@@ -114,38 +124,69 @@ export function useStakingData(pools: PoolItem[]) {
           earned,
           stakedBalance: userStakedLP,
           walletLpBalance,
+          periodFinish,
+          periodFinishDate: new Date(Number(periodFinish) * 1000),
+          totalStakedLP,
+          totalSupplyLP: 0n,
           epochAprPct: 0,
         };
         continue;
       }
 
-      // --- prix du token de reward en WTTRUST ---
+      // --- Prix du token de reward en natif
       const rewardPriceNative = await getNativePriceViaPair(client, rewardsToken, WNATIVE_ADDRESS);
 
-      // --- TVL perso (en natif) via part utilisateur ---
-      let userStakeNative = 0;
-      try {
-        const totalSupplyLP = await client.readContract({
-          address: p.pair as Address,
-          abi: erc20Abi,
-          functionName: "totalSupply",
-        }) as bigint;
+      // --- Lecture pair data (reserves + totalSupply LP)
+      let token0: Address | null = null;
+      let token1: Address | null = null;
+      let reserve0: bigint = 0n;
+      let reserve1: bigint = 0n;
+      let totalSupplyLP: bigint = 0n;
 
-        const tvlNative = Number(p.tvlNative || 0);
-        const userSharePool = totalSupplyLP === 0n ? 0 : Number(userStakedLP) / Number(totalSupplyLP);
-        userStakeNative = tvlNative * userSharePool;
+      try {
+        const [t0, t1, rsv, ts] = await Promise.all([
+          client.readContract({ address: p.pair as Address, abi: PAIR_ABI, functionName: "token0" }) as Promise<Address>,
+          client.readContract({ address: p.pair as Address, abi: PAIR_ABI, functionName: "token1" }) as Promise<Address>,
+          client.readContract({ address: p.pair as Address, abi: PAIR_ABI, functionName: "getReserves" }) as Promise<any>,
+          client.readContract({ address: p.pair as Address, abi: erc20Abi, functionName: "totalSupply" }) as Promise<bigint>,
+        ]);
+        token0 = t0;
+        token1 = t1;
+        const [r0, r1] = Array.isArray(rsv)
+          ? [rsv[0] as bigint, rsv[1] as bigint]
+          : [rsv?.reserve0 ?? 0n, rsv?.reserve1 ?? 0n];
+        reserve0 = r0;
+        reserve1 = r1;
+        totalSupplyLP = ts;
       } catch {
-        userStakeNative = 0;
+        // si lecture échoue, on garde 0 et l’APR sera 0 (guard)
       }
 
-      // --- APR perso ---
-      const rewardRateTokens = Number(formatUnits(rewardRate, decRw));
-      const userShareStaked = totalStakedLP === 0n ? 0 : Number(userStakedLP) / Number(totalStakedLP);
-      const userRewardPerSecNative = rewardRateTokens * rewardPriceNative * userShareStaked;
+      // --- TVL en natif (via pricing token0/token1 -> WNATIVE)
+      const tvlNative = await getPairTVLNative(client, token0, token1, reserve0, reserve1, WNATIVE_ADDRESS);
+
+      // --- APR pool (indépendant de l’utilisateur)
+      // rewardRate est en tokens/sec ; on le convertit en "natif/sec", puis annualise.
+
+      const rewardRateTokensPerSec = Number(formatUnits(rewardRate, decRw));
+
+
+      // --- APR perso (en fonction de la part réellement stakée)
       const active = now < Number(periodFinish || 0n);
+      // part de l’utilisateur dans les LP stakés du farm
+      const userShareStaked =
+        totalStakedLP === 0n ? 0 : Number(userStakedLP) / Number(totalStakedLP);
+
+      // part de l’utilisateur par rapport à la supply totale LP (pour valoriser en TVL)
+      const userSharePool =
+        totalSupplyLP === 0n ? 0 : Number(userStakedLP) / Number(totalSupplyLP);
+
+      const userStakeNative = tvlNative * userSharePool;
+      const userRewardPerSecNative = rewardRateTokensPerSec * rewardPriceNative * userShareStaked;
+
       const epochAprPct =
         active && userStakeNative > 0 && userRewardPerSecNative > 0
-          ? (userRewardPerSecNative * 31_536_000 / userStakeNative) * 100
+          ? (userRewardPerSecNative * SEC_PER_YEAR / userStakeNative) * 100
           : 0;
 
       const fetchedRewardToken = await getOrFetchToken(rewardsToken);
@@ -157,30 +198,32 @@ export function useStakingData(pools: PoolItem[]) {
         earned,
         stakedBalance: userStakedLP,
         walletLpBalance,
+        periodFinish,
+        periodFinishDate: new Date(Number(periodFinish) * 1000),
+        totalStakedLP,
+        totalSupplyLP,
+        poolReserves: token0 && token1 ? { token0, token1, reserve0, reserve1 } : undefined,
         epochAprPct,
       };
     }
 
     setStakingMap(next);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, pairsKey, user]); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client, pairsKey, user]);
 
-  // 1er chargement et rerun si la liste change
-  useEffect(() => {
-    void reload();
-  }, [reload]);
+  useEffect(() => { void reload(); }, [reload]);
 
-  // 🔔 S’abonner au “live” global (nouveau bloc + triggerAll après tx)
+  // 🔔 rafraîchissement live (nouveau bloc / trigger après tx)
   useLiveRegister(reload);
 
-  // Merge final
+  // Merge final dans la liste de pools
   const merged = useMemo<PoolItem[]>(() => {
     return pools.map(p => {
       const key = (p.pair as string).toLowerCase();
       const s = stakingMap[key];
       return {
         ...p,
-        ...(s ?? { staking: null, epochAprPct: 0 }),
+        ...(s ?? { staking: null, poolAprPct: 0, epochAprPct: 0 }),
       } as PoolItem;
     });
   }, [pools, stakingMap]);
@@ -188,7 +231,7 @@ export function useStakingData(pools: PoolItem[]) {
   return merged;
 }
 
-// ---- helpers inchangés ----
+/** Prix d’un token en natif via la pair (token, WNATIVE). Retourne 0 si pas de pair/liquidité. */
 async function getNativePriceViaPair(client: any, token: Address, WNATIVE: Address): Promise<number> {
   try {
     if (token.toLowerCase() === WNATIVE.toLowerCase()) return 1;
@@ -199,25 +242,72 @@ async function getNativePriceViaPair(client: any, token: Address, WNATIVE: Addre
       functionName: "getPair",
       args: [token, WNATIVE],
     }) as Address;
+
     if (!pair || pair === zeroAddress) return 0;
 
-    const [token0, reserves] = await Promise.all([
+    const [token0, reserves, decT] = await Promise.all([
       client.readContract({ address: pair, abi: PAIR_ABI, functionName: "token0" }) as Promise<Address>,
       client.readContract({ address: pair, abi: PAIR_ABI, functionName: "getReserves" }) as Promise<any>,
+      client.readContract({ address: token, abi: erc20Abi, functionName: "decimals" }).catch(() => 18) as Promise<number>,
     ]);
 
     const reserve0: bigint = Array.isArray(reserves) ? reserves[0] : (reserves?.reserve0 ?? 0n);
     const reserve1: bigint = Array.isArray(reserves) ? reserves[1] : (reserves?.reserve1 ?? 0n);
 
-    const decT = (await client.readContract({ address: token, abi: erc20Abi, functionName: "decimals" }).catch(() => 18)) as number;
-    const decW = 18;
-
-    const r0T = Number(formatUnits(reserve0, token0.toLowerCase() === token.toLowerCase() ? decT : decW));
-    const r1W = Number(formatUnits(reserve1, token0.toLowerCase() === token.toLowerCase() ? decW : decT));
-    const r0W = Number(formatUnits(reserve0, token0.toLowerCase() === token.toLowerCase() ? decW : decT));
-    const r1T = Number(formatUnits(reserve1, token0.toLowerCase() === token.toLowerCase() ? decT : decW));
-
-    const price = token0.toLowerCase() === token.toLowerCase() ? (r1W / r0T) : (r0W / r1T);
-    return isFinite(price) && price > 0 ? price : 0;
-  } catch { return 0; }
+    // Si token est token0: price = reserveWNATIVE / reserveTOKEN
+    // Sinon:               price = reserveWNATIVE / reserveTOKEN (avec les réserves inversées)
+    if (token0.toLowerCase() === token.toLowerCase()) {
+      const t = Number(formatUnits(reserve0, decT));
+      const w = Number(formatUnits(reserve1, 18));
+      const price = w / t;
+      return Number.isFinite(price) && price > 0 ? price : 0;
+    } else {
+      const t = Number(formatUnits(reserve1, decT));
+      const w = Number(formatUnits(reserve0, 18));
+      const price = w / t;
+      return Number.isFinite(price) && price > 0 ? price : 0;
+    }
+  } catch {
+    return 0;
+  }
 }
+
+
+/** TVL (en natif) à partir des réserves du pair. Si token0/1 nulls, renvoie 0. */
+async function getPairTVLNative(
+  client: any,
+  token0: Address | null,
+  token1: Address | null,
+  reserve0: bigint,
+  reserve1: bigint,
+  WNATIVE: Address
+): Promise<number> {
+  if (!token0 || !token1) return 0;
+
+  try {
+    const [dec0, dec1] = await Promise.all([
+      client.readContract({ address: token0, abi: erc20Abi, functionName: "decimals" }).catch(() => 18) as Promise<number>,
+      client.readContract({ address: token1, abi: erc20Abi, functionName: "decimals" }).catch(() => 18) as Promise<number>,
+    ]);
+
+    const p0 = token0.toLowerCase() === WNATIVE.toLowerCase()
+      ? 1
+      : await getNativePriceViaPair(client, token0, WNATIVE);
+
+    const p1 = token1.toLowerCase() === WNATIVE.toLowerCase()
+      ? 1
+      : await getNativePriceViaPair(client, token1, WNATIVE);
+
+    const r0 = Number(formatUnits(reserve0, dec0));
+    const r1 = Number(formatUnits(reserve1, dec1));
+
+    const v0 = r0 * (Number.isFinite(p0) ? p0 : 0);
+    const v1 = r1 * (Number.isFinite(p1) ? p1 : 0);
+
+    const tvl = v0 + v1;
+    return Number.isFinite(tvl) && tvl > 0 ? tvl : 0;
+  } catch {
+    return 0;
+  }
+}
+
