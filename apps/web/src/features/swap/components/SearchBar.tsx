@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "@ui/styles/TokenSelector.module.css";
 import searchIcone from "../../../assets/search.png";
 

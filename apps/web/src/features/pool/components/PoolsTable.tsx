@@ -101,7 +101,6 @@ function PoolsTableInner({
   onOpenLiquidity: (a: Address, b: Address) => void;
   pageSize: number;
 }) {
-  // ⬇️ NEW: filtre les paires indésirables AVANT tout calcul (vol/TVL/APR)
   const baseItems = useMemo(() => {
     return items.filter((p) =>
       !shouldHidePair(
@@ -115,16 +114,12 @@ function PoolsTableInner({
     );
   }, [items]);
 
-  // 1) volumes/prices (alimente vol1dNative)
   const { volMap, priceMap } = usePairsVolume1D(baseItems);
 
-  // 2) métriques (tvlNative, vol1dNative…)
   const withMetrics = usePairMetrics(baseItems, volMap, priceMap);
 
-  // 3) Pool APR (fees) — basé uniquement sur tvlNative & vol1dNative
   const withPoolApr = usePoolFeeApr(withMetrics, /* feeBps= */ 30);
 
-  // 4) Farm APR (rewards) — ajoute epochAprPct & infos staking
   const withStaking = useStakingData(withPoolApr);
 
   const view = useMemo(() => {
