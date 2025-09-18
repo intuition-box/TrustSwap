@@ -215,6 +215,10 @@
   outline: none;
 }
 
+.stakeCell {
+  padding-top: 2vh;
+}
+
 .stakeRow {
   display: flex;
   flex-direction: column;
@@ -229,6 +233,19 @@
   color: var(--text-color);
   font-size: 2vh;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.lpStake {
+  font-size: 1.4vh;
+  color: var(--text-grey);
+}
+
+.lpStake:hover {
+  text-decoration: underline;
 }
 
 .containerStake, .containerUnstake {
