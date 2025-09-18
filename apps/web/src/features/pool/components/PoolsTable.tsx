@@ -1,11 +1,14 @@
 // apps/web/src/features/pools/components/PoolsTable.tsx
 import { useMemo } from "react";
 import type { Address } from "viem";
+
 import { usePoolsData } from "../hooks/usePoolsData";
-import { usePairMetrics } from "../hooks/usePairMetrics";
-import { useStakingData } from "../hooks/useStakingData";
-import { PoolRow } from "./PoolRow";
 import { usePairsVolume1D } from "../hooks/usePairsVolume1D";
+import { usePairMetrics } from "../hooks/usePairMetrics";
+import { usePoolFeeApr } from "../hooks/usePoolFeeApr";
+import { useStakingData } from "../hooks/useStakingData"; 
+
+import { PoolRow } from "./PoolRow";
 import styles from "../tableau.module.css";
 import type { PoolItem } from "../types";
 
@@ -19,7 +22,9 @@ export function PoolsTable({
   onOpenLiquidity: (a: Address, b: Address) => void;
 }) {
   const pageSize = 10;
-  const { items, loading, error } = usePoolsData(pageSize, (page - 1) * pageSize);
+  const offset = (page - 1) * pageSize;
+
+  const { items, loading, error } = usePoolsData(pageSize, offset);
 
   const skeletonPool: PoolItem = {
     pair: "0x0000000000000000000000000000000000000000",
@@ -29,8 +34,8 @@ export function PoolsTable({
     reserve1: 0n,
     tvlNative: 0,
     vol1dNative: 0,
-    poolAprPct: 0,
-    epochAprPct: 0,
+    poolAprPct: 0,   // fees APR
+    epochAprPct: 0,  // farm APR (user-based)
     rewardToken: { symbol: "", address: "" as `0x${string}`, decimals: 18 },
     earned: 0n,
   };
@@ -56,10 +61,10 @@ export function PoolsTable({
             {Array.from({ length: pageSize }).map((_, i) => (
               <PoolRow
                 key={`loading-${i}`}
-                index={(page - 1) * pageSize + i + 1}
+                index={offset + i + 1}
                 pool={skeletonPool}
                 loading={true}
-                onOpenLiquidity={onOpenLiquidity} 
+                onOpenLiquidity={onOpenLiquidity}
               />
             ))}
           </tbody>
@@ -82,7 +87,6 @@ export function PoolsTable({
   );
 }
 
-
 function PoolsTableInner({
   page,
   query,
@@ -98,10 +102,13 @@ function PoolsTableInner({
   onOpenLiquidity: (a: Address, b: Address) => void;
   pageSize: number;
 }) {
-
   const { volMap, priceMap } = usePairsVolume1D(items);
+
   const withMetrics = usePairMetrics(items, volMap, priceMap);
-  const withStaking = useStakingData(withMetrics);
+
+  const withPoolApr = usePoolFeeApr(withMetrics, /* feeBps= */ 30);
+
+  const withStaking = useStakingData(withPoolApr);
 
   const view = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -110,21 +117,22 @@ function PoolsTableInner({
       ? withStaking
       : withStaking.filter(
           (p) =>
-            p.token0.symbol.toLowerCase().includes(q) ||
-            p.token1.symbol.toLowerCase().includes(q)
+            (p.token0?.symbol ?? "").toLowerCase().includes(q) ||
+            (p.token1?.symbol ?? "").toLowerCase().includes(q)
         );
 
-    const hasPos = (p: typeof withStaking[number]) =>
+    const hasPos = (p: PoolItem) =>
       (p.stakedBalance ?? 0n) > 0n || (p.walletLpBalance ?? 0n) > 0n;
 
+    // Tri: d'abord pools où user a une position, puis TVL décroissante, puis adresse
     return [...filtered].sort((a, b) => {
       const aPos = hasPos(a) ? 1 : 0;
       const bPos = hasPos(b) ? 1 : 0;
-      if (aPos !== bPos) return bPos - aPos;            
+      if (aPos !== bPos) return bPos - aPos;
 
       const at = a.tvlNative ?? 0;
       const bt = b.tvlNative ?? 0;
-      if (bt !== at) return bt - at;                      
+      if (bt !== at) return bt - at;
 
       const aKey = String(a.pair).toLowerCase();
       const bKey = String(b.pair).toLowerCase();
@@ -132,6 +140,7 @@ function PoolsTableInner({
     });
   }, [withStaking, query]);
 
+  const offset = (page - 1) * pageSize;
 
   return (
     <div className={styles.tableauContainer}>
@@ -150,8 +159,8 @@ function PoolsTableInner({
         <tbody>
           {view.map((p, i) => (
             <PoolRow
-              key={loading ? `loading-${i}` : p.pair}
-              index={(page - 1) * pageSize + i + 1}
+              key={`${String(p.pair).toLowerCase()}-${i}`}
+              index={offset + i + 1}
               pool={p}
               loading={loading}
               onOpenLiquidity={onOpenLiquidity}
