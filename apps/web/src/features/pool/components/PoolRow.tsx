@@ -1,4 +1,3 @@
-// apps/web/src/features/pools/components/PoolRow.tsx
 import React from "react";
 import type { Address } from "viem";
 import type { PoolItem } from "../types";
