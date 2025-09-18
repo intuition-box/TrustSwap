@@ -298,27 +298,10 @@ export function AlertModalHost() {
       {modals.map((a) => (
         <div
           key={a.id}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 2147483647,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "red",
-          }}
+          className={styles.containerFailed}
         >
           <div
-            style={{
-              width: "100%",
-              maxWidth: 520,
-              borderRadius: 16,
-              background: "#111",
-              color: "#fff",
-              padding: 20,
-              boxShadow: "0 25px 60px rgba(0,0,0,0.5)",
-              border: "1px solid rgba(255,255,255,0.12)",
-            }}
+            className={styles.toastContainerFailed}
           >
             <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
               {a.kind === "tx:failed"
@@ -338,14 +321,7 @@ export function AlertModalHost() {
               {"retry" in a && a.retry && (
                 <button
                   onClick={() => a.retry?.()}
-                  style={{
-                    padding: "8px 12px",
-                    borderRadius: 10,
-                    background: "red",
-                    color: "#fff",
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    cursor: "pointer",
-                  }}
+                  className={styles.retryBtn}
                 >
                   Retry
                 </button>
@@ -368,17 +344,9 @@ export function AlertModalHost() {
               )}
               <button
                 onClick={() => dismiss(a.id)}
-                style={{
-                  marginLeft: "auto",
-                  padding: "8px 12px",
-                  borderRadius: 10,
-                  background: "#fff",
-                  color: "#000",
-                  border: "none",
-                  cursor: "pointer",
-                }}
+                className={styles.closeToastBtn}
               >
-                Close
+                X
               </button>
             </div>
           </div>

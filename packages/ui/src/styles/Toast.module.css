@@ -14,6 +14,37 @@
     overflow: hidden;
 }
 
+.toastContainerFailed {
+    background: rgba(80, 80, 80, 0.2);
+    border-radius: 2vh;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(101, 101, 101, 0.3);
+    padding-left: 2vh;
+    padding-right: 2vh;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    min-width: 28vh;
+    position: relative;
+    overflow: hidden;
+    margin-right: 2vh;
+    margin-bottom: 2vh;
+}
+
+.containerFailed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100%;
+    z-index:  2147483647;
+    display: flex;
+    justify-content: end;
+    align-items: end;
+    background-color: transparent;
+}
+
 .haloToast {
     position: fixed;
     top: 0%;
@@ -46,4 +77,21 @@
 
 .closeToastBtn:hover {
     background-color: rgba(128, 128, 128, 0.134);
+}
+
+.retryBtn {
+    padding: 8px 12px;
+    background-color: #4ADAEA;
+    border: none;
+    border-radius: 10px;
+    color: #000000;
+    cursor: pointer;
+}
+
+.retryBtn:hover {
+    background-color: #78f1ff;
+}
+
+.retryBtn:active {
+    transform: scale(0.97);
 }
