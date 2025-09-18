@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useAccount } from "wagmi";  
+import { useAccount } from "wagmi";
 import { EpochAprCellContent } from "../cells/EpochAprCell";
 import { RewardCellContent } from "../cells/RewardCell";
 import { StakeClaimCellContent } from "../cells/StakeClaimCell";
@@ -24,22 +24,16 @@ export function PoolActionsCell({
   pool: PoolItem;
   loading?: boolean;
 }) {
-  const { isConnected } = useAccount(); 
+  const { isConnected } = useAccount();
   const staking: any = pool?.staking;
   const { claim } = useStakeActions(staking || undefined);
   const [showPopup, setShowPopup] = useState(false);
-  const [showClaimTip, setShowClaimTip] = useState(false); 
+  const [showClaimTip, setShowClaimTip] = useState(false);
 
-  if (!isConnected) {
-    return (
-      <td className={styles.tdStake}>
-        <span className={styles.placeholderDash ?? ""}>—</span>
-      </td>
-    );
-  }
-
+  // Keep farm status logic
   const isExpired = useMemo(() => {
     if (!staking) return false;
+
     const now = Math.floor(Date.now() / 1000);
     const end =
       staking?.end ??
@@ -48,11 +42,13 @@ export function PoolActionsCell({
       staking?.endsAt ??
       staking?.finishAt;
 
+    // Expired only if end time is in the past or explicit inactive flags are set
     if (typeof end === "number" && end > 0 && end <= now) return true;
     if (staking?.active === false || staking?.isActive === false || staking?.enabled === false) return true;
-    if ((pool.epochAprPct == null || pool.epochAprPct <= 0) && staking) return true;
+
+    // Do NOT infer expiration from APR being 0/undefined
     return false;
-  }, [staking, pool.epochAprPct]);
+  }, [staking]);
 
   const hasRewards = useMemo(() => {
     return (
@@ -72,10 +68,11 @@ export function PoolActionsCell({
     );
   }, [pool, staking]);
 
-  const showActions = hasRewards || hasStaked;
+  // IMPORTANT: show the full cell if a farm exists, even without user state
+  const showCell = Boolean(staking) || hasRewards || hasStaked;
 
-  // ⛔️ Aucun staking défini OU aucun état utilisateur (pas staké / pas de rewards) → affiche juste "—"
-  if (!staking || !showActions) {
+  // If there is truly nothing to show, keep the dash
+  if (!showCell) {
     return (
       <td className={styles.tdStake}>
         <span className={styles.placeholderDash ?? ""}>—</span>
@@ -83,11 +80,17 @@ export function PoolActionsCell({
     );
   }
 
-  // Sinon, afficher la cellule complète
   return (
-    <td className={styles.tdStake}>
+    <td
+      className={styles.tdStake}
+      onClick={(e) => {
+        // Prevent row onClick when interacting inside the cell
+        e.stopPropagation();
+      }}
+    >
       <div className={styles.containerStakeTD}>
-        <EpochAprCellContent value={pool.epochAprPct} loading={loading} expired={isExpired} />
+        {/* Always show APR/status if a farm exists */}
+        <EpochAprCellContent value={pool.poolAprPct ?? pool.epochAprPct} loading={loading} expired={isExpired} />
 
         {loading ? (
           <div className={styles.skeletonLine}></div>
@@ -98,15 +101,15 @@ export function PoolActionsCell({
             onMouseLeave={() => setShowClaimTip(false)}
             onFocus={() => setShowClaimTip(true)}
             onBlur={() => setShowClaimTip(false)}
-            onClick={(e) => e.stopPropagation()}
           >
             <button
-              className={styles.btnClaim} 
+              className={styles.btnClaim}
               onClick={(e) => {
                 e.stopPropagation();
                 claim?.();
               }}
-              disabled={!pool.staking}
+              // Disable actions when disconnected or when no staking ref
+              disabled={!isConnected || !staking}
               aria-describedby="claim-tooltip"
               aria-expanded={showClaimTip}
             >
@@ -135,6 +138,8 @@ export function PoolActionsCell({
               e.stopPropagation();
               setShowPopup(true);
             }}
+            // Disable when disconnected; UI stays identical
+            disabled={!isConnected || !staking}
           >
             Farm
           </button>
@@ -158,7 +163,7 @@ export function PoolActionsCell({
                       e.stopPropagation();
                       claim?.();
                     }}
-                    disabled={!pool.staking}
+                    disabled={!isConnected || !staking}
                   >
                     Claim
                   </button>

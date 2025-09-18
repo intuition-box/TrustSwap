@@ -47,6 +47,7 @@ type StakingSlice = {
   totalSupplyLP?: bigint;       // supply totale du token LP
   poolReserves?: { token0: Address; token1: Address; reserve0: bigint; reserve1: bigint };
 
+  poolAprPct?: number;          // APR global du pool
   epochAprPct?: number;         // APR perso (dépend de ce que l’utilisateur a staké)
 };
 
@@ -165,14 +166,21 @@ export function useStakingData(pools: PoolItem[]) {
       // --- TVL en natif (via pricing token0/token1 -> WNATIVE)
       const tvlNative = await getPairTVLNative(client, token0, token1, reserve0, reserve1, WNATIVE_ADDRESS);
 
-      // --- APR pool (indépendant de l’utilisateur)
-      // rewardRate est en tokens/sec ; on le convertit en "natif/sec", puis annualise.
+      const stakedShare =
+        totalSupplyLP === 0n ? 0 : Number(totalStakedLP) / Number(totalSupplyLP);
+      const stakedTvlNative = tvlNative * stakedShare;
+
 
       const rewardRateTokensPerSec = Number(formatUnits(rewardRate, decRw));
 
 
       // --- APR perso (en fonction de la part réellement stakée)
       const active = now < Number(periodFinish || 0n);
+
+      const poolAprPct =
+        active && stakedTvlNative > 0
+          ? (rewardRateTokensPerSec * rewardPriceNative * SEC_PER_YEAR / stakedTvlNative) * 100
+          : 0;
       // part de l’utilisateur dans les LP stakés du farm
       const userShareStaked =
         totalStakedLP === 0n ? 0 : Number(userStakedLP) / Number(totalStakedLP);
@@ -203,6 +211,7 @@ export function useStakingData(pools: PoolItem[]) {
         totalStakedLP,
         totalSupplyLP,
         poolReserves: token0 && token1 ? { token0, token1, reserve0, reserve1 } : undefined,
+        poolAprPct,
         epochAprPct,
       };
     }
