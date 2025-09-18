@@ -7,7 +7,7 @@ import { PoolCell } from "./cells/PoolCell";
 import { TvlCell } from "./cells/TvlCell";
 import { Volume1DCell } from "./cells/Volume1DCell";
 import { PoolAprCell } from "./cells/PoolAprCell";
-import { PoolActionsCell } from "./cells/PoolActionsCell"; // ✅ nouvelle cellule groupée
+import { PoolActionsCell } from "./cells/PoolActionsCell";
 import styles from "../tableau.module.css";
 
 // memo pour éviter rerenders inutiles

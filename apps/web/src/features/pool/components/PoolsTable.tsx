@@ -34,8 +34,8 @@ export function PoolsTable({
     reserve1: 0n,
     tvlNative: 0,
     vol1dNative: 0,
-    poolAprPct: 0,   // fees APR
-    epochAprPct: 0,  // farm APR (user-based)
+    poolAprPct: 0,
+    epochAprPct: 0,
     rewardToken: { symbol: "", address: "" as `0x${string}`, decimals: 18 },
     earned: 0n,
   };
