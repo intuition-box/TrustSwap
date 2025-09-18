@@ -143,10 +143,8 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(alertsReducer, { list: [] });
 
   useEffect(() => {
-    DEBUG && console.log("[Alerts] Provider mounted");
 
     const off = AlertsBus.on((payload) => {
-      DEBUG && console.log("[Alerts] BUS → PAYLOAD", payload);
       const computedDedupe = payload.dedupeKey ?? dedupeKeyFor(payload);
       const alert: Alert = {
         id: payload.id ?? genId(),
@@ -165,10 +163,6 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
       clearInterval(iv);
     };
   }, []);
-
-  useEffect(() => {
-    DEBUG && console.log("[Alerts] STATE", state.list);
-  }, [state.list]);
 
   const value = useMemo(
     () => ({

@@ -16,6 +16,7 @@ import { useSwap } from "../hooks/useSwap";
 import { usePairData } from "../hooks/usePairData";
 import { computePriceImpactPct } from "../hooks/usePriceImpact";
 import { useGasEstimate } from "../hooks/useGasEstimate";
+import { useTokenMeta } from "../../../hooks/useTokenMeta";
 import styles from "@ui/styles/Swap.module.css";
 import TokenField from "./TokenField";
 import FlipButton from "./FlipButton";
@@ -167,7 +168,6 @@ export default function SwapForm() {
     if (!pc) throw new Error("no public client");
     const amtIn = parseUnits(normalizeAmountStr(amtStr), getMeta(tin).decimals);
     const paths = buildPaths(tin, tout);
-
     const calls = paths.map(async (path) => {
       const amounts = (await pc.readContract({
         address: addresses.UniswapV2Router02 as Address,
@@ -186,6 +186,13 @@ export default function SwapForm() {
   
   const quoteSeq = useRef(0);
   useEffect(() => {
+
+    if (!tokenIn || !tokenOut) {
+      setAmountOut("");
+      setBestPath(null);
+      setLastOutBn(null);
+      return;
+    }
     const amtNorm = normalizeAmountStr(amountIn);
     if (!amtNorm || Number(amtNorm) <= 0) {
       setAmountOut("");
@@ -200,7 +207,7 @@ export default function SwapForm() {
         const pHook = (async () => {
           const qd = await quoteDetails(
             tokenIn, 
-            tokenOut ?? "0x0000000000000000000000000000000000000000", 
+            tokenOut, 
             amtNorm
           );
           if (!qd) throw new Error("hook-no-route");
@@ -213,7 +220,7 @@ export default function SwapForm() {
 
         const pFast = fastRouterQuote(
           tokenIn,
-          tokenOut ?? "0x0000000000000000000000000000000000000000",
+          tokenOut,
           amtNorm
         );
 
@@ -236,18 +243,17 @@ export default function SwapForm() {
   }, [tokenIn, tokenOut, amountIn, quoteDetails]); 
 
   // Pair data 
+  const pairReq = useRef(0);
   useEffect(() => {
-    let alive = true;
+    if (!tokenIn || !tokenOut) { setPairData(null); return; }
+    const id = ++pairReq.current;
     (async () => {
-      const pd = await fetchPair(tokenIn, tokenOut ?? "0x0000000000000000000000000000000000000000");
-      if (alive) {
-        setPairData(pd);
-        if (!pd) console.warn("[pairData] no LP for", tokenIn, tokenOut);
-      }
+      const pd = await fetchPair(tokenIn, tokenOut);
+      if (id !== pairReq.current) return; // anti-race
+      setPairData(pd);
+      if (!pd) console.warn("[pairData] no LP for", tokenIn, tokenOut);
     })();
-    return () => {
-      alive = false;
-    };
+    return () => { /* rien, on s'appuie sur id */ };
   }, [tokenIn, tokenOut, fetchPair]);
 
   // Estimation réseau
@@ -299,22 +305,37 @@ export default function SwapForm() {
   ]);
 
   // Détails
-  const ti = getMeta(tokenIn);
-  const to = tokenOut ? getMeta(tokenOut) : undefined;
+  const { meta: ti } = useTokenMeta(tokenIn);
+  const { meta: to } = useTokenMeta(tokenOut);
   const priceText =
-    Number(amountIn) > 0 && Number(amountOut) > 0
-      ? `1 ${ti.symbol} ≈ ${(Number(amountOut) / Number(amountIn)).toFixed(
-          6
-        )} ${to?.symbol}`
+    Number(amountIn) > 0 && Number(amountOut) > 0 && ti && to
+      ? `1 ${ti.symbol} ≈ ${(Number(amountOut) / Number(amountIn)).toFixed(6)} ${to.symbol}`
       : undefined;
 
-  const priceImpact = computePriceImpactPct(
+  const priceImpact = useMemo(() => {
+    return computePriceImpactPct(
+      tokenIn,
+      tokenOut ?? "0x0000000000000000000000000000000000000000",
+      amountIn,
+      amountOut,
+      pairData
+    );
+    // deps: tout ce qui influence l'impact
+  }, [
     tokenIn,
-    tokenOut ?? "0x0000000000000000000000000000000000000000",
+    tokenOut,
     amountIn,
     amountOut,
-    pairData
-  ); 
+    pairData?.pair,
+    pairData?.token0,
+    pairData?.token1,
+    pairData?.reserve0,
+    pairData?.reserve1,
+    (pairData as any)?.decimals0,
+    (pairData as any)?.decimals1,
+    bestPath?.join(">"),
+    lastOutBn?.toString(),
+  ]);
 
   async function onApproveAndSwap() {
     if (!address) return;
@@ -381,6 +402,15 @@ export default function SwapForm() {
     }
   };
 
+  useEffect(() => {
+    // on change de paire → on invalide la quote et l'impact courant
+    setAmountOut("");
+    setBestPath(null);
+    setLastOutBn(null);
+    setPairData(null);
+  }, [tokenIn, tokenOut]);
+
+
   return (
     <div className={styles.inputSwapBody}>
       <div className={styles.inputSwapContainer}>
@@ -417,7 +447,7 @@ export default function SwapForm() {
 
         <TokenField
           label="To"
-          token={tokenOut ?? "0x0000000000000000000000000000000000000000"}
+          token={tokenOut}
           onTokenChange={setTokenOutSafe}
           amount={amountOut}
           readOnly
