@@ -20,25 +20,31 @@ function toDynamicEvmNetwork() {
     rpcUrls: INTUITION.rpcUrls.default.http.slice(),
     blockExplorerUrls: [INTUITION.blockExplorers?.default?.url].filter(Boolean) as string[],
     nativeCurrency: INTUITION.nativeCurrency,
-    testnet: true, 
-    iconUrls: [], 
+    testnet: true,
+    iconUrls: [],
   }
 }
 
 export function RootProviders({ children }: PropsWithChildren) {
+  // Prefer env var, fallback to hard-coded id
+  const envId = (import.meta.env.VITE_DYNAMIC_ENV_ID as string | undefined) ?? "78601171-b1f9-42d1-b651-b76f97becab7"
+
+  if (!envId) {
+    console.error("Missing Dynamic environmentId")
+    return <div style={{ padding: 16 }}>Wallet connect disabled: missing Dynamic environmentId.</div>
+  }
+
   return (
     <DynamicContextProvider
       settings={{
-        environmentId: import.meta.env.VITE_DYNAMIC_ENVIRONMENT_ID,
+        environmentId: envId,
         walletConnectors: [EthereumWalletConnectors],
         overrides: { evmNetworks: [toDynamicEvmNetwork()] },
       }}
     >
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
-          <DynamicWagmiConnector>
-            {children}
-          </DynamicWagmiConnector>
+          <DynamicWagmiConnector>{children}</DynamicWagmiConnector>
         </QueryClientProvider>
       </WagmiProvider>
     </DynamicContextProvider>
