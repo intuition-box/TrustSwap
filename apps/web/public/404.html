@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+    <!-- SPA fallback for GitHub Pages using a custom domain at root -->
+    <script>
+      // Credits: https://github.com/rafgraph/spa-github-pages
+      (function() {
+        var l = window.location;
+        var segmentCount = 0; // custom domain served at root → keep 0
+        var redirect = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+          l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/?/' +
+          l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
+          (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+          l.hash;
+        l.replace(redirect);
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
