@@ -6,7 +6,8 @@ import { useAccount, usePublicClient } from "wagmi";
 import { erc20Abi, formatUnits, parseUnits } from "viem";
 import styles from "../../pools.module.css";
 
-const LP_DECIMALS = 18; // Uniswap V2 LP tokens sont en 18 décimales
+const LP_DECIMALS = 18;   // LP tokens = 18
+const UI_DECIMALS = 6;    // affichage/saisie UI
 
 export function StakeClaimCellContent({
   pool,
@@ -22,16 +23,15 @@ export function StakeClaimCellContent({
   const { stake, withdraw } = useStakeActions(stakingAddr);
 
   const stakedLpBn = pool.stakedBalance ?? 0n;
-
-
   const walletLpBn = useWalletLpFallback(pool.walletLpBalance, pool.pair);
 
+  // ⬇️ format “floor” (pas de Number/toFixed)
   const walletLpStr = useMemo(
-    () => safeFormat(walletLpBn, LP_DECIMALS),
+    () => formatUnitsFloor(walletLpBn, LP_DECIMALS, UI_DECIMALS),
     [walletLpBn]
   );
   const stakedLpStr = useMemo(
-    () => safeFormat(stakedLpBn, LP_DECIMALS),
+    () => formatUnitsFloor(stakedLpBn, LP_DECIMALS, UI_DECIMALS),
     [stakedLpBn]
   );
 
@@ -47,7 +47,8 @@ export function StakeClaimCellContent({
             className={styles.lpStake}
             onClick={(e) => {
               e.stopPropagation();
-              setStakeAmt(walletLpStr); // MAX
+              // MAX = string tronquée (≤ balance)
+              setStakeAmt(walletLpStr);
             }}
             style={{ cursor: "pointer" }}
             title="Click to use full balance"
@@ -60,9 +61,9 @@ export function StakeClaimCellContent({
           <input
             className={styles.amountInputStake}
             value={stakeAmt}
-            onChange={(e) => setStakeAmt(e.target.value)}
+            onChange={(e) => setStakeAmt(clampInputDecimals(e.target.value, UI_DECIMALS))}
             onClick={(e) => e.stopPropagation()}
-            placeholder="Amount to Stake"
+            placeholder={"0." + "0".repeat(UI_DECIMALS)}
             inputMode="decimal"
           />
           <button
@@ -70,7 +71,9 @@ export function StakeClaimCellContent({
             onClick={(e) => {
               e.stopPropagation();
               const v = parseUnitsSafe(stakeAmt, LP_DECIMALS);
-              if (v > 0n) stake?.(v);
+              // ⬇️ sécurité contract: ne jamais dépasser la balance
+              const send = v > walletLpBn ? walletLpBn : v;
+              if (send > 0n) stake?.(send);
               setStakeAmt("");
             }}
             disabled={!pool.staking}
@@ -103,9 +106,9 @@ export function StakeClaimCellContent({
           <input
             className={styles.amountInputUnstake}
             value={unstakeAmt}
-            onChange={(e) => setUnstakeAmt(e.target.value)}
+            onChange={(e) => setUnstakeAmt(clampInputDecimals(e.target.value, UI_DECIMALS))}
             onClick={(e) => e.stopPropagation()}
-            placeholder="Amount to Unstake"
+            placeholder={"0." + "0".repeat(UI_DECIMALS)}
             inputMode="decimal"
           />
           <button
@@ -113,7 +116,8 @@ export function StakeClaimCellContent({
             onClick={(e) => {
               e.stopPropagation();
               const v = parseUnitsSafe(unstakeAmt, LP_DECIMALS);
-              if (v > 0n) withdraw?.(v);
+              const send = v > stakedLpBn ? stakedLpBn : v;
+              if (send > 0n) withdraw?.(send);
               setUnstakeAmt("");
             }}
             disabled={!pool.staking}
@@ -136,12 +140,31 @@ export function StakeClaimCell(props: { pool: PoolItem; loading?: boolean }) {
 
 /* ---------------- helpers ---------------- */
 
-function safeFormat(v: bigint, decimals: number): string {
+// Tronque sans arrondir (floor) à uiDecimals — jamais au-dessus de v
+function formatUnitsFloor(v: bigint, decimals: number, uiDecimals: number): string {
   try {
-    return Number(formatUnits(v, decimals)).toFixed(6);
+    const s = formatUnits(v, decimals); // ex "123.456789..."
+    const dot = s.indexOf(".");
+    if (dot === -1) return s;
+    const int = s.slice(0, dot);
+    const frac = s.slice(dot + 1);
+    const fracCut = frac.slice(0, uiDecimals);
+    return fracCut.length ? `${int}.${fracCut}` : int;
   } catch {
-    return "0.000000";
+    return "0";
   }
+}
+
+// Limite le nombre de décimales saisies par l’utilisateur
+function clampInputDecimals(v: string, uiDecimals: number): string {
+  if (!v) return "";
+  // keep only first dot, digits only, no leading zeros issues
+  const cleaned = v.replace(/[^\d.]/g, "").replace(/^(\.)+/, "0.");
+  const parts = cleaned.split(".");
+  if (parts.length === 1) return parts[0].replace(/^0+(\d)/, "$1"); // no trailing zeros logic
+  const head = parts[0] || "0";
+  const tail = parts.slice(1).join(""); // if user typed multiple dots
+  return `${head}.${tail.slice(0, uiDecimals)}`;
 }
 
 function parseUnitsSafe(v: string, decimals: number): bigint {
@@ -152,7 +175,6 @@ function parseUnitsSafe(v: string, decimals: number): bigint {
     return 0n;
   }
 }
-
 
 function useWalletLpFallback(
   preloaded?: bigint,
@@ -168,7 +190,7 @@ function useWalletLpFallback(
 
   useEffect(() => {
     if (!pc || !address || !pairAddr) return;
-    if (preloaded != null) return; 
+    if (preloaded != null) return;
 
     let cancelled = false;
     (async () => {
