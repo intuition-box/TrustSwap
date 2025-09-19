@@ -27,7 +27,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'   # no built-in cache here
+          node-version: '20'   # keep your choice
+          cache: 'pnpm'        # enable built-in pnpm cache
 
       - name: Enable Corepack & pnpm
         run: |
@@ -40,20 +41,24 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('apps/web/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Install dependencies
-        working-directory: apps/web
+      # ⬇️ INSTALL AU ROOT (workspace), PAS dans apps/web
+      - name: Install dependencies (workspace root)
         run: pnpm install --frozen-lockfile
 
-      - name: Build with Vite
-        working-directory: apps/web
-        run: pnpm run build
+      # ⬇️ BUILDER LE SDK AVANT LE WEB
+      - name: Build SDK
+        run: pnpm -w --filter "@trustswap/sdk" run build
+
+      # ⬇️ BUILDER L’APP WEB
+      - name: Build with Vite (web)
+        run: pnpm -w --filter "./apps/web" run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
