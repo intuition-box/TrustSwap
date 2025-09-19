@@ -1,0 +1,7 @@
+{
+  "name": "TrustSwap Token List (Testnet)",
+  "tokens": [
+    { "chainId": 424242, "address": "0x7da120065e104C085fAc6f800d257a6296549cF3", "symbol": "TSWP", "decimals": 18, "name": "TrustSwap Token" },
+    { "chainId": 424242, "address": "0x51379Cc2C942EE2AE2fF0BD67a7b475F0be39Dcf", "symbol": "WTTRUST", "decimals": 18, "name": "Wrapped tTRUST" }
+  ]
+}

@@ -1,0 +1,356 @@
+.sectionPool {
+    height: 100vh;
+    padding-top: 9vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 65vw;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.halo {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    height: 60%;
+    width: 70%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      var(--secondary-color) 0%,
+      rgba(116, 232, 255, 0.1) 50%,
+      transparent 100%
+    );
+    transform: translate(-50%, -50%);
+    filter: blur(120px);
+    animation: moveHalo 7s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  @keyframes moveHalo {
+    0% {
+      transform: translate(-60%, -60%) rotate(0deg);
+    }
+    50% {
+      transform: translate(-50%, -50%) rotate(10deg);
+    }
+    100% {
+      transform: translate(-40%, -40%) rotate(20deg);
+    }
+  }
+  
+
+.containerPool {
+    width: 100%;
+    z-index: 100;
+}
+
+.containerHaloPool {
+
+}
+
+.filterPoolContainer {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 1vh;
+    width: 100%;
+    margin-bottom: 1vh;
+}
+
+.addLiquidityBtn {
+    background-color: var(--bg-white);
+    border: none;
+    height: 4.2vh;
+    padding-left: 1.2vh;
+    padding-right: 1.2vh;
+    border-radius: 1vh;
+    font-size: 1.6vh;
+    letter-spacing: -0.07vh;
+    cursor: pointer;
+}
+
+.addLiquidityBtn:active {
+    transform: scale(0.97);
+}
+
+.tableauContainer {
+  background-color: var(--bg-dark);
+  border: clamp(1px, 0.1vh, 2px) solid var(--border-tableau);
+  border-radius: 2.5vh;
+  min-height: 60vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+
+.tableauContainerLineTop {
+    content: "";
+    position: absolute;
+    top: -1px;
+    right: 50%;
+    transform: translateX(-50%);
+    height: 0.05vh;
+    min-height: 1px;
+    width: 30%;
+    background: linear-gradient(
+      90deg,
+      var(--border-grey),
+      var(--border-shadow-anim),
+      var(--border-grey)
+    );
+    box-shadow: 0 -2vh 6vh 2vh var(--shadow-grey);
+    z-index: 10;
+    animation: slideTopPool 8s ease-in-out infinite alternate;
+  }
+  
+  @keyframes slideTopPool {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
+  
+
+  .tableauContainerLineBottom {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 0.05vh;
+    min-height: 1px;
+    width: 30%;
+    background: linear-gradient(
+      90deg,
+      var(--border-grey),
+      var(--border-shadow-anim),
+      var(--border-grey)
+    );
+    z-index: 10;
+    animation: slideBottomPool 8s ease-in-out infinite alternate;
+  }
+  
+  @keyframes slideBottomPool {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
+
+.containerStat {
+  margin-right: auto;
+  margin-bottom: 5vh;
+}
+
+.statGlobalPool {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  height: 5vh;
+  margin-right: auto;
+}
+
+.lineStatGlobal {
+  height: 100%;
+  width: 0.1vh;
+  min-width: 1px;
+  background-color: var(--border-grey);
+}
+
+.statPool {
+  display: flex;
+  flex-direction: column;
+}
+
+.titleStat {
+  color: var(--stat-text);
+  letter-spacing: -0.05vh;
+  margin-bottom: 0.7vh;
+}
+
+.valueStat {
+  font-size: 2.5vh;
+  color: var(--text-color);
+}
+
+.filters {
+  background-color: var(--bg-filter);
+  height: 4.2vh;
+  width: auto;
+  display: flex;
+  align-items: center;
+  padding-left: 1.2vh;
+  padding-right: 0.3vh;
+  border-radius: 1vh;
+  border: 0.1vh solid var(--border-tableau);
+  cursor: pointer;
+}
+
+.filters:hover {
+  background-color: rgb(27, 27, 27);
+}
+
+
+
+
+.searchIconeFilters {
+  width: 2vh;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.searchInputFilters {
+  background-color: transparent;
+  border: none;
+  color: var(--text-color);
+  outline: none;
+}
+
+.stakeCell {
+  padding-top: 2vh;
+}
+
+.stakeRow {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  width: 92%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 1.5vh;
+}
+
+.labelStakePopup {
+  color: var(--text-color);
+  font-size: 2vh;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.lpStake {
+  font-size: 1.4vh;
+  color: var(--text-grey);
+}
+
+.lpStake:hover {
+  text-decoration: underline;
+}
+
+.containerStake, .containerUnstake {
+  margin-top: 1vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ligne {
+  margin-top: 3vh;
+  margin-bottom: 2vh;
+  background-color: var(--border-grey);
+  height: 0.1vh;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.amountInputUnstake, .amountInputStake {
+  background-color: var(--bg-btn);
+  border: 1px solid var(--border-btn);
+  box-shadow: inset 0 0 0.7vh 0.1vh var(--shadow-grey);
+  border-radius: 1.6vh;
+  color: var(--text-color);
+  font-weight: 500;
+  letter-spacing: -0.08vh;
+  font-size: 1.8vh;
+  padding-bottom: 1.4vh;
+  padding-top: 1.4vh;
+  padding-left: 1vh;
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  margin-right: 2vh;
+  outline: none;
+}
+
+.btnAction {
+  width: 10vh;
+  height: 4vh;
+  border: none;
+  border-radius: 1vh;
+  background-color: var(--bg-white);
+  color: var(--bg-dark);
+  cursor: pointer;
+  font-size: 1.7vh;
+  font-weight: 500;
+}
+
+.btnAction:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 700px) {
+  .tableauContainer {
+    max-width: 90vw;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: initial;
+  }
+}
+
+
+@media (max-width: 1200px) {
+  .sectionPool {
+    padding-top: 6vh;
+  }
+
+  .tableauContainer {
+    min-width: 90vw;
+  }
+
+
+  .tableauContainer::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filterPoolContainer {
+    max-width: 90vw;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .statGlobalPool {
+    gap: 1vh;
+    justify-content: start;
+    align-items: start;
+    font-size: 1.5vh;
+    margin-left: 1vh;
+  }
+
+  .titleStat {
+    color: var(--stat-text);
+    letter-spacing: -0.05vh;
+    margin-bottom: 0vh;
+    height: auto;
+  }
+  
+  .valueStat {
+    font-size: 2.5vh;
+    color: var(--text-color);
+  }
+}

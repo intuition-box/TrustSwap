@@ -1,0 +1,87 @@
+.sectionDetails {
+    width: 98%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0.7vh;
+    margin-bottom: 0.7vh;
+}
+
+.btnDetails {
+    background-color: transparent;
+    border: none;
+    color: var(--text-grey);
+    cursor: pointer;
+    font-size: 1.6vh;
+    letter-spacing: 0;
+    z-index: 1000;
+    transform-origin: center;
+    border-radius: 2vh;
+    margin-left: auto;
+}
+
+.detailsContainer {
+    display: flex;
+    flex-direction: column;
+    width: 92%;
+    margin-left: auto;
+    margin-right: auto;
+    gap: 0.8vh;
+    font-size: 1.8vh;
+    font-weight: 400;
+    margin-bottom: 0;
+    position: relative;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+}
+
+.labelDetails {
+    color: var(--text-grey);
+    letter-spacing: -0.07vh;
+}
+
+.labelDetailsSwapSlippage {
+    display: flex;
+    align-items: top;
+    justify-content: space-between;
+}
+
+.labelDetailsSwap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dataDetails {
+    color: var(--text-color);
+}
+
+.containerSlippage {
+    display: flex;
+    align-items: center;
+}
+
+.inputSlippage {
+    background-color: var(--bg-slippage);
+    border: none;
+    outline: none;
+    color: var(--text-color);
+    width: 5vh;
+    border-radius: 0.7vh;
+    padding: 0.3vh;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: 500;
+    text-align: right;
+    font-size: 1.9vh;
+    margin-right: 0.4vh;
+    border: clamp(1px, 0.1vh, 2px) solid var(--border-grey);
+}
+
+.percent {
+    color: var(--text-grey);
+}
