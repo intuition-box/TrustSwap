@@ -18,7 +18,8 @@ const WETH9_DEPOSIT_ABI = [
   { type: "function", name: "deposit", stateMutability: "payable", inputs: [], outputs: [] },
 ] as const satisfies Abi;
 
-const ROUTER_ABI = [
+// --- ABIs -------------------------------------------------------------------
+const ROUTER_ABI_LIQ = [
   {
     type: "function",
     name: "addLiquidity",
@@ -56,6 +57,40 @@ const ROUTER_ABI = [
       { name: "amountA", type: "uint256" },
       { name: "amountB", type: "uint256" },
     ],
+  },
+] as const satisfies Abi;
+
+const ROUTER_ABI_ETH = [
+  {
+    type: "function",
+    name: "removeLiquidityETH",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "token", type: "address" },
+      { name: "liquidity", type: "uint256" },
+      { name: "amountTokenMin", type: "uint256" },
+      { name: "amountETHMin", type: "uint256" },
+      { name: "to", type: "address" },
+      { name: "deadline", type: "uint256" },
+    ],
+    outputs: [
+      { name: "amountToken", type: "uint256" },
+      { name: "amountETH", type: "uint256" },
+    ],
+  },
+  {
+    type: "function",
+    name: "removeLiquidityETHSupportingFeeOnTransferTokens",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "token", type: "address" },
+      { name: "liquidity", type: "uint256" },
+      { name: "amountTokenMin", type: "uint256" },
+      { name: "amountETHMin", type: "uint256" },
+      { name: "to", type: "address" },
+      { name: "deadline", type: "uint256" },
+    ],
+    outputs: [{ name: "amountETH", type: "uint256" }],
   },
 ] as const satisfies Abi;
 
@@ -124,10 +159,10 @@ export function useLiquidityActions() {
   const chainId = useChainId();
   const alerts = useAlerts();
 
-  async function estimateOverrides(base: {
+  async function estimateOverrides<TAbi extends Abi, TFn extends string>(base: {
     address: Address;
-    abi: Abi;
-    functionName: string;
+    abi: TAbi;
+    functionName: TFn;
     args?: readonly unknown[];
     value?: bigint;
   }) {
@@ -268,7 +303,6 @@ export function useLiquidityActions() {
       throw new Error("Wallet not connected");
     }
 
-    // Toujours travailler en wrapped (WTTRUST)
     const A = toWrapped(tokenA);
     const B = toWrapped(tokenB);
     const owner = wallet.account!.address as Address;
@@ -287,10 +321,10 @@ export function useLiquidityActions() {
       await ensureAllowance(A, owner, ROUTER, amtADesired);
       await ensureAllowance(B, owner, ROUTER, amtBDesired);
 
-      // Appel Router
+      // Appel Router (ABI LIQ)
       const base = {
         address: ROUTER,
-        abi: ROUTER_ABI,
+        abi: ROUTER_ABI_LIQ,
         functionName: "addLiquidity",
         args: [A, B, amtADesired, amtBDesired, amtAMin, amtBMin, to, BigInt(deadlineSec)],
       } as const;
@@ -329,7 +363,6 @@ export function useLiquidityActions() {
         retry: async () => {
           await addLiquidity(tokenA, tokenB, amtADesired, amtBDesired, amtAMin, amtBMin, to, deadlineSec);
         },
-        dedupeKey: `addliqErr:${tokenA}:${tokenB}:${String(amtADesired)}:${String(amtBDesired)}`,
       });
       throw e;
     }
@@ -351,6 +384,7 @@ export function useLiquidityActions() {
     const owner = wallet.account!.address as Address;
 
     try {
+      // On travaille toujours en wrapped pour trouver la pair & allowances
       const A = toWrapped(tokenA);
       const B = toWrapped(tokenB);
 
@@ -384,14 +418,37 @@ export function useLiquidityActions() {
       const liq = liquidity > lpBalance ? lpBalance : liquidity;
       await ensureAllowance(pair, owner, ROUTER, liq);
 
-      const base = {
-        address: ROUTER,
-        abi: ROUTER_ABI,
-        functionName: "removeLiquidity",
-        args: [A, B, liq, amtAMin, amtBMin, to, BigInt(deadlineSec)],
-      } as const;
-      const overrides = await estimateOverrides(base);
-      const hash = await wallet!.writeContract({ ...base, ...overrides });
+      const isA_W = A.toLowerCase() === WNATIVE_ADDRESS.toLowerCase();
+      const isB_W = B.toLowerCase() === WNATIVE_ADDRESS.toLowerCase();
+
+      let hash: `0x${string}`;
+
+      if (isA_W || isB_W) {
+        const token = isA_W ? B : A;
+        const amountTokenMin = isA_W ? amtBMin : amtAMin;
+        const amountETHMin   = isA_W ? amtAMin : amtBMin;
+
+        const baseEth = {
+          address: ROUTER,
+          abi: ROUTER_ABI_ETH,
+          functionName: "removeLiquidityETH",
+          args: [token, liq, amountTokenMin, amountETHMin, to, BigInt(deadlineSec)],
+        } as const;
+
+        const overrides = await estimateOverrides(baseEth);
+        hash = await wallet!.writeContract({ ...baseEth, ...overrides });
+      } else {
+        // ERC20 ↔ ERC20
+        const baseErc20 = {
+          address: ROUTER,
+          abi: ROUTER_ABI_LIQ,
+          functionName: "removeLiquidity",
+          args: [A, B, liq, amtAMin, amtBMin, to, BigInt(deadlineSec)],
+        } as const;
+
+        const overrides = await estimateOverrides(baseErc20);
+        hash = await wallet!.writeContract({ ...baseErc20, ...overrides });
+      }
 
       alerts.push({
         kind: "tx:pending",
@@ -425,7 +482,6 @@ export function useLiquidityActions() {
         retry: async () => {
           await removeLiquidity(tokenA, tokenB, liquidity, amtAMin, amtBMin, to, deadlineSec);
         },
-        dedupeKey: `remligErr:${tokenA}:${tokenB}:${String(liquidity)}`,
       });
       throw e;
     }
