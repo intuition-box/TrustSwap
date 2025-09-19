@@ -27,45 +27,33 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'pnpm'
+          node-version: '20'   # no built-in cache here
 
-      # Install pnpm (no Corepack required)
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-
-      - name: Show versions
+      - name: Enable Corepack & pnpm
         run: |
-          node -v
-          pnpm -v
+          corepack enable
+          corepack prepare pnpm@9 --activate
+          pnpm --version
+          pnpm config set store-dir ~/.pnpm-store
 
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('apps/web/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-
+            ${{ runner.os }}-pnpm-store-
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      # Install deps at workspace root so pnpm links packages/* and apps/*
-      - name: Install dependencies (workspace)
-        run: |
-          pnpm config set store-dir ~/.pnpm-store
-          pnpm install --frozen-lockfile
+      - name: Install dependencies
+        working-directory: apps/web
+        run: pnpm install --frozen-lockfile
 
-      # Build SDK first so it's available for web
-      - name: Build SDK
-        run: pnpm -w --filter "@trustswap/sdk" build
-
-      # Build the web app (vite)
-      - name: Build web
-        run: pnpm -w --filter "./apps/web" run build
+      - name: Build with Vite
+        working-directory: apps/web
+        run: pnpm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
