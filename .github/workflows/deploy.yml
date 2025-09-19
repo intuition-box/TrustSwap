@@ -28,7 +28,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'   # keep your choice
-          cache: 'pnpm'        # enable built-in pnpm cache
 
       - name: Enable Corepack & pnpm
         run: |
@@ -48,15 +47,12 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      # ⬇️ INSTALL AU ROOT (workspace), PAS dans apps/web
       - name: Install dependencies (workspace root)
         run: pnpm install --frozen-lockfile
 
-      # ⬇️ BUILDER LE SDK AVANT LE WEB
       - name: Build SDK
         run: pnpm -w --filter "@trustswap/sdk" run build
 
-      # ⬇️ BUILDER L’APP WEB
       - name: Build with Vite (web)
         run: pnpm -w --filter "./apps/web" run build
 
