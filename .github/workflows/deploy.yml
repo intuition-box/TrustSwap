@@ -18,6 +18,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CI: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,36 +30,30 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
-      - name: Enable Corepack (for pnpm)
-        run: |
-          corepack enable
-          corepack prepare pnpm@9 --activate
-          pnpm --version
-
-      - name: Install deps (root, workspace)
-        run: pnpm install --frozen-lockfile
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          version: 9
+          run_install: false
+
+      - name: Show versions
+        run: |
+          node -v
+          pnpm -v
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      # IMPORTANT: install at repo root so workspace links are created
-      - name: Install workspace deps
+      # Install deps at repo root so workspace links are created
+      - name: Install deps (workspace)
         run: pnpm install --frozen-lockfile
 
-      # Build local SDK first so apps/web can import @trustswap/sdk
+      # Build local SDK first so apps/web can import it
       - name: Build SDK
         run: pnpm -w --filter "@trustswap/sdk" build
 
-      # Build the web app
-      - name: Build web (Vite)
+      # Build the web app (vite)
+      - name: Build web
         run: pnpm -w --filter "./apps/web" run build
 
       - name: Upload artifact
