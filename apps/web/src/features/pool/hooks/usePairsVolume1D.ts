@@ -88,23 +88,30 @@ export function usePairsVolume1D(items: PoolItem[]) {
             const a0Addr = p.token0.address.toLowerCase();
             const a1Addr = p.token1.address.toLowerCase();
 
+            // un seul côté par token
+            const traded0 = a0i + a0o;
+            const traded1 = a1i + a1o;
+
             let tradeWT = 0;
             const wIs0 = a0Addr === w ? true : a1Addr === w ? false : undefined;
 
             if (wIs0 !== undefined) {
-              // Paire avec WNATIVE → montant côté WNATIVE
-              const wt = wIs0 ? (a0i + a0o) : (a1i + a1o);
-              // WNATIVE est 18 décimales en général; sinon adapter via token*.decimals
-              const wDecimals =
-                wIs0 ? p.token0.decimals : p.token1.decimals;
-              tradeWT = Number(formatUnits(wt, wDecimals));
+              // Paire avec WNATIVE → ne prendre QUE le côté WNATIVE
+              const wDec = wIs0 ? p.token0.decimals : p.token1.decimals;
+              const wAmt = wIs0 ? traded0 : traded1;
+              tradeWT = Number(formatUnits(wAmt, wDec));
             } else {
-              // Paire sans WNATIVE → conversion via prix spot
+              // Paire sans WNATIVE → valoriser UN seul côté (celui non-nul) via prix spot
               const p0 = prices[a0Addr] ?? 0;
               const p1 = prices[a1Addr] ?? 0;
-              const v0 = p0 ? Number(formatUnits(a0i + a0o, p.token0.decimals)) * p0 : 0;
-              const v1 = p1 ? Number(formatUnits(a1i + a1o, p.token1.decimals)) * p1 : 0;
-              tradeWT = (Number.isFinite(v0) ? v0 : 0) + (Number.isFinite(v1) ? v1 : 0);
+
+              if (traded0 > 0n && p0 > 0) {
+                tradeWT = Number(formatUnits(traded0, p.token0.decimals)) * p0;
+              } else if (traded1 > 0n && p1 > 0) {
+                tradeWT = Number(formatUnits(traded1, p.token1.decimals)) * p1;
+              } else {
+                tradeWT = 0;
+              }
             }
 
             if (!Number.isFinite(tradeWT)) tradeWT = 0;
