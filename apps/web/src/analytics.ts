@@ -7,10 +7,10 @@ declare global {
   }
 }
 
-// Debounce last route
+// Prevent duplicate for same route
 let lastPathname: string | null = null;
 
-// Wait for Umami to load
+// Wait for Umami script
 function whenUmamiReady(cb: () => void, tries = 20) {
   if (typeof window !== "undefined" && window.umami) return cb();
   if (tries <= 0) return;
@@ -25,10 +25,8 @@ export function trackPageView(pathname: string) {
 
   whenUmamiReady(() => {
     if (window.umami?.trackView) {
-      // Official pageview -> shows in "Pageviews"
       window.umami.trackView(pathname, document.referrer || null, WEBSITE_ID);
     } else if (window.umami?.track) {
-      // Fallback as custom event (visible under "Events")
       window.umami.track("pageview", { url: pathname, website: WEBSITE_ID });
     }
   });
