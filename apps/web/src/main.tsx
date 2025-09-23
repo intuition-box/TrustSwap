@@ -6,13 +6,14 @@ import { RootProviders } from "./lib/dynamic"
 import { LiveRefetchProvider } from "./live/LiveRefetchProvider";
 import { AlertsProvider, AlertToaster, AlertModalHost } from "./features/alerts/Alerts";
 import styles from "../../web/src/styles/Layout.module.css"
-
+import PageViewTracker from "./utils/umamiPageViewTracker";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <AlertsProvider>
       <RootProviders>
         <BrowserRouter>
+          <PageViewTracker />
           <LiveRefetchProvider>
             <div className={styles.containerBody}>
               <div className={styles.halo}></div>

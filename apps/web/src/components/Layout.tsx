@@ -2,7 +2,6 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import styles from "../styles/Layout.module.css";
 import { ConnectButton } from "./ConnectButton"
-import { trackPageView } from "../analytics";
 
 export default function Layout() {
   const location = useLocation();
@@ -17,10 +16,6 @@ export default function Layout() {
       const navRect = activeEl.parentElement!.getBoundingClientRect();
       setBgStyle({ width: rect.width, left: rect.left - navRect.left });
     }
-  }, [location]);
-
-  useEffect(() => {
-    trackPageView(location.pathname);
   }, [location]);
 
   return (
