@@ -3,6 +3,9 @@ title: Introduction
 sidebar_position: 1
 ---
 
+![Docs Intro](./img/image-intro.png)
+
+
 
 Ceci est un litepaper sur la vision et la direction que nous souhaitons prendre. 
 
