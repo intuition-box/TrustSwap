@@ -1,25 +1,25 @@
-yangshun:
-  name: Yangshun Tay
-  title: Ex-Meta Staff Engineer, Co-founder GreatFrontEnd
+florian:
+  name: Florian Tribout
+  title: TrustSwap — Builder
   url: https://linkedin.com/in/yangshun
-  image_url: https://github.com/yangshun.png
+  image_url: https://github.com/Florian-THP.png
   page: true
   socials:
-    x: yangshunz
+    x: Dev_TrustSwap
     linkedin: yangshun
-    github: yangshun
+    github: Florian-THP
     newsletter: https://www.greatfrontend.com
 
-slorber:
-  name: Sébastien Lorber
-  title: Docusaurus maintainer
+james:
+  name: James Barthée
+  title: TrustSwap — Builder
   url: https://sebastienlorber.com
-  image_url: https://github.com/slorber.png
+  image_url: https://github.com/JamesDev292.png
   page:
     # customize the url of the author page at /blog/authors/<permalink>
-    permalink: '/all-sebastien-lorber-articles'
+    permalink: '/all-james-barthee-articles'
   socials:
-    x: sebastienlorber
-    linkedin: sebastienlorber
-    github: slorber
+    x: 0xJmsDev
+    linkedin: james-barthee-386a5913b
+    github: JamesDev292
     newsletter: https://thisweekinreact.com
