@@ -4,22 +4,24 @@ import Layout from "./components/Layout";
 import SwapPage from "./pages/SwapPage";
 import PoolsPage from "./pages/PoolsPage";
 import NotFound from "./pages/NotFound";
+import Landing from "./Landing"; // ta landing
 
 import './styles/App.css';
 
 export default function App() {
 
-
   return (
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<Navigate to="/swap" replace />} />
-          <Route path="/swap" element={<SwapPage />} />
-          <Route path="/pools" element={<PoolsPage />} />
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
+    <Routes>
+      {/* Routes avec layout (menu, nav, etc) */}
+      <Route element={<Layout />}>
+        <Route path="/" element={<Navigate to="/swap" replace />} />
+        <Route path="/swap" element={<SwapPage />} />
+        <Route path="/pools" element={<PoolsPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
 
+      {/* Landing isolée, sans layout */}
+      <Route path="/landing" element={<Landing />} />
+    </Routes>
   );
 }

@@ -22,6 +22,8 @@ export default function SwapPage() {
   };
 
   return (
+    <div className={styles.containerBody}>
+    <div className={styles.halo}></div>
     <section className={styles.containerSwap}>
       <div
         className={styles.swapCard}
@@ -34,5 +36,6 @@ export default function SwapPage() {
         <div className={styles.swapCardLineBottom}></div>
       </div>
     </section>
+    </div>
   );
 }

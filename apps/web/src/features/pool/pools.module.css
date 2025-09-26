@@ -1,3 +1,41 @@
+.containerBody {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  z-index: 10;
+
+  background-image:
+    radial-gradient(#000000 2px, transparent 2px),
+    linear-gradient(to bottom, #1e1e1e 0%, #080808 0%, #080808 100%);
+  background-size: 4px 4px, 100% 100%;
+  background-blend-mode: normal;
+}
+
+
+.halo {
+  content: "";
+  position: fixed;
+  top: -10%;
+  left: 50%;
+  height: 150%;
+  width: 25%;
+  transform: translateX(-50%) rotate(16deg);
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    #4ADAEA 30%,
+    #000000 60%,
+    #4ADAEA 90%,
+    #000000aa 100%
+  );
+  opacity: 0.8;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+
 .sectionPool {
     height: 100vh;
     padding-top: 9vh;
@@ -9,38 +47,6 @@
     margin-right: auto;
 }
 
-.halo {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    height: 60%;
-    width: 70%;
-    border-radius: 50%;
-    background: radial-gradient(
-      circle,
-      var(--secondary-color) 0%,
-      rgba(116, 232, 255, 0.1) 50%,
-      transparent 100%
-    );
-    transform: translate(-50%, -50%);
-    filter: blur(120px);
-    animation: moveHalo 7s ease-in-out infinite alternate;
-    pointer-events: none;
-    z-index: 0;
-  }
-  
-  @keyframes moveHalo {
-    0% {
-      transform: translate(-60%, -60%) rotate(0deg);
-    }
-    50% {
-      transform: translate(-50%, -50%) rotate(10deg);
-    }
-    100% {
-      transform: translate(-40%, -40%) rotate(20deg);
-    }
-  }
-  
 
 .containerPool {
     width: 100%;
