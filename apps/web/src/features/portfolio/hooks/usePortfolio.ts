@@ -58,6 +58,7 @@ export function usePortfolio() {
 
     async function run() {
       try {
+        if (!pc) return;
         setLoading(true);
         setError(null);
 
@@ -108,6 +109,7 @@ export function usePortfolio() {
           address: factory,
           abi: FACTORY_ABI,
           functionName: "allPairsLength",
+          args: [],
         })) as bigint;
 
         const MAX_SCAN = 1000n; // adjust to your DEX size
@@ -127,7 +129,9 @@ export function usePortfolio() {
 
         if (pairAddresses.length === 0) {
           if (!cancelled) {
-            setHoldings(nonZero.sort((a, b) => Number(b.balance - a.balance)));
+            setHoldings(
+              nonZero.sort((a, b) => (a.balance === b.balance ? 0 : a.balance < b.balance ? 1 : -1))
+            );
             setPositions([]);
             setLoading(false);
           }
@@ -189,7 +193,12 @@ export function usePortfolio() {
           const totalSupply = tsRes[i].result as bigint;
           const token0Addr = t0Res[i].result as Address;
           const token1Addr = t1Res[i].result as Address;
-          const { _reserve0, _reserve1 } = rsvRes[i].result as any;
+
+          // Parse reserves as tuple: [reserve0, reserve1, blockTimestampLast]
+          const [reserve0, reserve1] = rsvRes[i].result as readonly [bigint, bigint, number];
+
+          // Guard against zero totalSupply
+          if (totalSupply === 0n) continue;
 
           // Map WTTRUST -> native placeholder for UI, fetch meta safely
           const [t0Meta, t1Meta] = await Promise.all([
@@ -197,9 +206,12 @@ export function usePortfolio() {
             getOrFetchToken(isNative(token1Addr) ? NATIVE_PLACEHOLDER : token1Addr),
           ]);
 
-          const share = Number(lpBal) / Number(totalSupply);
-          const amt0 = (_reserve0 * lpBal) / totalSupply;
-          const amt1 = (_reserve1 * lpBal) / totalSupply;
+          // All-bigint math first
+          const amt0 = (reserve0 * lpBal) / totalSupply; // bigint
+          const amt1 = (reserve1 * lpBal) / totalSupply; // bigint
+
+          // sharePct as number with 2 decimals (basis points / 100)
+          const sharePct = Number((lpBal * 10000n) / totalSupply) / 100;
 
           out.push({
             pairAddress: pairAddresses[i],
@@ -207,7 +219,7 @@ export function usePortfolio() {
             token1: { address: t1Meta.address, symbol: t1Meta.symbol, decimals: t1Meta.decimals, name: t1Meta.name },
             lpBalance: lpBal,
             lpBalanceFormatted: formatUnits(lpBal, 18),
-            sharePct: Math.round(share * 10000) / 100,
+            sharePct,
             amount0: amt0,
             amount1: amt1,
             amount0Formatted: formatUnits(amt0, t0Meta.decimals),
@@ -216,7 +228,7 @@ export function usePortfolio() {
         }
 
         if (!cancelled) {
-          setHoldings(nonZero.sort((a, b) => Number(b.balance - a.balance)));
+          setHoldings(nonZero.sort((a, b) => (a.balance === b.balance ? 0 : a.balance < b.balance ? 1 : -1)));
           setPositions(out);
           setLoading(false);
         }
