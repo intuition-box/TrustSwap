@@ -65,6 +65,7 @@ export function usePortfolio() {
         // --- 1) Token holdings (native + ERC20 in TOKENLIST) ---
         // Native (placeholder in TOKENLIST has isNative=true)
         const nativeEntry = TOKENLIST.find(t => t.isNative);
+        if (!account) throw new Error("Account address is undefined");
         const nativeBal = await pc.getBalance({ address: account });
 
         const baseHoldings: TokenHolding[] = [
