@@ -1,0 +1,25 @@
+florian:
+  name: Florian Tribout
+  title: TrustSwap — Builder
+  url: https://linkedin.com/in/yangshun
+  image_url: https://github.com/Florian-THP.png
+  page: true
+  socials:
+    x: Dev_TrustSwap
+    linkedin: yangshun
+    github: Florian-THP
+    newsletter: https://www.greatfrontend.com
+
+james:
+  name: James Barthée
+  title: TrustSwap — Builder
+  url: https://sebastienlorber.com
+  image_url: https://github.com/JamesDev292.png
+  page:
+    # customize the url of the author page at /blog/authors/<permalink>
+    permalink: '/all-james-barthee-articles'
+  socials:
+    x: 0xJmsDev
+    linkedin: james-barthee-386a5913b
+    github: JamesDev292
+    newsletter: https://thisweekinreact.com
