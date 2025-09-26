@@ -7,7 +7,7 @@ sidebar_position: 1
 
 
 
-Ceci est un litepaper sur la vision et la direction que nous souhaitons prendre. 
+Ceci est un litepaper sur la vision et la direction que TrustSwap souhaite prendre. 
 
 L’écosystème actuel des DEX repose en grande partie sur des modèles inspirés d’Uniswap, dont la majorité se contentent de reproduire les mécanismes sans réelle innovation.
 
