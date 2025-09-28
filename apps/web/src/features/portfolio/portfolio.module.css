@@ -1,6 +1,6 @@
 .sectionPortfolio {
     height: 100vh;
-    padding-top: 9vh;
+    padding-top: 20vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -9,22 +9,32 @@
     margin-right: auto;
 }
 
+.connectPrompt {
+  padding: 1.5rem;
+  border-radius: 1rem;
+  text-align: center;
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
 .wrapper {
   display: grid;
   gap: 1.5rem;
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-filter);
+  border: 1px solid rgba(255, 255, 255, 0.26);
   border-radius: 1rem;
   padding: 1rem;
+  margin: 1.5rem;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(6px);
 }
 
 .title {
   font-size: 1.125rem;
+  min-width: 45vw;
   font-weight: 600;
   margin: 0 0 0.75rem 0;
 }
@@ -43,7 +53,7 @@
 }
 
 .row td {
-  padding: 0.6rem 0;
+  padding: 1rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   vertical-align: middle;
 }
@@ -77,4 +87,11 @@
   padding: 0.35rem 0;
   opacity: 0.75;
   font-size: 0.9rem;
+}
+
+.tokenIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
 }
