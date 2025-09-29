@@ -1,0 +1,25 @@
+{
+  "plugins": [
+    "prettier-plugin-tailwindcss",
+    "@ianvs/prettier-plugin-sort-imports"
+  ],
+  "semi": false,
+  "singleQuote": true,
+  "printWidth": 80,
+  "tabWidth": 2,
+  "importOrder": [
+    "^react$",
+    "",
+    "^@0xintuition/(.*)$",
+    "",
+    "<THIRD_PARTY_MODULES>",
+    "",
+    "^[./]"
+  ],
+  "importOrderParserPlugins": [
+    "classProperties",
+    "typescript",
+    "jsx",
+    "importAssertions"
+  ]
+}

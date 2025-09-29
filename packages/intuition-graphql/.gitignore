@@ -1,0 +1,31 @@
+node_modules/
+.vscode/
+out/
+/dist/
+tmp/
+
+# Turbo cache and build files
+.turbo/
+**/.turbo/
+**/turbo-*.log
+
+.nx/cache
+.nx/workspace-data
+packages/1ui/storybook-static
+
+.env*
+!.env.example
+.secrets
+act.sh
+
+# Verdaccio local registry files
+.verdaccio-db.json
+.npmrc
+
+# Build outputs
+/dist/
+**/dist/
+packages/*/dist/
+
+# System
+.DS_Store
