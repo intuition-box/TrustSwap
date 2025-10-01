@@ -1,44 +1,80 @@
 import styles from "../../web/src/styles/Landing.module.css";
 import  NavbarLanding  from "../src/landing/navbar";
 import SwapFeature from "../src/features/swap";
-import TrustIcone from "../src/assets/trust.png";
+import illustrationOne from "../src/assets/illustrationOne.png";
+
 
 function Landing() {
   return (
     <div className={styles.bodyLanding}>
-        <div className={styles.headerLanding}>
-          <div className={styles.priceTrust}>
-          <img src={TrustIcone} alt="trust" className={styles.logoLandingIcone} />
-          <span className={styles.nameTokenLanding}>TRUST</span>
-          <span className={styles.priceLandingToken}>
-            <span className={styles.dollarLanding}>$</span>
-            12.00
-          </span>
+    <div className={styles.headerContainer}>
+    <div className={styles.haloHeader}></div>
+    <div className={styles.containerTitleHeader}>
+      <div className={styles.titleContainer}>
+      <h1 className={styles.h1Header}>Built on Trust, Powered by Community</h1>
+      </div>
+      <div className={styles.swapContainerLanding}>
 
-          <span className={styles.var24hPositif}>+ 3.45%</span>
+      </div>
+    </div>
+    </div>
+    <div className={styles.mainContainer}>
+      <span className={styles.h2Main}>Where Trust Meets Community and Innovation.</span>
+      <span className={styles.sousTitleMain}>From safety to scalability, TrustSwap is built to grow with the DeFi community.</span>
+      <div className={styles.containerCardMain}>
+        <div className={styles.cardMain}>
+          <div className={styles.titleCard}>Secure Swaps</div>
+          <span className={styles.textCard}>Swap tokens instantly with audited contracts and full transparency.</span>
+        </div>
+        <div className={styles.cardMain}>
+        <div className={styles.titleCard}>Driven by Community</div>
+        <span className={styles.textCard}>Your participation secures and grows the ecosystem.</span>
+        </div>
+        <div className={styles.cardMain}>
+        <div className={styles.titleCard}>Multi-Project Hub</div>
+        <span className={styles.textCard}>One protocol, multiple integrations: Intuition, Colony, GBM.</span>
+        </div>
+      </div>
+     </div>
+     <div className={styles.mainContainer}>
+      <span className={styles.h3Main}>“One protocol, many integrations. A unified ecosystem built around TrustSwap.”</span>
+       <img
+              src={illustrationOne}
+              alt="search"
+              className={styles.illustrationOne}
+            />
+        
+        <div className={styles.titleContainerMAin}>INTUITION</div>
+        <div className={styles.containerCardMainIntuition}>
+          <div className={styles.lineCard}></div>
+          <div className={styles.cardA}>
+            <p className={styles.textCardMainTwo}>The first open and tokenized knowledge graph, separating identity, data, and algorithms from the application layer.</p>
           </div>
-          <div className={styles.priceTswp}>
-          <img src={TrustIcone} alt="trust" className={styles.logoLandingIcone} />
-          <span className={styles.nameTokenLanding}>TSWP</span>
-          <span className={styles.priceLandingToken}>
-            <span className={styles.dollarLanding}>$</span>
-            1.37
-          </span>
-
-          <span className={styles.var24hNegatif}>- 10.24%</span>
-          </div>
-        <NavbarLanding />
-          <div className={styles.titleTrustswapContainer}>
-            <h1 className={styles.titleTrustswap}>Secure Swaps<br></br>You Can Always Trust.</h1>
-            <div className={styles.containerSwapLanding}>
-            <SwapFeature />
-            </div>
+          <div className={styles.cardB}>
+          <p className={styles.textCardMainTwo}>A semantic data layer that turns raw information into trustable, interoperable knowledge for Web3.</p>
           </div>
         </div>
-
-        <div className={styles.mainLanding}>
-
+        <div className={styles.titleContainerMAinReverse}>COLONY</div>
+        <div className={styles.containerCardMainColony}>
+        <div className={styles.lineCardGrey}></div>
+        <div className={styles.cardA}>
+        <p className={styles.textCardMainTwo}>From decision-making to resource allocation, everything runs transparently and without middlemen.</p>
         </div>
+        <div className={styles.cardB}>
+        <p className={styles.textCardMainTwo}>A protocol that gives communities the tools to organize, fund, and grow together.</p>
+        </div>
+        </div>
+        <div className={styles.titleContainerMAin}>GBM</div>
+        <div className={styles.containerCardMainGbm}>
+        <div className={styles.lineCardGrey}></div>
+        <div className={styles.cardA}>
+        <p className={styles.textCardMainTwo}>An auction protocol where every bid is rewarded.</p>
+        </div>
+        <div className={styles.cardB}>
+        <p className={styles.textCardMainTwo}>A system where bidding drives both engagement and fairness</p>
+        </div>
+        </div>
+     </div>
     </div>
   );
 }
