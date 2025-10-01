@@ -1,2 +1,6 @@
-**/*.yaml
-**/*.template
+node_modules
+dist
+build
+coverage
+**/.next
+**/.turbo
