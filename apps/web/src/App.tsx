@@ -5,11 +5,11 @@ import SwapPage from "./pages/SwapPage";
 import PoolsPage from "./pages/PoolsPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import NotFound from "./pages/NotFound";
+import Landing from "./Landing"; // ta landing
 
 import './styles/App.css';
 
 export default function App() {
-
 
   return (
       <Routes>
@@ -18,10 +18,10 @@ export default function App() {
           <Route path="/swap" element={<SwapPage />} />
           <Route path="/pools" element={<PoolsPage />} />
           <Route path="/portfolio" element={<PortfolioPage />} />
-
           {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Route>
+        <Route path="/landing" element={<Landing />} />
       </Routes>
 
   );
