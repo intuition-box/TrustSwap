@@ -1,0 +1,97 @@
+.sectionPortfolio {
+    height: 100vh;
+    padding-top: 20vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 65vw;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.connectPrompt {
+  padding: 1.5rem;
+  border-radius: 1rem;
+  text-align: center;
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.wrapper {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--bg-filter);
+  border: clamp(1px, 0.1vh, 2px) solid var(--border-tableau);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin: 1.5rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+}
+
+.title {
+  font-size: 1.125rem;
+  min-width: 45vw;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.925rem;
+}
+
+.thead th {
+  text-align: left;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-weight: 600;
+}
+
+.row td {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: middle;
+}
+
+.tokenCell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+}
+
+.muted {
+  opacity: 0.7;
+}
+
+.number {
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  padding: 0.35rem 0;
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+.tokenIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
