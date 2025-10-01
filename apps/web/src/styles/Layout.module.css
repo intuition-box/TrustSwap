@@ -5,6 +5,8 @@
     left: 2vh;
     font-weight: 500;
     letter-spacing: -0.1vh;
+    color: var(--text-color);
+    text-decoration: none;
 }
 
 .navbar {

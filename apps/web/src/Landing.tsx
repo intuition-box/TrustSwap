@@ -1,5 +1,4 @@
 import styles from "../../web/src/styles/Landing.module.css";
-import  NavbarLanding  from "../src/landing/navbar";
 import SwapFeature from "../src/features/swap";
 import illustrationOne from "../src/assets/illustrationOne.png";
 
@@ -11,10 +10,15 @@ function Landing() {
     <div className={styles.haloHeader}></div>
     <div className={styles.containerTitleHeader}>
       <div className={styles.titleContainer}>
-      <h1 className={styles.h1Header}>Built on Trust, Powered by Community</h1>
+      <span className={styles.h1Header}>Built on Trust, Powered by Community</span>
+      <span className={styles.sousTitleHeader}>Discover our project and TrustSwap's vision.</span>
       </div>
       <div className={styles.swapContainerLanding}>
-
+        <div className={styles.SwapCardHeader}>
+          <div className={styles.swapLanding}>
+          <SwapFeature />
+          </div>
+        </div>
       </div>
     </div>
     </div>
