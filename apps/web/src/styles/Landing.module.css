@@ -9,7 +9,13 @@
 .headerContainer {
     min-height: 100vh;
     width: 100%;
+    max-width: 80vw;
     position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .haloHeader {
@@ -33,7 +39,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 50vh;
+    height: 100%;
   }
 
   .titleContainer, .swapContainerLanding {
@@ -45,16 +51,50 @@
     display: flex;
     flex-direction: column;
     justify-content: end;
+    height: 100%;
+    margin-top: auto;
+    margin-bottom: 20vh;
   }
 
 .h1Header {
     font-size: 6vh;
-    letter-spacing: -0.12vh;
+    letter-spacing: -0.15vh;
     font-weight: 400;
     font-weight: bold;
     background: linear-gradient(to left, #6E6E6E, #FFFFFF, #6E6E6E, #FFFFFF, #6E6E6E);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+.sousTitleHeader {
+  color: var(--text-grey);
+  font-size: 3vh;
+  letter-spacing: -0.05vh;
+}
+
+.SwapCardHeader {
+  width: 100%;
+  height: 80vh;
+  border-radius: 5vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  position: relative;
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-grey);
+}
+
+
+
+.swapLanding {
+  width: 80%;
+  position: relative;
+  border: 1px solid var(--border-grey);
+  border-radius: 3vh;
+  padding: 1vh;
 }
 
 .mainContainer {

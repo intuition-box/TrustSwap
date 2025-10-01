@@ -53,7 +53,13 @@ export default function Layout() {
     <div>
       <header>
         <div>
-          <div className={styles.logoPage}>TrustSwap</div>
+        <NavLink
+              to="/landing"
+              ref={swapRef}
+              className={styles.logoPage}
+            >
+              TrustSwap
+            </NavLink>
           <nav ref={navRef} className={styles.navbar}>
             <div className={styles.navbarLine}></div>
             <div
