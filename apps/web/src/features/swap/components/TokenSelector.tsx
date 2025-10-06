@@ -85,10 +85,11 @@ export default function TokenSelector({
     return Array.from(map.values());
   }, [baseTokens, imported]);
 
+
   const visibleTokens: Token[] = useMemo(() => {
     return mergedTokens.filter((t) => {
       if (!t) return false;
-      if (t.hidden) return false;
+      if (t.hidden) return false; 
 
       return !shouldHideToken(
         {
@@ -99,8 +100,8 @@ export default function TokenSelector({
           status: t.status as any,
         },
         {
-          includeTest: false,
-          allowImported: false,
+          includeTest: false,    
+          allowImported: false,   
           importedAddresses: importedSet,
         }
       );

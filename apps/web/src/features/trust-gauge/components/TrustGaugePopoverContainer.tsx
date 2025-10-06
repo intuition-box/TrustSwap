@@ -2,15 +2,16 @@
 import React, { useCallback, useState } from "react";
 import { TrustGaugePopover } from "./TrustGaugePopover";
 import { useCreateTokenAtom } from "../hooks/useCreateTokenAtom";
+import { useCreateListingTriple } from "../hooks/useCreateListingTriple";
 import { useAtomByToken } from "../hooks/useAtomByToken";
-import { CHAIN_ID } from "../config"; 
+import { CHAIN_ID } from "../config";
 
-type TrustGaugePopoverContainerProps = {
+interface TrustGaugePopoverContainerProps {
   tokenAddress: string;
   className?: string;
   icon?: React.ReactNode;
   onVote?: () => void;
-};
+}
 
 export function TrustGaugePopoverContainer({
   tokenAddress,
@@ -18,13 +19,11 @@ export function TrustGaugePopoverContainer({
   icon,
   onVote,
 }: TrustGaugePopoverContainerProps) {
-  const { createTokenAtom } = useCreateTokenAtom(); // uses config defaults (Intuition testnet)
+  const { createTokenAtom } = useCreateTokenAtom();
+  const { createListingTriple } = useCreateListingTriple();
 
-  const chainId =  CHAIN_ID; 
-  const { refetch: refetchAtom } = useAtomByToken({
-    chainId,
-    tokenAddress,
-  });
+  const chainId = CHAIN_ID;
+  const { data: subjectId, refetch: refetchAtom } = useAtomByToken({ chainId, tokenAddress });
 
   const [busy, setBusy] = useState(false);
 
@@ -33,14 +32,23 @@ export function TrustGaugePopoverContainer({
       if (busy) return;
       setBusy(true);
       try {
-        if (intent !== "atom") return;
-        await createTokenAtom({ tokenAddress: tokenAddress as `0x${string}` }); // no chainId passed
-        await refetchAtom();
+        if (intent === "atom") {
+          await createTokenAtom({ tokenAddress });
+          await refetchAtom?.();
+          return;
+        }
+        if (intent === "listing") {
+          if (!subjectId) throw new Error("No subjectId found. Create atom first.");
+          await createListingTriple({ subjectId });
+          // Listing hook will refetch inside the popover; ensure atom stays fresh too
+          await refetchAtom?.();
+          return;
+        }
       } finally {
         setBusy(false);
       }
     },
-    [busy, createTokenAtom, refetchAtom, tokenAddress]
+    [busy, createTokenAtom, createListingTriple, subjectId, refetchAtom, tokenAddress]
   );
 
   return (
