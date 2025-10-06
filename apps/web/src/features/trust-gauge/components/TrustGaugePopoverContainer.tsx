@@ -3,6 +3,7 @@ import React, { useCallback, useState } from "react";
 import { TrustGaugePopover } from "./TrustGaugePopover";
 import { useCreateTokenAtom } from "../hooks/useCreateTokenAtom";
 import { useAtomByToken } from "../hooks/useAtomByToken";
+import { CHAIN_ID } from "../config"; 
 
 type TrustGaugePopoverContainerProps = {
   tokenAddress: string;
@@ -19,7 +20,7 @@ export function TrustGaugePopoverContainer({
 }: TrustGaugePopoverContainerProps) {
   const { createTokenAtom } = useCreateTokenAtom(); // uses config defaults (Intuition testnet)
 
-  const chainId = 5; // Replace with the appropriate chainId for your environment (e.g., 5 for Goerli testnet)
+  const chainId =  CHAIN_ID; 
   const { refetch: refetchAtom } = useAtomByToken({
     chainId,
     tokenAddress,
@@ -33,7 +34,7 @@ export function TrustGaugePopoverContainer({
       setBusy(true);
       try {
         if (intent !== "atom") return;
-        await createTokenAtom({ tokenAddress }); // no chainId passed
+        await createTokenAtom({ tokenAddress: tokenAddress as `0x${string}` }); // no chainId passed
         await refetchAtom();
       } finally {
         setBusy(false);
@@ -44,7 +45,7 @@ export function TrustGaugePopoverContainer({
 
   return (
     <TrustGaugePopover
-      chainId={undefined}            // not needed anymore
+      chainId={chainId}
       tokenAddress={tokenAddress}
       className={className}
       icon={icon}

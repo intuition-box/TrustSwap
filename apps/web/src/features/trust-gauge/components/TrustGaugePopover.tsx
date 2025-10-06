@@ -16,7 +16,7 @@ type TrustGaugePopoverProps = {
   className?: string;
   icon?: React.ReactNode;
   onCreateSignal?: (params: { chainId: number; tokenAddress: string; intent?: "atom" | "listing" }) => Promise<void>;
-  onVote?: (params: { chainId: number; termId: bigint; side: "for" | "against" }) => Promise<void>;
+  onVote?: (params: { chainId: number; termId: string; side: "for" | "against" }) => Promise<void>;
 };
 
 export function TrustGaugePopover({
@@ -27,10 +27,11 @@ export function TrustGaugePopover({
   onCreateSignal,
   onVote,
 }: TrustGaugePopoverProps) {
-  const { data: subjectId, isLoading: isAtomLoading } = useAtomByToken({
+  const { data: subjectId, isLoading: isAtomLoading, refetch: refetchAtom } = useAtomByToken({
     chainId,
     tokenAddress,
   });
+  console.log("[TrustGaugePopover] inputs", { subjectId, isAtomLoading });
 
   // Normalize subjectId -> bigint > 0n only
   const subjectIdRaw = subjectId && typeof subjectId === "object" && "vaultId" in subjectId
@@ -47,14 +48,14 @@ export function TrustGaugePopover({
     }
   }, [subjectIdRaw]);
 
-  const hasAtom = !!subjectIdBn;
+  const hasAtom = !!subjectId;
 
   // Gate the listing fetch behind hasAtom (requires your hook to support `enabled`)
   const {
     data: listing,
     isLoading: isListingLoadingRaw,
     refetch: refetchListing,
-  } = useTrustedListing({ subjectId: subjectIdBn, enabled: hasAtom });
+  } = useTrustedListing({ subjectId, enabled: hasAtom });
 
   const isListingLoading = hasAtom && isListingLoadingRaw;
 
@@ -74,6 +75,7 @@ export function TrustGaugePopover({
   async function handleCreateSignal(intent) {
     if (!onCreateSignal) return;
     await onCreateSignal({ chainId, tokenAddress, intent });
+    await refetchAtom?.();
     await refetchListing?.();
   }
 
@@ -81,7 +83,7 @@ export function TrustGaugePopover({
     if (!onVote) return;
     const termId = side === "for" ? listing?.tripleId : listing?.counterTripleId;
     if (!termId) return;
-    await onVote({ chainId, termId, side });
+    await onVote({ chainId, termId: String(termId), side });
     await refetchListing?.();
   }
 

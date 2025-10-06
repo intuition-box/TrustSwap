@@ -11,63 +11,40 @@ export function useAtomByToken({
   chainId: number;
   tokenAddress: string;
 }) {
-  // Build the exact URI the indexer expects (must match creation)
   const uri = useMemo(() => toCAIP19(chainId, tokenAddress), [chainId, tokenAddress]);
 
-  const query = useGetAtomByCanonicalDataQuery(
-    { uri },
-    { staleTime: 60_000 }
+  const query = useGetAtomByCanonicalDataQuery({ uri }, { staleTime: 60_000 });
+
+  // Keep the term_id as a hex string for GraphQL compatibility
+  const termId = useMemo(
+    () => (query.data?.atoms?.[0]?.term_id as `0x${string}` | undefined) ?? null,
+    [query.data]
   );
 
-  // Normalize the first atom's term_id into a bigint (or null)
-  const subjectId = useMemo(() => {
-    const term = query.data?.atoms?.[0]?.term_id as string | undefined;
-    if (!term) return null;
-    try {
-      const bn = BigInt(term);
-      return bn > 0n ? bn : null;
-    } catch {
-      return null;
-    }
-  }, [query.data]);
-
-  // Debug logs
   useEffect(() => {
-    if (query.isFetching) {
-      console.debug("[useAtomByToken] fetching", { uri });
-    }
+    console.log("[useAtomByToken] mount/update", { chainId, tokenAddress, uri });
+  }, [chainId, tokenAddress, uri]);
+
+  useEffect(() => {
+    if (query.isFetching) console.log("[useAtomByToken] fetching", { uri });
   }, [query.isFetching, uri]);
 
   useEffect(() => {
     if (query.isSuccess) {
       const atoms = query.data?.atoms ?? [];
-      console.debug("[useAtomByToken] success", {
-        uri,
-        count: atoms.length,
-        first: atoms[0],
-        subjectId,
-      });
-      if (!atoms.length) {
-        console.debug("[useAtomByToken] no atom found for URI", { uri });
-      }
+      console.log("[useAtomByToken] success", { uri, count: atoms.length, first: atoms[0], termId });
     }
-  }, [query.isSuccess, query.data, uri, subjectId]);
+    if (query.isError) console.error("[useAtomByToken] error", { uri, error: query.error });
+  }, [query.isSuccess, query.isError, query.data, query.error, uri, termId]);
 
-  useEffect(() => {
-    if (query.isError) {
-      console.error("[useAtomByToken] error", { uri, error: query.error });
-    }
-  }, [query.isError, query.error, uri]);
-
-  // Return compat shape for your Popover: { data: subjectId, isLoading, refetch, ... }
   return {
-    data: subjectId,                   // <-- bigint | null (what your Popover expects)
+    data: termId,                 // <-- string | null
     isLoading: query.isFetching || query.isLoading,
     isFetching: query.isFetching,
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,
-    uri,                               // helpful for debugging upstream
-    raw: query.data,                   // optional: the raw GraphQL payload
+    uri,
+    raw: query.data,
   } as const;
 }

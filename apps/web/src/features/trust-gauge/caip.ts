@@ -15,6 +15,6 @@ return `eip155:${chainId}:${checksum}`;
 * (Optional) CAIP-19 builder for ERC-20 tokens if you decide to use it in the future.
 */
 export function toCAIP19(chainId: number, tokenAddress: string) {
-const checksum = getAddress(tokenAddress);
-return `eip155:${chainId}/erc20:${checksum}`;
+  const addr = `${tokenAddress}`.toLowerCase();
+  return `caip19:eip155:${Number(chainId)}/erc20:${addr}`;
 }
