@@ -4,6 +4,7 @@ import { TrustGaugeRing } from "./TrustGaugeRing";
 import styles from "../TrustGaugePopover.module.css";
 import { useAtomByToken } from "../hooks/useAtomByToken";
 import { useTrustedListing } from "../hooks/useTrustedListing";
+import { formatEther } from "viem";
 
 /**
  * If you're using TS, update the prop type to include "intent":
@@ -55,7 +56,14 @@ export function TrustGaugePopover({
     data: listing,
     isLoading: isListingLoadingRaw,
     refetch: refetchListing,
-  } = useTrustedListing({ subjectId, enabled: hasAtom });
+  } = useTrustedListing({ subjectId, enabled: hasAtom, debug: true });
+
+   console.log("[TrustGaugePopover] listing state", {
+   subjectId,
+   hasAtom,
+   isListingLoadingRaw,
+   listing,
+ });
 
   const isListingLoading = hasAtom && isListingLoadingRaw;
 
@@ -67,6 +75,16 @@ export function TrustGaugePopover({
     const million = 1000000n;
     const scaled = (forShares * million) / total;
     return Number(scaled) / 1000000;
+  }, [listing]);
+
+  const votesForLabel = useMemo(() => {
+    const v = listing?.forShares ?? 0n;
+    return Number(formatEther(v)).toLocaleString(undefined, { maximumFractionDigits: 4 });
+  }, [listing]);
+
+  const votesAgainstLabel = useMemo(() => {
+    const v = listing?.againstShares ?? 0n;
+    return Number(formatEther(v)).toLocaleString(undefined, { maximumFractionDigits: 4 });
   }, [listing]);
 
   const isLoading = isAtomLoading || isListingLoading;
@@ -134,9 +152,14 @@ export function TrustGaugePopover({
           </div>
         ) : (
           <div className={styles.popoverSection}>
+            <div className={styles.popoverTitle}>Listing votes</div>
+            <div className={styles.popoverText}>
+              <strong>FOR:</strong> {votesForLabel} tTRUST&nbsp;&nbsp;|&nbsp;&nbsp;
+              <strong>AGAINST:</strong> {votesAgainstLabel} tTRUST
+            </div>
             <button
               className={styles.successBtn}
-              disabled={listing?.userSide === "against"}
+              disabled={listing?.userSide === "against" || isLoading}
               onClick={(e) => {
                 e.stopPropagation();
                 handleVote("for");
@@ -146,7 +169,7 @@ export function TrustGaugePopover({
             </button>
             <button
               className={styles.dangerBtn}
-              disabled={listing?.userSide === "for"}
+              disabled={listing?.userSide === "for" || isLoading}
               onClick={(e) => {
                 e.stopPropagation();
                 handleVote("against");
