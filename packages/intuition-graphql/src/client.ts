@@ -1,13 +1,13 @@
 import { GraphQLClient } from 'graphql-request'
 
-import { API_URL_PROD } from './constants'
+import { API_URL_DEV } from './constants'
 
 export interface ClientConfig {
   headers: HeadersInit
   apiUrl?: string
 }
 
-const DEFAULT_API_URL = API_URL_PROD
+const DEFAULT_API_URL = API_URL_DEV
 
 let globalConfig: { apiUrl?: string } = {
   apiUrl: DEFAULT_API_URL,

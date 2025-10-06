@@ -36,6 +36,15 @@ importers:
 
   apps/web:
     dependencies:
+      '@0xintuition/graphql':
+        specifier: workspace:*
+        version: link:../../packages/intuition-graphql
+      '@0xintuition/protocol':
+        specifier: 2.0.0-alpha.2
+        version: 2.0.0-alpha.2(viem@2.37.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))
+      '@0xintuition/sdk':
+        specifier: 2.0.0-alpha.2
+        version: 2.0.0-alpha.2(encoding@0.1.13)(react@19.1.1)(viem@2.37.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))
       '@dynamic-labs/ethereum':
         specifier: ^4.30.3
         version: 4.30.3(@types/react@19.1.12)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(immer@10.0.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@19.1.1))(utf-8-validate@5.0.10)(viem@2.37.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
@@ -57,6 +66,9 @@ importers:
       '@trustswap/ui':
         specifier: workspace:^
         version: link:../../packages/ui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -83,7 +95,7 @@ importers:
         specifier: ^19.1.7
         version: 19.1.9(@types/react@19.1.12)
       '@vitejs/plugin-react':
-        specifier: ^5.0.0
+        specifier: ^5.0.2
         version: 5.0.2(vite@7.1.4(@types/node@24.3.0)(jiti@2.6.1)(tsx@4.20.5)(yaml@2.8.1))
       eslint:
         specifier: ^9.33.0
@@ -104,7 +116,7 @@ importers:
         specifier: ^8.39.1
         version: 8.42.0(eslint@9.34.0(jiti@2.6.1))(typescript@5.8.3)
       vite:
-        specifier: ^7.1.2
+        specifier: ^7.1.4
         version: 7.1.4(@types/node@24.3.0)(jiti@2.6.1)(tsx@4.20.5)(yaml@2.8.1)
 
   packages/contracts:
@@ -284,6 +296,19 @@ packages:
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
       typescript: ^5.0.0
+
+  '@0xintuition/graphql@2.0.0-alpha.2':
+    resolution: {integrity: sha512-BF6FDrI21GR2wpAKJYkfAuLphadsmqyydOwogBemJKmW5wAwt+/McBAxtmWzX/Ar0eMDxYoWvsOgduVbSYOVrA==}
+
+  '@0xintuition/protocol@2.0.0-alpha.2':
+    resolution: {integrity: sha512-ty+RUqYgAxZ6upPT/8Do8MNJGxkyxGJeZbjins6FwUs8y39dGm1DWiO79V/43MiC21fFBXagOUfvHl7+FNOiZg==}
+    peerDependencies:
+      viem: ^2.0.0
+
+  '@0xintuition/sdk@2.0.0-alpha.2':
+    resolution: {integrity: sha512-PU1XIuTYdHenVQ+dMJ8GsCpNVyRiAMKdDFiOcfAmmnWgEkKs/fzupDbZ0pqKIpRREoQ9zBs4N6OLtkBSH3yGmw==}
+    peerDependencies:
+      viem: ^2.0.0
 
   '@adraffy/ens-normalize@1.10.1':
     resolution: {integrity: sha512-96Z2IP3mYmF1Xg2cDm8f1gWGf/HUVedQ3FMifV4kG/PQ4yEP51xDtRAEfhVNt5f/uzpNkZHwWQuUcu6D6K+Ekw==}
@@ -3487,6 +3512,10 @@ packages:
 
   clsx@1.2.1:
     resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
+    engines: {node: '>=6'}
+
+  clsx@2.1.1:
+    resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
 
   color-convert@1.9.3:
@@ -6860,6 +6889,29 @@ snapshots:
       '@gql.tada/internal': 1.0.8(graphql@16.11.0)(typescript@5.9.2)
       graphql: 16.11.0
       typescript: 5.9.2
+
+  '@0xintuition/graphql@2.0.0-alpha.2(encoding@0.1.13)(react@19.1.1)':
+    dependencies:
+      '@graphql-codegen/typescript-document-nodes': 4.0.16(encoding@0.1.13)(graphql@16.11.0)
+      '@tanstack/react-query': 5.85.9(react@19.1.1)
+      graphql: 16.11.0
+      graphql-request: 7.2.0(graphql@16.11.0)
+    transitivePeerDependencies:
+      - encoding
+      - react
+
+  '@0xintuition/protocol@2.0.0-alpha.2(viem@2.37.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))':
+    dependencies:
+      viem: 2.37.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+
+  '@0xintuition/sdk@2.0.0-alpha.2(encoding@0.1.13)(react@19.1.1)(viem@2.37.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))':
+    dependencies:
+      '@0xintuition/graphql': 2.0.0-alpha.2(encoding@0.1.13)(react@19.1.1)
+      '@0xintuition/protocol': 2.0.0-alpha.2(viem@2.37.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))
+      viem: 2.37.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+    transitivePeerDependencies:
+      - encoding
+      - react
 
   '@adraffy/ens-normalize@1.10.1': {}
 
@@ -11902,6 +11954,8 @@ snapshots:
   clone@1.0.4: {}
 
   clsx@1.2.1: {}
+
+  clsx@2.1.1: {}
 
   color-convert@1.9.3:
     dependencies:

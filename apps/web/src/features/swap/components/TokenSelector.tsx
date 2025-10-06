@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import type { Address } from "viem";
 import { isAddress, getAddress, erc20Abi } from "viem";
 import { usePublicClient } from "wagmi";
+import { INTUITION } from "@trustswap/sdk"; // fallback chain id
 import { TOKENLIST } from "../../../lib/tokens";
 import styles from "@ui/styles/TokenSelector.module.css";
 import arrowIcone from "../../../assets/arrow-selector.png";
@@ -11,8 +12,9 @@ import { getTokenIcon } from "../../../lib/getTokenIcon";
 import { SearchBar } from "./SearchBar";
 import { ImportTokenRow } from "./ImportTokenRow";
 import { useImportedTokens } from "../hooks/useImportedTokens";
-
+import { TrustGaugePopoverContainer } from "../../trust-gauge/components/TrustGaugePopoverContainer";
 import { shouldHideToken } from "../../../lib/tokenFilters";
+import { MULTIVAULT_ADDRESS } from "../../trust-gauge/config";
 
 type Token = {
   address: Address;
@@ -41,7 +43,7 @@ export default function TokenSelector({
 }: {
   value?: Address | "";
   onChange: (a: Address) => void;
-  tokens?: Token[]; 
+  tokens?: Token[];
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -49,6 +51,9 @@ export default function TokenSelector({
 
   const ref = useRef<HTMLDivElement>(null);
   const pc = usePublicClient();
+
+  // Use chain id from wagmi public client (fallback to INTUITION id)
+  const chainId = (pc?.chain?.id as number | undefined) ?? INTUITION.id;
 
   // Base tokens (props > TOKENLIST)
   const baseTokens: Token[] = useMemo(
@@ -69,7 +74,7 @@ export default function TokenSelector({
     [imported]
   );
 
-  // Merge base + imported 
+  // Merge base + imported
   const mergedTokens: Token[] = useMemo(() => {
     const map = new Map<string, Token>();
     for (const t of baseTokens) map.set(norm(t.address), t);
@@ -80,11 +85,10 @@ export default function TokenSelector({
     return Array.from(map.values());
   }, [baseTokens, imported]);
 
-
   const visibleTokens: Token[] = useMemo(() => {
     return mergedTokens.filter((t) => {
       if (!t) return false;
-      if (t.hidden) return false; 
+      if (t.hidden) return false;
 
       return !shouldHideToken(
         {
@@ -95,21 +99,19 @@ export default function TokenSelector({
           status: t.status as any,
         },
         {
-          includeTest: false,    
-          allowImported: false,   
+          includeTest: false,
+          allowImported: false,
           importedAddresses: importedSet,
         }
       );
     });
   }, [mergedTokens, importedSet]);
 
-  
   const selectedToken = useMemo(
     () => (value ? visibleTokens.find((t) => eq(t.address, value)) ?? null : null),
     [visibleTokens, value]
   );
 
-  
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return visibleTokens;
@@ -121,7 +123,6 @@ export default function TokenSelector({
     });
   }, [visibleTokens, query]);
 
-
   const canShowImport = useMemo(() => {
     if (!query) return false;
     if (!isAddress(query as Address)) return false;
@@ -130,7 +131,6 @@ export default function TokenSelector({
     const exists = mergedTokens.some((t) => eq(t.address, candidate));
     if (exists || importing) return false;
 
-
     const blocked = shouldHideToken(
       { address: candidate, symbol: "", decimals: 18 },
       { includeTest: false, allowImported: false }
@@ -138,15 +138,13 @@ export default function TokenSelector({
     return !blocked;
   }, [query, mergedTokens, importing]);
 
-
   const onPick = (addr: Address) => {
     const t = visibleTokens.find((x) => eq(x.address, addr));
-    if (!t) return; 
+    if (!t) return;
     onChange(checksum(addr));
     setOpen(false);
     setQuery("");
   };
-
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -158,10 +156,8 @@ export default function TokenSelector({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
   async function resolveAndImport(addr: Address) {
     const ca = checksum(addr);
-
 
     const blocked = shouldHideToken(
       { address: ca, symbol: "", decimals: 18 },
@@ -186,7 +182,7 @@ export default function TokenSelector({
           if (typeof n === "string" && n) name = n;
           if (typeof d === "number") decimals = d;
         } catch {
-      
+          // Silently ignore read failures
         }
       }
 
@@ -244,17 +240,27 @@ export default function TokenSelector({
               return (
                 <div
                   key={t.address}
+                  className={`${styles.item} ${isSelected ? styles.selected : ""}`}
                   onMouseDown={(e) => {
+                    // Don't select the row if the click happened inside an interactive zone (popover)
+                    const target = e.target as HTMLElement;
+                    if (target.closest('[data-stop-row-select]')) {
+                      return; // let the popover/button handle it
+                    }
                     e.preventDefault();
                     onPick(checksum(t.address));
                   }}
-                  className={`${styles.item} ${isSelected ? styles.selected : ""}`}
                 >
-                  <img
-                    src={getTokenIcon(t.address)}
-                    alt={t.symbol}
-                    className={styles.tokenIcon}
-                  />
+
+                  {/* Wrap the popover so we can mark it as "do not trigger row select" */}
+                  <div data-stop-row-select>
+                    <TrustGaugePopoverContainer
+                      chainId={(pc?.chain?.id ?? 13579)}
+                      multivault={MULTIVAULT_ADDRESS}
+                      tokenAddress={t.address as `0x${string}`}
+                      icon={<img src={getTokenIcon(t.address)} alt={t.symbol} className={styles.tokenIcon} />}
+                    />
+                  </div>
 
                   <span className={styles.nameTokenDropdown}>
                     {t.name && <span className={styles.tokenName}>{t.name}</span>}
