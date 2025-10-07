@@ -22,6 +22,7 @@ import {
   TRUSTSWAP_VAULT_ID,
   DEFAULT_AMOUNTS,
 } from "../config";
+import { useTxAlerts, useAlerts } from "../../alerts/Alerts";
 
 // Minimal Intuition Testnet chain spec for viem fallbacks
 const INTUITION_RPC_HTTP = "https://testnet.rpc.intuition.systems/http";
@@ -40,6 +41,9 @@ export function useCreateListingTriple() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  const txAlerts = useTxAlerts();
+  const alerts = useAlerts();
 
   // best-effort public client
   const getPublicClient = useCallback(() => {
@@ -121,19 +125,39 @@ export function useCreateListingTriple() {
           }
         );
 
+        // Alerts: pending
+        txAlerts.onSubmit(txHash, /* explorerUrl */ undefined, CHAIN_ID);
+
+        // Wait receipt
+        const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+        if (receipt.status === "success") {
+          txAlerts.onSuccess(txHash, /* explorerUrl */ undefined, CHAIN_ID);
+        } else {
+          txAlerts.onError(txHash, "Transaction reverted", () => createListingTriple({ subjectId: s, stakeWei: amt }));
+        }
+
         if (import.meta.env.DEV) {
-          console.log("[useCreateListingTriple] sent", { subjectId: s, predicateId: p, objectId: o, amt, txHash });
+          console.debug("[useCreateListingTriple] sent", { subjectId: s, predicateId: p, objectId: o, amt, txHash });
         }
 
         return { txHash, subjectId: s, predicateId: p, objectId: o, stake: amt };
       } catch (e: any) {
+        const msg = String(e?.shortMessage || e?.message || e);
+
+        // Map explicit user cancellation
+        if (e?.code === 4001 || /user rejected|user denied|request rejected|cancel/i.test(msg)) {
+          alerts.warn("Transaction cancelled by user.");
+        } else {
+          txAlerts.onError(undefined, msg, () => createListingTriple({ subjectId, stakeWei }));
+        }
+
         setError(e);
         throw e;
       } finally {
         setLoading(false);
       }
     },
-    [getPublicClient, getWalletClient, isConnected, address, ensureOnIntuition]
+    [getPublicClient, getWalletClient, isConnected, address, ensureOnIntuition, txAlerts, alerts]
   );
 
   return { createListingTriple, loading, error };

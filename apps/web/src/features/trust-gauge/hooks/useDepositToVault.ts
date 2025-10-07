@@ -6,6 +6,7 @@ import type { Address } from "viem";
 import { isHex, pad, toHex } from "viem";
 import { deposit, MultiVaultAbi } from "@0xintuition/protocol";
 import { CHAIN_ID, DEFAULT_CURVE_ID, MULTIVAULT_ADDRESS } from "../config";
+import { useTxAlerts, useAlerts } from "../../alerts/Alerts";
 
 type DepositArgs = {
   termId: `0x${string}` | string | bigint; // hex, decimal string, or bigint
@@ -86,7 +87,7 @@ export async function getDefaultCurveId(publicClient: any, multivault: `0x${stri
   }
 }
 
-// Prefer curveId=2 (portal behavior) if it accepts a tiny deposit; else use on-chain default; else try 1, then 0.
+// Prefer curveId=2 (portal behavior) if it accepts a tiny deposit; else on-chain default; else 1, then 0.
 async function resolveCurveId(
   publicClient: any,
   multivault: `0x${string}`,
@@ -104,8 +105,8 @@ async function resolveCurveId(
         abi: mvWriteAbi,
         functionName: "deposit",
         account,
-        args: [account, termId32, cid, 0n],         // minShares=0 (portal behavior)
-        value: 1_000_000_000_000_000n,             // 0.001 tTRUST
+        args: [account, termId32, cid, 0n],  // minShares=0 (portal behavior)
+        value: 1_000_000_000_000_000n,      // 0.001 tTRUST
       });
       return cid;
     } catch {
@@ -128,6 +129,9 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
   const [findingMin, setFindingMin] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [curveIdDefault, setCurveIdDefault] = useState<bigint | null>(null);
+
+  const txAlerts = useTxAlerts();
+  const alerts = useAlerts(); // for non-tx warnings (e.g., user cancelled)
 
   // Fetch on-chain defaultCurveId once
   useEffect(() => {
@@ -223,7 +227,7 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
     [publicClient, isConnected, address, multivault, activeChainId, chainId, switchChainAsync, curveIdDefault]
   );
 
-  // Deposit a user-provided exact amount; default minShares=0 (portal behavior).
+  // Deposit a user-provided exact amount; default minShares=0 (portal behavior) + alerts integration.
   const depositExact = useCallback(
     async ({
       termId,
@@ -307,15 +311,50 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
           { args: [recv, termId32, usedCurveId, minShares], value: amountWei }
         );
 
+        // Alert: pending (broadcasted)
+        txAlerts.onSubmit(txHash, /* explorerUrl */ undefined, chainId);
+
+        // Wait for confirmation then alert accordingly
+        const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+        if (receipt.status === "success") {
+          txAlerts.onSuccess(txHash, /* explorerUrl */ undefined, chainId);
+        } else {
+          txAlerts.onError(txHash, "Transaction reverted");
+        }
+
         return { txHash };
       } catch (e: any) {
+        // Map common cancel/reject to a friendly warning toast
+        const msg = String(e?.shortMessage || e?.message || e);
+        if (e?.code === 4001 || /user rejected|user denied|request rejected/i.test(msg)) {
+          alerts.warn("Transaction cancelled by user.");
+        } else {
+          txAlerts.onError(undefined, msg, () => {
+            // retry callback with the same args if desired
+            // no-op by default
+          });
+        }
         setError(e);
         throw e;
       } finally {
         setLoading(false);
       }
     },
-    [publicClient, walletClient, isConnected, address, multivault, activeChainId, chainId, switchChainAsync, previewShares, getMinAcceptedDeposit, curveIdDefault]
+    [
+      publicClient,
+      walletClient,
+      isConnected,
+      address,
+      multivault,
+      activeChainId,
+      chainId,
+      switchChainAsync,
+      previewShares,
+      getMinAcceptedDeposit,
+      curveIdDefault,
+      txAlerts,
+      alerts,
+    ]
   );
 
   // Button "MIN": compute minimal accepted value (policy-only, minShares=0) and deposit it
