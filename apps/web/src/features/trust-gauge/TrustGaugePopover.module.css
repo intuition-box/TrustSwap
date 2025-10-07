@@ -31,20 +31,20 @@
 .popover {
   visibility: hidden;
   opacity: 0;
-  transition: opacity 150ms ease;
+  transition: opacity 150ms ease, transform 150ms ease;
   position: absolute;
   top: 100%;
   margin-top: 8px;
   left: 50%;
-  transform: translateX(0%);
+  transform: translateX(-50%) translateY(4px); /* center + subtle drop */
   z-index: 50;
-  width: 320px;
-  background: #fff;
-  color: #111827;
-  border: 1px solid #E5E7EB;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  padding: 12px;
+  width: auto;           /* let the card decide */
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
 /* Show on hover/focus */
@@ -52,6 +52,7 @@
 .wrap:focus-within .popover {
   visibility: visible;
   opacity: 1;
+  transform: translateX(0%) translateY(0);
 }
 
 /* Basic utility styles */
@@ -82,3 +83,200 @@
 
 .btnDanger { background: #EF4444; color: #fff; }
 .btnDanger:disabled { opacity: .5; cursor: not-allowed; }
+
+/* English-only comments - add to your module file */
+
+.popoverCard {
+  position: relative;
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  border-radius: 16px;
+  padding: 14px 14px 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  animation: popIn 160ms ease-out;
+}
+
+@keyframes popIn {
+  from { transform: translateY(4px) scale(0.98); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.popoverHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.popoverKicker {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+}
+
+.popoverTitle {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.popoverText {
+  font-size: 12px;
+  color: rgba(255,255,255,0.86);
+}
+
+.errorText {
+  margin-top: 10px;
+  color: #ff6b6b;
+}
+
+.divider {
+  height: 1px;
+  width: 100%;
+  margin: 10px 0 12px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.22),
+    transparent
+  );
+}
+
+.statRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.statPill {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+}
+
+.statFor {
+  box-shadow: inset 0 0 0 1px rgba(0, 220, 130, 0.25);
+  background: linear-gradient(180deg, rgba(0, 220, 130, 0.15), rgba(0,0,0,0.06));
+}
+
+.statAgainst {
+  box-shadow: inset 0 0 0 1px rgba(235, 87, 87, 0.28);
+  background: linear-gradient(180deg, rgba(235, 87, 87, 0.17), rgba(0,0,0,0.06));
+}
+
+.statLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.9);
+}
+
+.statValue {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
+}
+
+.inputRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.25);
+  padding: 8px 10px;
+  border-radius: 12px;
+  transition: border-color 160ms ease;
+}
+
+.inputRow:focus-within {
+  border-color: rgba(140, 180, 255, 0.6);
+}
+
+.inputPrefix {
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  user-select: none;
+}
+
+.inputControl {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 13px;
+}
+
+.btnRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btnGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,0.24);
+  background: rgba(255,255,255,0.10);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+/* Variant hooks to your existing tokens */
+.primaryBtn {
+  background: linear-gradient(180deg, rgba(52, 152, 219, 0.32), rgba(52, 152, 219, 0.12));
+  border-color: rgba(52, 152, 219, 0.4);
+}
+
+.successBtn {
+  background: linear-gradient(180deg, rgba(46, 204, 113, 0.32), rgba(46, 204, 113, 0.12));
+  border-color: rgba(46, 204, 113, 0.4);
+}
+
+.dangerBtn {
+  background: linear-gradient(180deg, rgba(231, 76, 60, 0.34), rgba(231, 76, 60, 0.12));
+  border-color: rgba(231, 76, 60, 0.42);
+}
+
+.secondaryBtn {
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+  border-color: rgba(255,255,255,0.18);
+}
+
+

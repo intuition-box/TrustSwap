@@ -8,7 +8,13 @@ import { useAtomByToken } from "../hooks/useAtomByToken";
 import { useDepositToVault } from "../hooks/useDepositToVault";
 import { CHAIN_ID } from "../config";
 
-export function TrustGaugePopoverContainer({ tokenAddress, className, icon }) {
+interface TrustGaugePopoverContainerProps {
+  tokenAddress: string;
+  className?: string;
+  icon?: React.ReactNode;
+}
+
+export function TrustGaugePopoverContainer({ tokenAddress, className, icon }: TrustGaugePopoverContainerProps) {
   const { createTokenAtom } = useCreateTokenAtom();
   const { createListingTriple } = useCreateListingTriple();
   const {
@@ -30,7 +36,7 @@ export function TrustGaugePopoverContainer({ tokenAddress, className, icon }) {
       setBusy(true);
       try {
         if (intent === "atom") {
-          await createTokenAtom({ tokenAddress: tokenAddress });
+          await createTokenAtom({ tokenAddress: tokenAddress as `0x${string}` });
           await refetchAtom?.();
           return;
         }
@@ -49,7 +55,7 @@ export function TrustGaugePopoverContainer({ tokenAddress, className, icon }) {
 
   // From popover: deposit a user-entered amount (wei) to termId
   const onDepositExact = useCallback(
-    async ({ termId, amountWei }) => {
+    async ({ termId, amountWei }: { termId: string; amountWei: string }) => {
       if (busy || voteLoading) return;
       setBusy(true);
       try {
@@ -63,7 +69,7 @@ export function TrustGaugePopoverContainer({ tokenAddress, className, icon }) {
 
   // From popover: deposit the minimum accepted amount to termId
   const onDepositMin = useCallback(
-    async ({ termId }) => {
+    async ({ termId }: { termId: string }) => {
       if (busy || voteLoading || findingMin) return;
       setBusy(true);
       try {

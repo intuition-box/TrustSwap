@@ -117,12 +117,21 @@ export function TrustGaugePopover({
 
   const votersLabel = (n?: number) => `${n ?? 0} ${n === 1 ? "voter" : "voters"}`;
 
+// English-only comments
   return (
     <div className={`${styles.wrap} ${className || ""}`}>
       <div className={styles.trigger}>
         <div className={styles.ringBox} style={{ width: 28, height: 28 }}>
-          <TrustGaugeRing ratioFor={ratioFor} size={28} />
-          <div className={styles.ringIcon}>{icon || null}</div>
+          <div className={styles.trigger}>
+            <TrustGaugeRing
+              forCount={listing?.voteFor ?? 0}
+              againstCount={listing?.voteAgainst ?? 0}
+              size={48}
+              ratioFor={ratioFor}
+              thickness={3}
+              icon={icon} // or icon={({ size }) => <YourIcon width={size} height={size} />}
+            />
+          </div>
         </div>
       </div>
 
@@ -134,57 +143,83 @@ export function TrustGaugePopover({
         data-stop-row-select
       >
         {!hasAtom ? (
-          <div className={styles.popoverSection}>
-            <div className={styles.popoverTitle}>Not verified</div>
-            <div className={styles.popoverText}>No atom found for this token.</div>
-            <button
-              className={styles.primaryBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCreateSignal("atom");
-              }}
-            >
-              Create signal
-            </button>
-          </div>
-        ) : !listing?.tripleId ? (
-          <div className={styles.popoverSection}>
-            <div className={styles.popoverTitle}>Not listed on TrustSwap</div>
-            <div className={styles.popoverText}>Create the listing triple to enable voting.</div>
-            <button
-              className={styles.primaryBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCreateSignal("listing");
-              }}
-            >
-              Create listing
-            </button>
-          </div>
-        ) : (
-          <div className={styles.popoverSection}>
-            <div className={styles.popoverTitle}>Listing votes</div>
-
-            <div className={styles.popoverText}>
-              <strong>FOR:</strong> &nbsp;{votersLabel(forVoters)}
-              &nbsp;&nbsp;|&nbsp;&nbsp;
-              <strong>AGAINST:</strong> &nbsp;{votersLabel(againstVoters)}
+          <div className={`${styles.popoverCard} ${styles.popoverSection}`}>
+            <div className={styles.popoverHeader}>
+              <div className={styles.popoverKicker}>Status</div>
+              <div className={styles.popoverTitle}>Not verified</div>
+              <div className={styles.popoverText}>No atom found for this token.</div>
             </div>
 
-            <div className={styles.popoverRow} style={{ marginTop: 8 }}>
+            <div className={styles.divider} />
+
+            <div className={styles.btnRow}>
+              <button
+                className={`${styles.btn} ${styles.primaryBtn}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCreateSignal("atom");
+                }}
+              >
+                Create signal
+              </button>
+            </div>
+          </div>
+        ) : !listing?.tripleId ? (
+          <div className={`${styles.popoverCard} ${styles.popoverSection}`}>
+            <div className={styles.popoverHeader}>
+              <div className={styles.popoverKicker}>Status</div>
+              <div className={styles.popoverTitle}>Not listed on TrustSwap</div>
+              <div className={styles.popoverText}>Create the listing triple to enable voting.</div>
+            </div>
+
+            <div className={styles.divider} />
+
+            <div className={styles.btnRow}>
+              <button
+                className={`${styles.btn} ${styles.primaryBtn}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCreateSignal("listing");
+                }}
+              >
+                Create listing
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className={`${styles.popoverCard} ${styles.popoverSection}`}>
+            <div className={styles.popoverHeader}>
+              <div className={styles.popoverTitle}>Listing votes</div>
+            </div>
+
+            <div className={styles.statRow}>
+              <div className={`${styles.statPill} ${styles.statFor}`}>
+                <span className={styles.statLabel}>FOR</span>
+                <span className={styles.statValue}>{votersLabel(forVoters)}</span>
+              </div>
+              <div className={`${styles.statPill} ${styles.statAgainst}`}>
+                <span className={styles.statLabel}>AGAINST</span>
+                <span className={styles.statValue}>{votersLabel(againstVoters)}</span>
+              </div>
+            </div>
+
+            <div className={styles.divider} />
+
+            <div className={styles.inputRow}>
+              <span className={styles.inputPrefix}>tTRUST</span>
               <input
                 type="text"
-                placeholder="Amount in tTRUST (e.g., 0.01)"
-                className={styles.input}
+                placeholder="Amount"
+                className={styles.inputControl}
                 value={amountStr}
                 onChange={(e) => setAmountStr(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
 
-            <div className={styles.popoverRow} style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <div className={styles.btnGrid}>
               <button
-                className={styles.successBtn}
+                className={`${styles.btn} ${styles.successBtn}`}
                 disabled={loading || !listing?.tripleId}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -194,7 +229,7 @@ export function TrustGaugePopover({
                 Vote FOR (amount)
               </button>
               <button
-                className={styles.secondaryBtn}
+                className={`${styles.btn} ${styles.secondaryBtn}`}
                 disabled={loading || !listing?.tripleId}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -205,7 +240,7 @@ export function TrustGaugePopover({
               </button>
 
               <button
-                className={styles.dangerBtn}
+                className={`${styles.btn} ${styles.dangerBtn}`}
                 disabled={loading || !listing?.counterTripleId}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -215,7 +250,7 @@ export function TrustGaugePopover({
                 Vote AGAINST (amount)
               </button>
               <button
-                className={styles.secondaryBtn}
+                className={`${styles.btn} ${styles.secondaryBtn}`}
                 disabled={loading || !listing?.counterTripleId}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -227,7 +262,7 @@ export function TrustGaugePopover({
             </div>
 
             {!!lastError && (
-              <div className={styles.popoverText} style={{ marginTop: 8, color: "var(--danger)" }}>
+              <div className={`${styles.popoverText} ${styles.errorText}`}>
                 {lastError}
               </div>
             )}
@@ -236,4 +271,5 @@ export function TrustGaugePopover({
       </div>
     </div>
   );
+
 }
