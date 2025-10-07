@@ -13069,6 +13069,10 @@ export type GetTrustedListingTripleAggregatesQuery = {
     object: { __typename?: 'atoms'; term_id: string; label?: string | null; image?: string | null };
     term?: {
       __typename?: 'terms';
+      positions_aggregate: {
+        __typename?: 'positions_aggregate';
+        aggregate?: { __typename?: 'positions_aggregate_fields'; count: number } | null;
+      };
       vaults: Array<{
         __typename?: 'vaults';
         positions_aggregate: {
@@ -13084,6 +13088,10 @@ export type GetTrustedListingTripleAggregatesQuery = {
     } | null;
     counter_term?: {
       __typename?: 'terms';
+      positions_aggregate: {
+        __typename?: 'positions_aggregate';
+        aggregate?: { __typename?: 'positions_aggregate_fields'; count: number } | null;
+      };
       vaults: Array<{
         __typename?: 'vaults';
         positions_aggregate: {
@@ -14039,6 +14047,11 @@ export const GetTrustedListingTripleAggregatesDocument = `
       image
     }
     term {
+      positions_aggregate {
+        aggregate {
+          count
+        }
+      }
       vaults(where: {curve_id: {_eq: $curveId}}) {
         positions_aggregate {
           aggregate {
@@ -14054,6 +14067,11 @@ export const GetTrustedListingTripleAggregatesDocument = `
       }
     }
     counter_term {
+      positions_aggregate {
+        aggregate {
+          count
+        }
+      }
       vaults(where: {curve_id: {_eq: $curveId}}) {
         positions_aggregate {
           aggregate {
@@ -19399,6 +19417,25 @@ export const GetTrustedListingTripleAggregates = {
                     selections: [
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'positions_aggregate' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'aggregate' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'count' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'vaults' },
                         arguments: [
                           {
@@ -19513,6 +19550,25 @@ export const GetTrustedListingTripleAggregates = {
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'positions_aggregate' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'aggregate' },
+                              selectionSet: {
+                                kind: 'SelectionSet',
+                                selections: [
+                                  { kind: 'Field', name: { kind: 'Name', value: 'count' } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'vaults' },

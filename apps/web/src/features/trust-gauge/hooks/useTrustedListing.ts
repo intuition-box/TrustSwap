@@ -15,6 +15,8 @@ type Listing = {
   forShares: bigint;
   againstShares: bigint;
   userSide?: "for" | "against" | null;
+  voteFor?: number;  
+  voteAgainst?: number;
 };
 
 function toBigIntSafe(x: unknown): bigint {
@@ -67,6 +69,9 @@ export function useTrustedListing({
     // Your query returns: triples(limit:1) { term_id, counter_term_id, term { vaults {...} }, counter_term { vaults {...} } }
     const triple = raw?.triples?.[0] ?? null;
 
+    const voteFor = triple?.term?.positions_aggregate?.aggregate?.count;
+    const voteAgainst = triple?.counter_term?.positions_aggregate?.aggregate?.count;
+
     // "FOR" side aggregates live under `term.vaults[0]`
     const tVault = triple?.term?.vaults?.[0];
     const forSumShares = tVault?.positions_aggregate?.aggregate?.sum?.shares ?? 0;
@@ -91,6 +96,8 @@ export function useTrustedListing({
       console.log("[useTrustedListing] map", {
         vars,
         tripleKeys: triple ? Object.keys(triple) : null,
+        voteFor,
+        voteAgainst,
         forSumShares,
         againstSumShares,
         userForShares,
@@ -99,7 +106,7 @@ export function useTrustedListing({
       });
     }
 
-    return { tripleId, counterTripleId, forShares, againstShares, userSide };
+    return { tripleId, counterTripleId, forShares, voteFor, againstShares, voteAgainst, userSide };
   }, [active, query.data, debug]);
 
   useEffect(() => {

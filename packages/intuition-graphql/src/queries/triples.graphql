@@ -21,6 +21,11 @@ query GetTrustedListingTripleAggregates(
     object { term_id label image }
 
     term {
+      positions_aggregate {
+        aggregate {
+          count
+        }
+      }
       vaults(where: { curve_id: { _eq: $curveId } }) {
         positions_aggregate {
           aggregate {
@@ -35,6 +40,11 @@ query GetTrustedListingTripleAggregates(
     }
 
     counter_term {
+      positions_aggregate {
+        aggregate {
+          count
+        }
+      }
       vaults(where: { curve_id: { _eq: $curveId } }) {
         positions_aggregate {
           aggregate {

@@ -48,7 +48,7 @@ export function TrustGaugePopover({
     }
   }, [subjectIdRaw]);
 
-  const hasAtom = !!subjectId;
+  const hasAtom = !!subjectIdBn;
 
   const {
     data: listing,
@@ -57,6 +57,7 @@ export function TrustGaugePopover({
   } = useTrustedListing({ subjectId, enabled: hasAtom, debug: true });
 
   const isListingLoading = hasAtom && isListingLoadingRaw;
+  const loading = Boolean(isAtomLoading || isListingLoading || isBusy);
 
   const ratioFor = useMemo(() => {
     const forShares = listing?.forShares || 0n;
@@ -68,45 +69,37 @@ export function TrustGaugePopover({
     return Number(scaled) / 1000000;
   }, [listing]);
 
-  const votesForLabel = useMemo(() => {
-    const v = listing?.forShares ?? 0n;
-    return Number(formatEther(v)).toLocaleString(undefined, { maximumFractionDigits: 4 });
-  }, [listing]);
 
-  const votesAgainstLabel = useMemo(() => {
-    const v = listing?.againstShares ?? 0n;
-    return Number(formatEther(v)).toLocaleString(undefined, { maximumFractionDigits: 4 });
-  }, [listing]);
+  // Voter counts come directly from useTrustedListing now
+  const forVoters = listing?.voteFor ?? 0;
+  const againstVoters = listing?.voteAgainst ?? 0;
 
-  const isLoading = isAtomLoading || isListingLoading;
-
-  // Local input state for tTRUST amount (human units, e.g., "0.01")
+  // Local amount input
   const [amountStr, setAmountStr] = useState("");
 
-  function parseAmountToWeiSafe(v) {
+  function parseAmountToWeiSafe(v: any) {
     try {
       const trimmed = String(v || "").trim();
       if (!trimmed) return 0n;
-      return parseEther(trimmed); // assumes 18 decimals
+      return parseEther(trimmed);
     } catch {
       return 0n;
     }
   }
 
-  async function handleCreateSignal(intent) {
+  async function handleCreateSignal(intent: string) {
     if (!onCreateSignal) return;
     await onCreateSignal({ chainId, tokenAddress, intent });
     await refetchAtom?.();
     await refetchListing?.();
   }
 
-  async function doDepositExact(side) {
+  async function doDepositExact(side: "for" | "against") {
     if (!onDepositExact) return;
     const termId = side === "for" ? listing?.tripleId : listing?.counterTripleId;
     if (!termId) return;
     const wei = parseAmountToWeiSafe(amountStr);
     if (wei <= 0n) {
-      // simple UX guard; replace with your toast system if available
       console.warn("Enter a positive amount in tTRUST.");
       return;
     }
@@ -114,13 +107,15 @@ export function TrustGaugePopover({
     await refetchListing?.();
   }
 
-  async function doDepositMin(side) {
+  async function doDepositMin(side: "for" | "against") {
     if (!onDepositMin) return;
     const termId = side === "for" ? listing?.tripleId : listing?.counterTripleId;
     if (!termId) return;
     await onDepositMin({ chainId, termId: String(termId), side });
     await refetchListing?.();
   }
+
+  const votersLabel = (n?: number) => `${n ?? 0} ${n === 1 ? "voter" : "voters"}`;
 
   return (
     <div className={`${styles.wrap} ${className || ""}`}>
@@ -169,12 +164,13 @@ export function TrustGaugePopover({
         ) : (
           <div className={styles.popoverSection}>
             <div className={styles.popoverTitle}>Listing votes</div>
+
             <div className={styles.popoverText}>
-              <strong>FOR:</strong> {votesForLabel} tTRUST&nbsp;&nbsp;|&nbsp;&nbsp;
-              <strong>AGAINST:</strong> {votesAgainstLabel} tTRUST
+              <strong>FOR:</strong> &nbsp;{votersLabel(forVoters)}
+              &nbsp;&nbsp;|&nbsp;&nbsp;
+              <strong>AGAINST:</strong> &nbsp;{votersLabel(againstVoters)}
             </div>
 
-            {/* Amount input */}
             <div className={styles.popoverRow} style={{ marginTop: 8 }}>
               <input
                 type="text"
@@ -186,11 +182,10 @@ export function TrustGaugePopover({
               />
             </div>
 
-            {/* Action buttons */}
             <div className={styles.popoverRow} style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button
                 className={styles.successBtn}
-                disabled={isLoading || isBusy || !listing?.tripleId}
+                disabled={loading || !listing?.tripleId}
                 onClick={(e) => {
                   e.stopPropagation();
                   doDepositExact("for");
@@ -200,7 +195,7 @@ export function TrustGaugePopover({
               </button>
               <button
                 className={styles.secondaryBtn}
-                disabled={isLoading || isBusy || !listing?.tripleId}
+                disabled={loading || !listing?.tripleId}
                 onClick={(e) => {
                   e.stopPropagation();
                   doDepositMin("for");
@@ -211,7 +206,7 @@ export function TrustGaugePopover({
 
               <button
                 className={styles.dangerBtn}
-                disabled={isLoading || isBusy || !listing?.counterTripleId}
+                disabled={loading || !listing?.counterTripleId}
                 onClick={(e) => {
                   e.stopPropagation();
                   doDepositExact("against");
@@ -221,7 +216,7 @@ export function TrustGaugePopover({
               </button>
               <button
                 className={styles.secondaryBtn}
-                disabled={isLoading || isBusy || !listing?.counterTripleId}
+                disabled={loading || !listing?.counterTripleId}
                 onClick={(e) => {
                   e.stopPropagation();
                   doDepositMin("against");
