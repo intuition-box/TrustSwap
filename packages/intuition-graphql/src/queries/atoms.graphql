@@ -1,0 +1,17 @@
+query GetAtomByCanonicalData($uri: String!) {
+  atoms(
+    where: {
+      _or: [
+        { data: { _eq: $uri } }
+        { raw_data: { _eq: $uri } }
+      ]
+    }
+    limit: 1
+  ) {
+    term_id
+    data
+    raw_data
+    label
+    type
+  }
+}

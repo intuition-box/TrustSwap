@@ -16,10 +16,10 @@ function addr(a?: Address | string | null) {
 
 
 const DENY_TOKEN_ADDRESSES: string[] = [
-  "0x124c4e8470ed201ae896c2df6ee7152ab7438d80", 
-  "0x5fdd4edd250b9214d77103881be0f09812d501d6", 
+  //"0x124c4e8470ed201ae896c2df6ee7152ab7438d80", 
+  //"0x5fdd4edd250b9214d77103881be0f09812d501d6", 
 
-   "0x51379cc2c942ee2ae2ff0bd67a7b475f0be39dcf", 
+  //"0x51379cc2c942ee2ae2ff0bd67a7b475f0be39dcf", 
 ];
 
 const DENY_SYMBOLS: string[] = [

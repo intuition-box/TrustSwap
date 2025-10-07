@@ -1,0 +1,61 @@
+query GetTrustedListingTripleAggregates(
+  $subjectId: String!
+  $listedOnId: String!
+  $trustswapId: String!
+  $curveId: numeric!
+  $accountIdLower: String!
+) {
+  triples(
+    where: {
+      subject: { term_id: { _eq: $subjectId } }
+      predicate: { term_id: { _eq: $listedOnId } }
+      object: { term_id: { _eq: $trustswapId } }
+    }
+    limit: 1
+  ) {
+    term_id
+    counter_term_id
+
+    subject { term_id label image }
+    predicate { term_id label image }
+    object { term_id label image }
+
+    term {
+      positions_aggregate {
+        aggregate {
+          count
+        }
+      }
+      vaults(where: { curve_id: { _eq: $curveId } }) {
+        positions_aggregate {
+          aggregate {
+            count
+            sum { shares }
+          }
+        }
+        positions(where: { account_id: { _ilike: $accountIdLower } }) {
+          shares
+        }
+      }
+    }
+
+    counter_term {
+      positions_aggregate {
+        aggregate {
+          count
+        }
+      }
+      vaults(where: { curve_id: { _eq: $curveId } }) {
+        positions_aggregate {
+          aggregate {
+            count
+            sum { shares }
+          }
+        }
+        positions(where: { account_id: { _ilike: $accountIdLower } }) {
+          shares
+        }
+      }
+    }
+  }
+}
