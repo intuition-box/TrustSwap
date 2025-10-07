@@ -11,8 +11,8 @@ type DepositArgs = {
   termId: `0x${string}` | string | bigint; // hex, decimal string, or bigint
   amountWei: bigint;                        // already in wei from the popup
   receiver?: Address | "self";              // defaults to "self"
-  curveId?: number;                         // defaults to on-chain defaultCurveId (fallback DEFAULT_CURVE_ID)
-  minShares?: bigint;                       // defaults to 1n for safety
+  curveId?: number;                         // defaults to resolved curve (prefers 2), else on-chain default, else fallback
+  minShares?: bigint;                       // defaults to 0n (portal behavior)
 };
 
 type DepositMinArgs = {
@@ -24,16 +24,16 @@ type DepositMinArgs = {
 type DepositResult = { txHash: `0x${string}`; usedValueWei?: bigint };
 
 const mvReadAbi = [
-  // (uint256 shares, uint256 assetsAfterFees) previewDeposit(bytes32 termId, uint256 curveId, uint256 assets)
   {
+    // (uint256 shares, uint256 assetsAfterFees) previewDeposit(bytes32 termId, uint256 curveId, uint256 assets)
     type: "function",
     name: "previewDeposit",
     stateMutability: "view",
     inputs: [{ type: "bytes32" }, { type: "uint256" }, { type: "uint256" }],
     outputs: [{ type: "uint256" }, { type: "uint256" }],
   },
-  // optional: uint256 currentSharePrice(bytes32 termId, uint256 curveId)
   {
+    // optional: uint256 currentSharePrice(bytes32 termId, uint256 curveId)
     type: "function",
     name: "currentSharePrice",
     stateMutability: "view",
@@ -43,8 +43,8 @@ const mvReadAbi = [
 ] as const;
 
 const mvWriteAbi = [
-  // deposit(address receiver, bytes32 termId, uint256 curveId, uint256 minShares)
   {
+    // deposit(address receiver, bytes32 termId, uint256 curveId, uint256 minShares)
     type: "function",
     name: "deposit",
     stateMutability: "payable",
@@ -86,6 +86,35 @@ export async function getDefaultCurveId(publicClient: any, multivault: `0x${stri
   }
 }
 
+// Prefer curveId=2 (portal behavior) if it accepts a tiny deposit; else use on-chain default; else try 1, then 0.
+async function resolveCurveId(
+  publicClient: any,
+  multivault: `0x${string}`,
+  account: `0x${string}`,
+  termId32: `0x${string}`,
+  curveIdDefault: bigint | null
+): Promise<bigint> {
+  const candidates = [2n, curveIdDefault ?? 0n, 1n, 0n]
+    .filter((x, i, arr) => x !== null && arr.indexOf(x as bigint) === i) as bigint[];
+
+  for (const cid of candidates) {
+    try {
+      await publicClient.simulateContract({
+        address: multivault,
+        abi: mvWriteAbi,
+        functionName: "deposit",
+        account,
+        args: [account, termId32, cid, 0n],         // minShares=0 (portal behavior)
+        value: 1_000_000_000_000_000n,             // 0.001 tTRUST
+      });
+      return cid;
+    } catch {
+      // try next
+    }
+  }
+  return curveIdDefault ?? 1n;
+}
+
 export function useDepositToVault(params?: { chainId?: number; multivault?: Address }) {
   const chainId = params?.chainId ?? CHAIN_ID;
   const multivault = (params?.multivault ?? MULTIVAULT_ADDRESS) as Address;
@@ -108,7 +137,7 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
       .catch(() => setCurveIdDefault(1n));
   }, [publicClient, multivault]);
 
-  // Helper: preview shares for a given assets amount
+  // Helper: preview shares for a given assets amount (only for warnings)
   const previewShares = useCallback(
     async (termId32: `0x${string}`, curveIdBn: bigint, amt: bigint) => {
       try {
@@ -126,7 +155,7 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
     [publicClient, multivault]
   );
 
-  // Compute minimal accepted amount (≥1 share AND ≥ policy minimum). Returns minWei.
+  // Compute minimal accepted amount (policy-only, like the portal): minShares=0, bump until BelowMinimumDeposit disappears.
   const getMinAcceptedDeposit = useCallback(
     async ({
       termId,
@@ -145,48 +174,19 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
       setError(null);
 
       try {
-        const recv = receiver === "self" ? (address as Address) : (receiver as Address);
+        const recv = (receiver === "self" ? address : receiver) as `0x${string}`;
         const termId32 = normalizeTermId32(termId);
-        const usedCurveId = BigInt(curveId ?? Number(curveIdDefault ?? 1n));
+        const usedCurveId = BigInt(
+          curveId ?? Number(await resolveCurveId(publicClient, multivault as `0x${string}`, address as `0x${string}`, termId32, curveIdDefault))
+        );
 
-        // Optional seed via currentSharePrice
-        let seed = 0n;
-        try {
-          seed = await publicClient.readContract({
-            address: multivault,
-            abi: mvReadAbi,
-            functionName: "currentSharePrice",
-            args: [termId32, usedCurveId],
-          });
-        } catch {}
-
-        // Phase 1 — ensure ≥ 1 share
         const balance = await publicClient.getBalance({ address });
         const cap = (balance * 95n) / 100n;
 
-        let value = seed > 0n ? seed : 10_000_000_000_000n; // ~1e13 wei start
-        let shares = await previewShares(termId32, usedCurveId, value);
-        let i = 0;
-
-        while (shares === 0n && i++ < 20) {
-          value = value === 0n ? 10_000_000_000_000n : value * 2n;
-          if (value > cap) {
-            const err: any = new Error("Insufficient balance to mint at least 1 share.");
-            err.code = "INSUFFICIENT_BALANCE_FOR_MIN";
-            err.requiredWei = value;
-            err.balanceWei = balance;
-            throw err;
-          }
-          shares = await previewShares(termId32, usedCurveId, value);
-        }
-        if (shares === 0n) {
-          const err: any = new Error("Curve appears unseeded/inactive: 0 shares for large probes.");
-          err.code = "CURVE_UNSEEDED";
-          throw err;
-        }
-
-        // Phase 2 — ensure policy minimum: simulate until no BelowMinimumDeposit
+        // Start from 0.001 tTRUST and bump until policy accepts it (minShares=0)
+        let value = 1_000_000_000_000_000n; // 0.001
         let attempts = 0;
+
         while (attempts++ < 20) {
           try {
             await publicClient.simulateContract({
@@ -194,7 +194,7 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
               abi: mvWriteAbi,
               functionName: "deposit",
               account: address as `0x${string}`,
-              args: [recv, termId32, usedCurveId, 1n],
+              args: [recv, termId32, usedCurveId, 0n], // minShares=0
               value,
             });
             break; // success
@@ -220,17 +220,17 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
         setFindingMin(false);
       }
     },
-    [publicClient, isConnected, address, multivault, activeChainId, chainId, switchChainAsync, previewShares, curveIdDefault]
+    [publicClient, isConnected, address, multivault, activeChainId, chainId, switchChainAsync, curveIdDefault]
   );
 
-  // Deposit a user-provided exact amount (pre-simulate; if too low, return a rich error with requiredWei).
+  // Deposit a user-provided exact amount; default minShares=0 (portal behavior).
   const depositExact = useCallback(
     async ({
       termId,
       amountWei,
       receiver = "self",
       curveId,
-      minShares = 1n,
+      minShares = 0n,
     }: DepositArgs): Promise<DepositResult> => {
       if (!publicClient) throw new Error("Missing public client");
       if (!walletClient) throw new Error("Missing wallet client");
@@ -246,9 +246,11 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
       setError(null);
 
       try {
-        const recv = receiver === "self" ? (address as Address) : (receiver as Address);
+        const recv = (receiver === "self" ? address : receiver) as `0x${string}`;
         const termId32 = normalizeTermId32(termId);
-        const usedCurveId = BigInt(curveId ?? Number(curveIdDefault ?? DEFAULT_CURVE_ID));
+        const usedCurveId = BigInt(
+          curveId ?? Number(await resolveCurveId(publicClient, multivault as `0x${string}`, address as `0x${string}`, termId32, curveIdDefault ?? BigInt(DEFAULT_CURVE_ID)))
+        );
 
         // Balance check
         const bal = await publicClient.getBalance({ address });
@@ -260,22 +262,24 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
           throw err;
         }
 
-        // Optional preflight: ensure ≥ 1 share
+        // Optional warning: if caller explicitly asked for ≥1 share (minShares>0), hint a suggested minimum
         try {
-          const s = await previewShares(termId32, usedCurveId, amountWei);
-          if (s === 0n && minShares > 0n) {
-            const minWei = await getMinAcceptedDeposit({ termId, curveId: Number(usedCurveId), receiver: recv });
-            const err: any = new Error("Amount would mint 0 shares. Use the suggested minimum.");
-            err.code = "AMOUNT_BELOW_MIN";
-            err.requiredWei = minWei;
-            err.balanceWei = bal;
-            throw err;
+          if (minShares > 0n) {
+            const s = await previewShares(termId32, usedCurveId, amountWei);
+            if (s === 0n) {
+              const minWei = await getMinAcceptedDeposit({ termId, curveId: Number(usedCurveId), receiver: recv });
+              const err: any = new Error("Amount would mint 0 shares. Use the suggested minimum.");
+              err.code = "AMOUNT_BELOW_MIN";
+              err.requiredWei = minWei;
+              err.balanceWei = bal;
+              throw err;
+            }
           }
         } catch {
-          // ignore preview errors; simulate below will still catch policy minimum
+          // ignore preview errors; simulate below catches policy minimum anyway
         }
 
-        // Pre-simulate to catch policy minimum
+        // Pre-simulate to catch policy minimum (BelowMinimumDeposit)
         try {
           await publicClient.simulateContract({
             address: multivault,
@@ -314,7 +318,7 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
     [publicClient, walletClient, isConnected, address, multivault, activeChainId, chainId, switchChainAsync, previewShares, getMinAcceptedDeposit, curveIdDefault]
   );
 
-  // Button "MIN": compute minimal accepted value and deposit it with minShares=1
+  // Button "MIN": compute minimal accepted value (policy-only, minShares=0) and deposit it
   const depositMin = useCallback(
     async ({
       termId,
@@ -323,7 +327,7 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
     }: DepositMinArgs): Promise<DepositResult> => {
       const recv = receiver === "self" ? (address as Address) : (receiver as Address);
       const minValue = await getMinAcceptedDeposit({ termId, curveId, receiver: recv });
-      const res = await depositExact({ termId, amountWei: minValue, receiver: recv, curveId, minShares: 1n });
+      const res = await depositExact({ termId, amountWei: minValue, receiver: recv, curveId, minShares: 0n });
       return { ...res, usedValueWei: minValue };
     },
     [getMinAcceptedDeposit, depositExact, address]
@@ -335,10 +339,10 @@ export function useDepositToVault(params?: { chainId?: number; multivault?: Addr
     depositMin,
     getMinAcceptedDeposit,
     // state
-    loading,        // depositing state
-    findingMin,     // computing min state
+    loading,
+    findingMin,
     error,
-    // optional expose for debug/UI
+    // debug
     curveIdDefault: curveIdDefault ?? null,
   };
 }
