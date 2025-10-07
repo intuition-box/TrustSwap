@@ -1,23 +1,22 @@
 // apps/web/src/features/trust-gauge/components/TrustGaugePopover.jsx
-import React, { useMemo } from "react";
+// English-only comments
+import React, { useMemo, useState } from "react";
 import { TrustGaugeRing } from "./TrustGaugeRing";
 import styles from "../TrustGaugePopover.module.css";
 import { useAtomByToken } from "../hooks/useAtomByToken";
 import { useTrustedListing } from "../hooks/useTrustedListing";
-import { formatEther } from "viem";
-
-/**
- * If you're using TS, update the prop type to include "intent":
- * onCreateSignal?: (params: { chainId: number; tokenAddress: string; intent?: "atom" | "listing" }) => Promise<void>;
- */
+import { formatEther, parseEther } from "viem";
 
 type TrustGaugePopoverProps = {
   chainId: number;
   tokenAddress: string;
   className?: string;
   icon?: React.ReactNode;
-  onCreateSignal?: (params: { chainId: number; tokenAddress: string; intent?: "atom" | "listing" }) => Promise<void>;
-  onVote?: (params: { chainId: number; termId: string; side: "for" | "against" }) => Promise<void>;
+  onCreateSignal?: (params: { chainId: number; tokenAddress: string; intent: string }) => Promise<void>;
+  onDepositExact?: (params: { chainId: number; termId: string; side: string; amountWei: bigint }) => Promise<void>;
+  onDepositMin?: (params: { chainId: number; termId: string; side: string }) => Promise<void>;
+  isBusy?: boolean;
+  lastError?: string;
 };
 
 export function TrustGaugePopover({
@@ -26,18 +25,18 @@ export function TrustGaugePopover({
   className,
   icon,
   onCreateSignal,
-  onVote,
+  onDepositExact,
+  onDepositMin,
+  isBusy,
+  lastError,
 }: TrustGaugePopoverProps) {
   const { data: subjectId, isLoading: isAtomLoading, refetch: refetchAtom } = useAtomByToken({
     chainId,
     tokenAddress,
   });
-  console.log("[TrustGaugePopover] inputs", { subjectId, isAtomLoading });
 
-  // Normalize subjectId -> bigint > 0n only
-  const subjectIdRaw = subjectId && typeof subjectId === "object" && "vaultId" in subjectId
-    ? subjectId.vaultId
-    : subjectId;
+  const subjectIdRaw =
+    subjectId && typeof subjectId === "object" && "vaultId" in subjectId ? subjectId.vaultId : subjectId;
 
   const subjectIdBn = useMemo(() => {
     if (subjectIdRaw === null || subjectIdRaw === undefined) return null;
@@ -51,19 +50,11 @@ export function TrustGaugePopover({
 
   const hasAtom = !!subjectId;
 
-  // Gate the listing fetch behind hasAtom (requires your hook to support `enabled`)
   const {
     data: listing,
     isLoading: isListingLoadingRaw,
     refetch: refetchListing,
   } = useTrustedListing({ subjectId, enabled: hasAtom, debug: true });
-
-   console.log("[TrustGaugePopover] listing state", {
-   subjectId,
-   hasAtom,
-   isListingLoadingRaw,
-   listing,
- });
 
   const isListingLoading = hasAtom && isListingLoadingRaw;
 
@@ -88,7 +79,19 @@ export function TrustGaugePopover({
   }, [listing]);
 
   const isLoading = isAtomLoading || isListingLoading;
-  const hasTriple = Boolean(listing?.tripleId);
+
+  // Local input state for tTRUST amount (human units, e.g., "0.01")
+  const [amountStr, setAmountStr] = useState("");
+
+  function parseAmountToWeiSafe(v) {
+    try {
+      const trimmed = String(v || "").trim();
+      if (!trimmed) return 0n;
+      return parseEther(trimmed); // assumes 18 decimals
+    } catch {
+      return 0n;
+    }
+  }
 
   async function handleCreateSignal(intent) {
     if (!onCreateSignal) return;
@@ -97,11 +100,25 @@ export function TrustGaugePopover({
     await refetchListing?.();
   }
 
-  async function handleVote(side) {
-    if (!onVote) return;
+  async function doDepositExact(side) {
+    if (!onDepositExact) return;
     const termId = side === "for" ? listing?.tripleId : listing?.counterTripleId;
     if (!termId) return;
-    await onVote({ chainId, termId: String(termId), side });
+    const wei = parseAmountToWeiSafe(amountStr);
+    if (wei <= 0n) {
+      // simple UX guard; replace with your toast system if available
+      console.warn("Enter a positive amount in tTRUST.");
+      return;
+    }
+    await onDepositExact({ chainId, termId: String(termId), side, amountWei: wei });
+    await refetchListing?.();
+  }
+
+  async function doDepositMin(side) {
+    if (!onDepositMin) return;
+    const termId = side === "for" ? listing?.tripleId : listing?.counterTripleId;
+    if (!termId) return;
+    await onDepositMin({ chainId, termId: String(termId), side });
     await refetchListing?.();
   }
 
@@ -121,7 +138,6 @@ export function TrustGaugePopover({
         onPointerDown={(e) => e.stopPropagation()}
         data-stop-row-select
       >
-        {/* Show "Not verified" until we have a real subjectId > 0n */}
         {!hasAtom ? (
           <div className={styles.popoverSection}>
             <div className={styles.popoverTitle}>Not verified</div>
@@ -136,7 +152,7 @@ export function TrustGaugePopover({
               Create signal
             </button>
           </div>
-        ) : !hasTriple ? (
+        ) : !listing?.tripleId ? (
           <div className={styles.popoverSection}>
             <div className={styles.popoverTitle}>Not listed on TrustSwap</div>
             <div className={styles.popoverText}>Create the listing triple to enable voting.</div>
@@ -157,26 +173,69 @@ export function TrustGaugePopover({
               <strong>FOR:</strong> {votesForLabel} tTRUST&nbsp;&nbsp;|&nbsp;&nbsp;
               <strong>AGAINST:</strong> {votesAgainstLabel} tTRUST
             </div>
-            <button
-              className={styles.successBtn}
-              disabled={listing?.userSide === "against" || isLoading}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleVote("for");
-              }}
-            >
-              Vote FOR
-            </button>
-            <button
-              className={styles.dangerBtn}
-              disabled={listing?.userSide === "for" || isLoading}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleVote("against");
-              }}
-            >
-              Vote AGAINST
-            </button>
+
+            {/* Amount input */}
+            <div className={styles.popoverRow} style={{ marginTop: 8 }}>
+              <input
+                type="text"
+                placeholder="Amount in tTRUST (e.g., 0.01)"
+                className={styles.input}
+                value={amountStr}
+                onChange={(e) => setAmountStr(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+
+            {/* Action buttons */}
+            <div className={styles.popoverRow} style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button
+                className={styles.successBtn}
+                disabled={isLoading || isBusy || !listing?.tripleId}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  doDepositExact("for");
+                }}
+              >
+                Vote FOR (amount)
+              </button>
+              <button
+                className={styles.secondaryBtn}
+                disabled={isLoading || isBusy || !listing?.tripleId}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  doDepositMin("for");
+                }}
+              >
+                Min FOR
+              </button>
+
+              <button
+                className={styles.dangerBtn}
+                disabled={isLoading || isBusy || !listing?.counterTripleId}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  doDepositExact("against");
+                }}
+              >
+                Vote AGAINST (amount)
+              </button>
+              <button
+                className={styles.secondaryBtn}
+                disabled={isLoading || isBusy || !listing?.counterTripleId}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  doDepositMin("against");
+                }}
+              >
+                Min AGAINST
+              </button>
+            </div>
+
+            {!!lastError && (
+              <div className={styles.popoverText} style={{ marginTop: 8, color: "var(--danger)" }}>
+                {lastError}
+              </div>
+            )}
           </div>
         )}
       </div>
