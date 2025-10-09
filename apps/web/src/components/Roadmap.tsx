@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "../styles/roadmap.module.css";
+import Footer from "./Footer"
 
 const Roadmap = () => {
   const milestones = [
@@ -45,6 +46,7 @@ const Roadmap = () => {
           ))}
         </ul>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -44,10 +44,20 @@ function Landing() {
           <span className={styles.textCard}>Swap tokens instantly with audited contracts and full transparency.</span>
         </div>
         <div className={styles.cardMain}>
+        <img
+              src={security}
+              alt="security"
+              className={styles.imgCardTop}
+            />
         <div className={styles.titleCard}>Driven by Community</div>
         <span className={styles.textCard}>Your participation secures and grows the ecosystem.</span>
         </div>
         <div className={styles.cardMain}>
+        <img
+              src={security}
+              alt="security"
+              className={styles.imgCardTop}
+            />
         <div className={styles.titleCard}>Multi-Project Hub</div>
         <span className={styles.textCard}>One protocol, multiple integrations: Intuition, Colony, GBM.</span>
         </div>
@@ -117,8 +127,9 @@ function Landing() {
         <p className={styles.textCardMainTwo}>TEXT TEXT TEXT</p>
         </div>
         </div>
+        <Roadmap />
      </div>
-     <Roadmap />
+  
     </div>
   );
 }
