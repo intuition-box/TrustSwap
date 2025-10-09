@@ -229,6 +229,20 @@
   margin-bottom: 40px;
 }
 
+.imgCardTopUser {
+  width: 85%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 40px;
+}
+
+.imgCardTopHub {
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 40px;
+}
+
 .titleCard {
   font-weight: 500;
   font-size: 20px;
@@ -251,7 +265,7 @@
   max-width: 960px;
   font-size: 30px;
   font-weight: 500;
-  color: #14F3A5;
+  color: #4adaea;
   margin-top: 20px;
   padding-left: 30px;
   padding-right: 30px;
@@ -265,7 +279,7 @@
   max-width: 960px;
   font-size: 30px;
   font-weight: 500;
-  color: #14F3A5;
+  color: #4ADAEA;
   margin-top: 20px;
   padding-left: 30px;
   padding-right: 30px;
@@ -287,7 +301,7 @@
   max-width: 960px;
   font-size: 30px;
   font-weight: 500;
-  color: #14F3A5;
+  color: #4ADAEA;
   display: flex;
   align-items: center;
   justify-content: end;
@@ -466,6 +480,21 @@
     margin-right: auto;
     margin-bottom: 40px;
   }
+
+  .imgCardTopUser {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
+  }
+
+  .imgCardTopHub {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
+  }
+
 
   .containerCardMain {
     display: flex;

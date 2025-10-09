@@ -5,6 +5,8 @@ import intuition from "../src/assets/intuition.png";
 import colony from "../src/assets/colony.png";
 import gbm from "../src/assets/gbm.png";
 import security from "../src/assets/security.png";
+import user from "../src/assets/user.png";
+import hub from "../src/assets/hub.png";
 import Roadmap from "./components/Roadmap"
 
 function Landing() {
@@ -45,18 +47,18 @@ function Landing() {
         </div>
         <div className={styles.cardMain}>
         <img
-              src={security}
-              alt="security"
-              className={styles.imgCardTop}
+              src={user}
+              alt="user"
+              className={styles.imgCardTopUser}
             />
         <div className={styles.titleCard}>Driven by Community</div>
         <span className={styles.textCard}>Your participation secures and grows the ecosystem.</span>
         </div>
         <div className={styles.cardMain}>
         <img
-              src={security}
-              alt="security"
-              className={styles.imgCardTop}
+              src={hub}
+              alt="hub"
+              className={styles.imgCardTopHub}
             />
         <div className={styles.titleCard}>Multi-Project Hub</div>
         <span className={styles.textCard}>One protocol, multiple integrations: Intuition, Colony, GBM.</span>
