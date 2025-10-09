@@ -18,8 +18,8 @@ TrustSwap vise à dépasser les limites des DEX traditionnels en introduisant un
 
 
 - **Fair launch GBM Auctions**  
-  Pour soutenir les nouveaux projets, TrustSwap proposera un launchpad basé sur les enchères GBM. Ce modèle **bid-to-earn** récompense les enchérisseurs surenchéris (jusqu'à +10% selon les paramètres), ce qui aligne l’engagement et l’équité. 
-  GBM apporte en plus un **“stabilization buffer”** : une fraction des recettes d’enchère dédiée au **seed de liquidité initiale** et, si nécessaire, à des **buybacks ciblés** pour lisser d’éventuels excès d’outbid et réduire le “regret” post-enchère. Nous restons **ouverts à d’autres formats** (Dutch, LBP, lockdrop) quand ils offrent une exécution plus simple/rapide selon le cas. ([gbm.auction][3])
+  Pour soutenir les nouveaux projets, TrustSwap proposera un launchpad basé sur les enchères GBM. Ce modèle **bid-to-earn** récompense les enchérisseurs surenchéris (jusqu'à +10%), ce qui aligne l’engagement et l’équité. 
+  GBM apporte en plus un **“stabilization buffer”** : une partie des recettes de l'enchère peut servir à des **buybacks ciblés** pour lisser d’éventuels excès d’outbid et réduire le “regret” post-enchère. Nous restons **ouverts à d’autres formats** ([LBPs][5], [CoinMachine][6]...) tant qu'ils offrent une exécution simple, rapide et équitable. ([gbm.auction][3])
 
 En combinant ces briques, TrustSwap se positionne comme un **DEX communautaire, transparent et innovant**, où la réputation et l'inteligence collective comptent autant que le capital déposé.
 
@@ -29,3 +29,7 @@ En combinant ces briques, TrustSwap se positionne comme un **DEX communautaire, 
 [2]: https://docs.colony.io/learn/governance/ "Colony Knowledge Realm"
 [3]: https://www.gbm.auction/ "GBM Auction"
 [4]: https://www.docs.intuition.systems/docs/introduction/overview "Protocol Intuition"
+
+[5]: https://docs.balancer.fi/concepts/explore-available-balancer-pools/liquidity-bootstrapping-pool.html "LPBs"
+
+[6]: https://blog.colony.io/introducing-coin-machine/ "CoinMachine"
