@@ -10,6 +10,7 @@ import hub from "../src/assets/hub.png";
 import Roadmap from "./components/Roadmap"
 
 function Landing() {
+  const docsUrl = `${import.meta.env.BASE_URL}docs/`;
   return (
     <div className={styles.bodyLanding}>
     <div className={styles.headerContainer}>
@@ -17,16 +18,18 @@ function Landing() {
       <div className={styles.titleContainer}>
       <span className={styles.h1Header}>Built on Trust<br/>Community Powered</span>
       <span className={styles.sousTitleHeader}>Dive into TrustSwap's vision.</span>
-      <button className={styles.btnHeaderLanding}>WhitePaper</button>
+      <a className={styles.btnHeaderLanding} href={docsUrl}>
+        WhitePaper
+      </a>
       </div>
       <div className={styles.swapContainerLanding}>
         
         <div className={styles.SwapCardHeader}>
         <div className={styles.halo}></div>
           <div className={styles.swapLanding}>
-                      <div className={styles.swapCardLineTop}></div>
-                      <SwapFeature />
-                      <div className={styles.swapCardLineBottom}></div>
+            <div className={styles.swapCardLineTop}></div>
+            <SwapFeature />
+            <div className={styles.swapCardLineBottom}></div>
           </div>
         </div>
       </div>

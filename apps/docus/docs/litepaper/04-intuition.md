@@ -4,7 +4,7 @@ sidebar_position: 4
 ---
 
 
-### Voting Overlay
+### Trust Gauge
   - Chaque token listé affiche une jauge visuelle de confiance communautaire.  
   - Les votes sont liés au triple (ex : TOKEN – WHITELISTED – TRUSTSWAP).
 
