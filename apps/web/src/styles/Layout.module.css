@@ -192,7 +192,7 @@
 @media (max-width: 1200px) {
     .containerNavBar {
         top: auto;
-        bottom: 2vh;
+        bottom: 10px;
         z-index: 10000;
     }
 

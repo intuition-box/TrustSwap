@@ -4,13 +4,11 @@ import Footer from "./Footer"
 
 const Roadmap = () => {
   const milestones = [
-    { year: 2019, text: "Lancement du projet initial et définition de la vision globale." },
-    { year: 2020, text: "Lancement du projet initial et définition de la vision globale." },
-    { year: 2021, text: "Mise en place de l’équipe et développement des premières fonctionnalités clés." },
-    { year: 2022, text: "Ouverture de la bêta publique et premières intégrations partenaires." },
-    { year: 2023, text: "Amélioration de l’expérience utilisateur et expansion internationale." },
-    { year: 2024, text: "Lancement officiel de la version complète et adoption rapide du marché." },
-    { year: 2025, text: "Optimisation continue, nouvelles collaborations et vision long terme." },
+    { year:  "Phase 1", title: "MVP Dex Testnet (Swap, Pool, Landing Page, Litepaper...).", text: "trust"},
+    { year:  "Phase 2", title: "Deployment TrustSwap on Mainnet.", text: "trust" },
+    { year:  "Phase 3", title: "First Integration of the Intuition Protocol (Trust Gauge Token).", text: "trust" },
+    { year:  "Phase 4", title: "Ouverture de la bêta publique et premières intégrations partenaires.", text: "trust" },
+    { year:  "Phase 5", title: "Ouverture de la bêta publique et premières intégrations partenaires.", text: "trust" },
   ];
 
   const repeatedMilestones = Array(2)
@@ -25,7 +23,7 @@ const Roadmap = () => {
   return (
     <div className={styles.roadmapContainer}>
         <span className={styles.roadmapTitle}>Roadmap</span>
-        <span className={styles.sousTitleRoadMap}>From safety to scalability, TrustSwap is built to grow with the DeFi community.</span>
+        <span className={styles.sousTitleRoadMap}>TrustSwap’s first building blocks: a clear path toward a trust-driven DEX.</span>
       <div className={styles["cards-container"]}>
         <ul
           className={styles.cards}
@@ -40,8 +38,12 @@ const Roadmap = () => {
                 defaultChecked={i === 0}
               />
               <label htmlFor={`item-${i}`}>{item.year}</label>
-              <h2>{item.year}</h2>
-              <p className={styles.textRoadmap}>{item.text}</p>
+        
+              <p className={styles.textRoadmap}>
+              {item.title}
+              <span className={styles.text}>{item.text}</span>
+              </p>
+             
             </li>
           ))}
         </ul>

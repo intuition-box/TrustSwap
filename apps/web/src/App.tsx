@@ -5,7 +5,7 @@ import SwapPage from "./pages/SwapPage";
 import PoolsPage from "./pages/PoolsPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import NotFound from "./pages/NotFound";
-import Landing from "./Landing"; // ta landing
+import Landing from "./Landing";
 
 import './styles/App.css';
 
