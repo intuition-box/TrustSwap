@@ -357,6 +357,18 @@
   color: var(--text-grey);
 }
 
+.textCardMainTwoCenter {
+  font-weight: 500;
+  font-size: 25px;
+  letter-spacing: -1px;
+  max-width: 100%;
+  text-align: left;
+  color: var(--text-grey);
+  margin-bottom: auto;
+  margin-top: auto;
+  text-align: center;
+}
+
 .textWhite {
   color: var(--text-color);
 }
@@ -389,6 +401,9 @@
 
 
 @media (max-width: 800px) {
+  .swapLanding {
+    width: 100%;
+  }
 
   .titleContainer, .swapContainerLanding {
     width: 100%;
@@ -396,6 +411,11 @@
 
   .swapContainerLanding {
 
+  }
+
+  .illustrationIntuition {
+    width: 100%;
+    max-width: 300px;
   }
 
   .h1Header {
@@ -428,6 +448,7 @@
 
   .illustrationOne {
     width: 90%;
+    max-width: 400px;
   }
 
   .containerCardMainIntuition, .containerCardMainGbm {
@@ -475,21 +496,21 @@
   }
 
   .imgCardTop {
-    width: 40%;
+    width: 200px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 40px;
   }
 
   .imgCardTopUser {
-    width: 70%;
+    width: 260px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 40px;
   }
 
   .imgCardTopHub {
-    width: 70%;
+    width: 200px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 40px;

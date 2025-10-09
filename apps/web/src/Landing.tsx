@@ -113,8 +113,8 @@ function Landing() {
         <div className={styles.lineCardGrey}></div>
         <div className={styles.cardA}>
         <p className={styles.textCardMainTwo}>
-        <span className={styles.textWhite}>A system </span>
-         where bidding drives both engagement and fairness</p>
+        <span className={styles.textWhite}>An auction protocol </span>
+         where every higher bid earns a reward. No more sniping, just fairness.</p>
         <img
               src={gbm}
               alt="search"
@@ -126,7 +126,10 @@ function Landing() {
           <span>Other...</span>
           </div>
         <div className={styles.cardB}>
-        <p className={styles.textCardMainTwo}>TEXT TEXT TEXT</p>
+        <p className={styles.textCardMainTwoCenter}>
+        <span className={styles.textWhite}>Any protocol </span>
+           that delivers provable value can be proposed by the community and integrated via the DAO...
+        </p>
         </div>
         </div>
         <Roadmap />

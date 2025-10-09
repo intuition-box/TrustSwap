@@ -31,7 +31,7 @@
 .cards-container {
     --base-rotation: 0deg;
     --full-circle: 360deg;
-    --radius: 25vw;
+    --radius: 30vw;
     --duration: 200ms;
     --cards-container-size: calc(var(--radius) * 2);
     --cards-container-padding: 2rem;
@@ -45,7 +45,7 @@
     --label-dot-size: 10px;
     --title-top: 5rem;
     --title-offset-y: 30px;
-    --info-top: 9rem;
+    --info-top: 8rem;
     --info-width: min(70%, 500px);
     --info-offset-y: 30px;
     box-sizing: content-box;
@@ -123,7 +123,6 @@
     left: 50%;
     translate: -50% 5px;
     width: 1px;
-
     height: var(--label-line-h);
     background-color: rgb(255, 255, 255);
     box-shadow: 0 20px 100px 5px #FFFFFF;
@@ -152,7 +151,6 @@
 
 .cards > li > p {
     top: var(--info-top);
-    margin: 0 auto;
     width: var(--info-width);
     max-width: 50%;
     z-index: 2;
@@ -162,6 +160,18 @@
     text-wrap: pretty;
     opacity: var(--info-opacity,0);
     transition: var(--duration) ease-in-out var(--info-delay,0ms);
+}
+
+.textRoadmap {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-weight: 600;
+}
+
+.text {
+    color: var(--text-grey);
+    font-weight: 400;
 }
 
 li:has(input:checked) {
