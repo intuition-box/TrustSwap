@@ -1,46 +1,71 @@
 .logoPage {
     position: fixed;
-    top: 2vh;
-    font-size: 3vh;
-    left: 2vh;
+    top: 4vh;
+    font-size: 25px;
+    left: 20px;
     font-weight: 500;
-    letter-spacing: -0.1vh;
+    letter-spacing: -1px;
     color: var(--text-color);
     text-decoration: none;
+    z-index: 100000;
+}
+
+.containerNavBar {
+    background: rgba(35, 35, 35, 0.2);
+    border-radius: 20px;
+    padding: 5px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(101, 101, 101, 0.3);
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100000;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .navbar {
-    position: fixed;
-    top: 2vh;
-    left: 50%;
-    height: 6.4vh;
+    height: 50px;
     border-radius: 2vh;
-    transform: translateX(-50%);
-    width: auto;
-    background-color: var(--bg-dark);
-    border: 1px solid var(--border-grey);
+    background-color: var(--black);
+    color: var(--text-color);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
     display: flex;
     align-items: center;
-    padding-left: 1vh;
-    padding-right: 1vh;
-    z-index: 10;
+    position: relative;
 }
 
 .linkBase {
     position: relative;
     z-index: 10;
-    padding: 0 4vh;
+    padding: 0 30px;
     display: flex;
     align-items: center;
-    border-radius: 1.5vh;
     border: 1px solid transparent;
     text-decoration: none;
     color: var(--text-grey);
-    height: 5vh;
-    letter-spacing: -0.1vh;
+    height: 50px;
+    letter-spacing: -0.6px;
     transition: color 0.3s;
     font-weight: 500;
-    font-size: 1.8vh;
+    font-size: 14px;
+}
+
+.linkBase:hover {
+    color: var(--text-color);
 }
 
 .linkTextActive {
@@ -49,12 +74,21 @@
 
 .activeBg {
     position: absolute;
-    height: 5vh;
-    border-radius: 1.5vh;
-    background-color: var(--bg-btn);
-    border: 1px solid var(--border-btn);
+    height: 1px;
+    background-color: #D9D9D9;
     transition: left 0.3s ease, width 0.3s ease;
     z-index: 1;
+    bottom: 0;
+}
+
+.activeBgShadow {
+    content: " ";
+    position: absolute;
+    bottom: 0;
+    height: 20px;
+    width: 100px;
+    box-shadow: 0px 0px 100px #D9D9D9;
+    z-index: -1;
 }
 
 .line {
@@ -67,18 +101,17 @@
 .linkBaseComing {
     position: relative;
     z-index: 10;
-    padding: 0 2vh;
+    padding: 0 30px;
     display: flex;
     align-items: center;
-    border-radius: 1.5vh;
     border: 1px solid transparent;
     text-decoration: none;
     color: var(--text-grey);
-    height: 5vh;
-    letter-spacing: -0.1vh;
+    height: 50px;
+    letter-spacing: -0.6px;
     transition: color 0.3s;
     font-weight: 500;
-    font-size: 1.8vh;
+    font-size: 14px;
     cursor: not-allowed;
 }
 
@@ -109,21 +142,32 @@
     position: fixed;
     top: 2vh;
     right: 2vh;
+    background: rgba(35, 35, 35, 0.2);
+    border-radius: 20px;
+    padding: 5px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(101, 101, 101, 0.3);
+    z-index: 10000;
 }
 
 .connectWalletBtn {
-    background-color: var(--bg-dark);
-    border: 1px solid var(--border-grey);
-    box-shadow: inset 0 0 2vh 1vh var(--shadow-grey);
-    height: 6.4vh;
+    height: 50px;
     border-radius: 2vh;
-    padding-left: 2vh;
-    padding-right: 2vh;
-    cursor: pointer;
-}
-
-.connectWalletBtn:hover {
-    box-shadow: inset 0 0 0.7vh 0.4vh var(--shadow-grey);
+    background-color: var(--black);
+    color: var(--text-color);
+    border: 1px solid var(--black-border);
+    box-shadow: 
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+      padding: 0 20px;
+      cursor: pointer;
 }
 
 .connectWalletBtn:active {
@@ -146,7 +190,7 @@
 }
 
 @media (max-width: 1200px) {
-    .navbar {
+    .containerNavBar {
         top: auto;
         bottom: 2vh;
         z-index: 10000;
@@ -202,4 +246,8 @@
   align-items: center;
   margin-top: 0.08vh;
   margin-left: 0.6vh;
+}
+
+.navHeader {
+    background-color: red;
 }
