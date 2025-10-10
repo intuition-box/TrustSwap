@@ -19,7 +19,7 @@ function Landing() {
       <span className={styles.h1Header}>Built on Trust<br/>Community Powered</span>
       <span className={styles.sousTitleHeader}>Dive into TrustSwap's vision.</span>
       <a className={styles.btnHeaderLanding} href={docsUrl}>
-        LightPaper
+        LitePaper
       </a>
       </div>
       <div className={styles.swapContainerLanding}>
@@ -119,10 +119,10 @@ function Landing() {
         <span className={styles.textWhite}>An auction protocol </span>
          where every higher bid earns a reward. No more sniping, just fairness.</p>
         <img
-              src={gbm}
-              alt="search"
-              className={styles.illustrationIntuition}
-            />
+          src={gbm}
+          alt="search"
+          className={styles.illustrationIntuition}
+        />
       
         </div>
         <div className={styles.titleContainerMAinMobile}>
@@ -131,7 +131,7 @@ function Landing() {
         <div className={styles.cardB}>
         <p className={styles.textCardMainTwoCenter}>
         <span className={styles.textWhite}>Any protocol </span>
-           that delivers provable value can be proposed by the community and integrated via the DAO...
+          that delivers provable value can be proposed by the community and integrated via the DAO...
         </p>
         </div>
         </div>

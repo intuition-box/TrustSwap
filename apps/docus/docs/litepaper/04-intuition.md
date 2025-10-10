@@ -1,28 +1,37 @@
 ---
-title: Knowledge graphe Intuition
+title: Protocol Intuition
 sidebar_position: 4
 ---
 
 
-### Trust Gauge
-  - Chaque token listé affiche une jauge visuelle de confiance communautaire.  
-  - Les votes sont liés au triple (ex : TOKEN – WHITELISTED – TRUSTSWAP).
+### **Trust Gauge**
 
-  ![Exemple Voting Overlay](./img/Voting-Overlay.png)
-	
-### Reputation-weighted listing
-  - Seuls les tokens validés par des utilisateurs avec une réputation significative sont whitelisté.  
-  - La réputation on-chain d'un user pèse plus lourd dans les décisions de listing.  
-  - Un token peut être délisté automatiquement si trop de votes négatifs ou des claims négatifs crédibles (“Team exit scam”, “Rug pull détecté”).
-  - La création de pool de liquidité peut être soumise à la validation de la communauté.  
-  - Les pools validées apparaissent dans la section principale; les autres restent masquées ou dans une section dédiée (expérimental).
+* Each listed token displays a **visual trust gauge**, representing community sentiment.
+* Votes are linked to a verifiable triple (e.g., **TOKEN – WHITELISTED – TRUSTSWAP**).
 
-### Knowledge Graph Integration
-  - Chaque token est relié à des triples on-chain (ex : *Team doxée*, *Audit réalisé par …*).  
-  - Les users peuvent explorer le graph reliant le token à son écosystème.
+![Voting Overlay Example](./img/Voting-Overlay.png)
 
-### Social Trading Overlay
-  - Les positions de confiance deviennent publiques (ex : 20 adresses réputées ont voté pour ce token).  
-  - Les utilisateurs peuvent suivre la réputation d’autres wallets comme on suit des traders.  
-  - On remplace le simple volume trading par un indicateur **volume + réputation**.
+---
+### **Reputation-Weighted Listing**
+
+* Only tokens validated by users with **meaningful on-chain reputation** are whitelisted.
+* A user’s reputation directly **influences the weight** of their vote.
+* Tokens can be **automatically delisted** if they receive too many negative votes or credible negative claims (e.g., “Team exit scam,” “Rug pull detected”).
+* Verified pools appear in the main interface, while unverified ones remain hidden or grouped in an **experimental** section.
+
+---
+
+### **Knowledge Graph Integration**
+
+* Every token is connected to **on-chain triples** (e.g., *Team doxxed*, *Audit completed by …*).
+* Users can **explore the knowledge graph**, revealing the relationships between a token and its surrounding ecosystem.
+
+---
+
+### **Social Trading Overlay**
+
+* **Trust positions** become public (e.g., “20 reputable addresses voted for this token”).
+* Users can **follow the reputation** of other wallets, similar to following traders.
+* Trading data evolves from simple **volume metrics** to **volume-plus-reputation indicators**, merging market activity with verified trust.
+
 

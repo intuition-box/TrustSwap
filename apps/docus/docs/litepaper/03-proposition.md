@@ -1,27 +1,39 @@
 ---
-title: Notre proposition
+title: Proposal
 sidebar_position: 3
 ---
 
 
-TrustSwap vise à dépasser les limites des DEX traditionnels en introduisant une nouvelle génération de protocole, où la **confiance et l'implication communautaire** devient un pilier central aux côtés de la liquidité.
+**TrustSwap** aims to go beyond the limits of traditional DEXs by introducing a new generation of protocol, one where **trust and community participation** stand alongside liquidity as foundational pillars.
 
-- **Trading & Liquidité**  
-  TrustSwap repose actuellement sur un fork d'Uniswap V2 pour son socle éprouvé : contrats v2-core audités et formellement vérifiés, massivement utilisés en production depuis 2020, avec plusieurs centaines de milliards de dollars de volume cumulé, gage de robustesse opérationnelle. Les utilisateurs pourront fournir et retirer de la liquidité comme sur tout DEX moderne. L'objectif a moyen terme sera de fork des version plus rescente comme la V3 d'Uniswap, Balancer ou autre. ([dapp.org.uk][1])
+* **Trading & Liquidity**
+  TrustSwap is currently built on a fork of **Uniswap V2**, chosen for its proven foundation: **v2-core contracts** that have been **audited, formally verified**, and **battle-tested in production since 2020**, processing **hundreds of billions of dollars in cumulative volume**, a benchmark of operational robustness.
+  Users can provide or withdraw liquidity like on any modern DEX, while medium-term plans include forking newer versions such as **Uniswap V3**, **Balancer**, or other advanced AMM architectures. ([dapp.org.uk][1])
 
-- **Confiance & Réputation via Intuition**  
-  L'objectif est de transformer la confiance d’un simple **signal social** en **paramètre exécutable** du DEX. Le graphe Intuition alimente des **triples vérifiables** (équipe doxée, audits, incidents, engagements tenus), et ces preuves ajustent **l’expérience, les priorités et les limites** du protocole en temps réel. En intégrant le protocole d’Intuition, TrustSwap accède à un système et des fonctionalités encore inédite et mesurables. ([docs.intuition.systems][4])
+* **Trust & Reputation via Intuition**
+  The goal is to turn **trust** from a mere *social signal* into an **executable parameter** of the DEX. The **Intuition knowledge graph** powers **verifiable triples** (doxxed teams, audits, incidents, fulfilled commitments), allowing these proofs to dynamically adjust the DEX’s **UX, priorities, and limits** in real time.
+  By integrating Intuition, TrustSwap gains access to **measurable, reputation-driven features**, a living trust layer directly embedded in market dynamics. ([docs.intuition.systems][4])
 
+* **DAO & Governance via Colony**
+  Governance in TrustSwap isn’t symbolic, it’s structural. By launching with **Colony from day one**, the project anchors a **truly decentralized framework**.
+  Colony enables **lazy consensus** (votes occur only when there’s objection), **domain-based budgeting**, and **merit-based payments** that grow **non-purchasable reputation**. This ensures smoother decision-making, measurable meritocracy, and clear roles from the very start. ([docs.colony.io][2])
 
-- **DAO & Gouvernance via Colony** 
-  La gouvernance ne sera pas un simple exercice symbolique. Lancer avec **Colony** au J-1 ancre d’emblée un fonctionnement réellement décentralisé. Colony c'est le lazy consensus (on ne vote que s’il y a objection), le domaines budgétaires et paiements au mérite qui font croître la réputation non-achetable. Cela apporte des décisions plus fluides, une méritocratie mesurable et des rôles clairs dès le démarrage. ([docs.colony.io][2])
+* **Fair Launch via GBM Auctions**
+  To empower new projects, TrustSwap integrates **GBM Auctions**, a **bid-to-earn** model that rewards outbid participants with up to **+10%**, aligning engagement with fairness.
+  GBM also introduces a **“stabilization buffer”**: part of the auction proceeds can fund **targeted buybacks** to smooth out extreme bids and reduce post-auction “regret.”
+  TrustSwap remains **open to other fair launch formats** such as **LBPs** or **CoinMachine**, as long as they ensure **simple, fast, and equitable execution**. ([gbm.auction][3])
 
+By combining these building blocks, **TrustSwap** positions itself as a **community-driven, transparent, and innovative DEX**, where **reputation and collective intelligence** matter as much as **capital and liquidity**.
 
-- **Fair launch GBM Auctions**  
-  Pour soutenir les nouveaux projets, TrustSwap proposera un launchpad basé sur les enchères GBM. Ce modèle **bid-to-earn** récompense les enchérisseurs surenchéris (jusqu'à +10%), ce qui aligne l’engagement et l’équité. 
-  GBM apporte en plus un **“stabilization buffer”** : une partie des recettes de l'enchère peut servir à des **buybacks ciblés** pour lisser d’éventuels excès d’outbid et réduire le “regret” post-enchère. Nous restons **ouverts à d’autres formats** ([LBPs][5], [CoinMachine][6]...) tant qu'ils offrent une exécution simple, rapide et équitable. ([gbm.auction][3])
+---
 
-En combinant ces briques, TrustSwap se positionne comme un **DEX communautaire, transparent et innovant**, où la réputation et l'inteligence collective comptent autant que le capital déposé.
+[1]: https://dapp.org.uk
+[2]: https://docs.colony.io
+[3]: https://gbm.auction
+[4]: https://docs.intuition.systems
+[5]: https://docs.balancer.fi/concepts/pools/liquidity-bootstrapping.html
+[6]: https://coindesk.com/learn/what-is-coin-machine
+
 
 
 

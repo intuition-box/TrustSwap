@@ -4,11 +4,11 @@ import Footer from "./Footer"
 
 const Roadmap = () => {
   const milestones = [
-    { year:  "Phase 1", title: "MVP Dex Testnet (Swap, Pool, Landing Page, Litepaper...).", text: "trust"},
-    { year:  "Phase 2", title: "Deployment TrustSwap on Mainnet.", text: "trust" },
-    { year:  "Phase 3", title: "First Integration of the Intuition Protocol (Trust Gauge Token).", text: "trust" },
-    { year:  "Phase 4", title: "Ouverture de la bêta publique et premières intégrations partenaires.", text: "trust" },
-    { year:  "Phase 5", title: "Ouverture de la bêta publique et premières intégrations partenaires.", text: "trust" },
+    { year:  "Phase 1", title: "Testnet (MVP)", text: "The experimentation ground. Deployment of the DEX on testnet with the core building blocks: swap, pools, portfolio, and tracking features."},
+    { year:  "Phase 2", title: "Mainnet Launch & Communication", text: "Official deployment of the DEX. This is the real kickoff: public launch, start of communication, first users, and first listed projects. We’ll also introduce supporting tools, analytics page, blog, documentation, and the first community channels." },
+    { year:  "Phase 3", title: "Colony Integration & First Intuition Features", text: "Implementation of decentralized governance through Colony: domains, dynamic reputation, and lazy voting. In parallel, the first integration of Intuition, introducing reputation-based logic and direct voting features on tokens." },
+    { year:  "Phase 4", title: "GBM Launchpad", text: "Deployment of the GBM Auctions module for fair launches. Each auction becomes incentive-driven, transparent, and frictionless." },
+    { year:  "Phase 5", title: "Community Action & Exploration of Future Features", text: "Full openness to community proposals. Research and testing of new value-proven protocols, any module suggested and validated through the DAO. The goal: to make TrustSwap evolve as a living ecosystem, powered by its users." },
   ];
 
   const repeatedMilestones = Array(2)
@@ -43,7 +43,7 @@ const Roadmap = () => {
               {item.title}
               <span className={styles.text}>{item.text}</span>
               </p>
-             
+
             </li>
           ))}
         </ul>

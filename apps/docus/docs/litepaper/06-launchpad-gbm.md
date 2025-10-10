@@ -3,26 +3,35 @@ title: Launchpad IDA GBM
 sidebar_position: 6
 ---
 
-Lancer un token doit être prévisible, équitable et résistant aux abus. GBM (Go Bid More) apporte un cadre “bid-to-earn” où le prix se découvre publiquement, sans guerre de gas ni sniping.
+Launching a token should be **predictable, fair, and resistant to abuse**.
+**GBM (Go Bid More)** introduces a **bid-to-earn** framework where price discovery happens publicly, with no gas wars, no sniping, and no insider advantage.
 
-### Modèle “Bid-to-Earn”
-À chaque surenchère, l’enchérisseur précédent récupère sa mise + une prime (jusqu’à ~10% suivant son outbid). Participer est donc récompensé même si l’on ne gagne pas, ce qui favorise l'engagement.
+---
 
-### Lancement équitable des tokens
-- Pas de ventes privées opaques.  
-- Enchères **publiques, transparentes et accessibles** à tous.  
-- Moins de pump & dump liés aux insiders.
+### **Bid-to-Earn Model**
 
-Le prix se révèle au fil des enchères ; chaque surenchère accorde une prime à l’enchérisseur précédent, ce qui aligne les incitations et décourage les rafles opportunistes.
-Il est aussi possible de reserver un stabilization buffer : un pourcentage des recettes peux servir à approfondir la liquidité (seed/renforcement LP) ou à des buybacks ciblés pour lisser des outbids extrêmes et réduire le “regret” post-enchère.
-À la fin d’une enchère réussie : Une paire peux automatiquement etre créé (ex. $NEW / $tTRUST).  
-Cela apporte une expérience fluide du **launch** au **trading**.
+With every new bid, the **previous bidder is rewarded**, receiving their initial bid **plus a premium** (up to ~10% depending on the outbid).
+Participation is therefore **rewarded even without winning**, encouraging engagement and a healthier dynamic among bidders.
 
+---
 
-### Transparence et communauté
-- Projets reliés au graphe Intuition (claims : audit, équipe, roadmap…).  
-- Votes de la communauté influencent la confiance post-lancement.  
-- La réputation communautaire devient clé pour le succès.
+### **Fair Token Launch**
 
+* **No opaque private sales.**
+* **Public, transparent, and accessible auctions** open to everyone.
+* **Fewer pump & dump risks** linked to early insiders.
 
-En bref, GBM aligne équité, transparence et liquidité dès le jour 1, transformant le lancement en un processus sain, lisible et résistant aux abus.
+Price is gradually revealed through bidding, each outbid pays a premium to the previous participant, **aligning incentives** and discouraging **opportunistic sniping**.
+Optionally, a **stabilization buffer** can be reserved: a percentage of the auction proceeds may be used to **deepen liquidity** (seed or strengthen LPs) or conduct **targeted buybacks** to smooth extreme bids and reduce post-auction regret.
+
+At the end of a successful auction, a **liquidity pair** (e.g., `$NEW / $tTRUST`) can be **automatically created**, providing a **seamless transition from launch to trading**.
+
+---
+
+### **Transparency & Community**
+
+* Projects are linked to the **Intuition knowledge graph** (claims: audits, team, roadmap…).
+* **Community voting** influences post-launch trust and visibility.
+* **Reputation** becomes a key driver of long-term project success.
+
+In short, **GBM aligns fairness, transparency, and liquidity from day one**, turning token launches into a **clean, readable, and manipulation-resistant** process.
