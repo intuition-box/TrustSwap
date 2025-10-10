@@ -1,11 +1,10 @@
 ---
-title: Tokenomics (à venir)
+title: Tokenomics (soon)
 sidebar_position: 7
 ---
 
+Coming soon...
 
-Cette section sera complétée prochainement.
 
-
-### Trust-based incentives
-  - Farming/staking intègre la réputation (plus la réputation est élevée, plus les rewards sont boostés).
+<!-- ### Trust-based incentives
+  - Farming/staking intègre la réputation (plus la réputation est élevée, plus les rewards sont boostés). -->

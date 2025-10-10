@@ -43,7 +43,7 @@ const Roadmap = () => {
               {item.title}
               <span className={styles.text}>{item.text}</span>
               </p>
-             
+
             </li>
           ))}
         </ul>

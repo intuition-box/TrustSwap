@@ -6,42 +6,45 @@ tags: []
 ---
 
 
-## Pourquoi nous lançons TrustSwap  
+## Why We’re Building TrustSwap
 
-Il y a quelques mois, avec Florian, nous avons commencé à discuter de l’idée de monter un projet ensemble. L’opportunité s’est présentée lorsque **Intuition** a lancé un petit hackathon d’une semaine pour stimuler le développement sur sa blockchain.  
+A few months ago, **Florian** and I started talking about the idea of launching a project together. The opportunity came when **Intuition** announced a one-week hackathon to spark development on its blockchain.
 
-Nous avons alors décidé d’expérimenter la création d’un **DEX minimaliste**. Le développement a avancé rapidement : le travail d’équipe était efficace, fluide, et au terme de ce hackathon, nous avions un **DEX fonctionnel**.  
+We decided to experiment with building a **minimalist DEX**. The development progressed quickly, teamwork was smooth and efficient and by the end of the hackathon, we had a **fully functional DEX**.
 
-C’est à ce moment-là que nous avons décider de prolonger l'aventure et d'explorer les possibilité sur un nouveau genre de DEX en intégrant le protocole Intuition. 
-
----
-
-## De l’expérimentation à une vision  
-
-Nous avons commencé à réfléchir aux fonctionnalités qui permettraient d’aligner ce DEX avec **la technologie et la vision d’Intuition**. Durant nos recherches, nous avons aussi découvert de nouveaux protocoles qui résonnent parfaitement avec notre approche, comme **Colony** (pour une gouvernance DAO plus équitable) ou **GBM Auctions** (pour des mécanismes de lancement plus justes et ludiques).  
-
-Ces découvertes ont mis en lumière un problème que l’on retrouve dans la plupart des DEX :  
-**le pouvoir de vote se retrouve bien trop souvent concentré entre les mains de quelques “whales”**.  
-Dans ces modèles, la gouvernance se limite souvent à décider où seront appliquées les récompenses, au détriment de la communauté.  
+That’s when we decided to **keep going**, to turn this experiment into something bigger and explore how **Intuition’s protocol** could power a new kind of DEX.
 
 ---
 
-## Notre différence  
+## From Experiment to Vision
 
-Avec TrustSwap, nous voulons proposer **quelque chose de différent**.  
-Notre objectif est de replacer la **communauté au cœur du projet**, d’instaurer une gouvernance plus équilibrée et d’aller au-delà de la simple redistribution des rewards.  
+We began thinking about features that would align our DEX with **Intuition’s technology and philosophy**.
+During our research, we discovered other protocols that resonated perfectly with our vision — such as **Colony** (for fair, reputation-based DAO governance) and **GBM Auctions** (for transparent and engaging token launches).
 
-TrustSwap, ce n’est pas seulement un nouveau DEX :  
-- C’est un espace où la **confiance** est la valeur centrale.  
-- C’est une plateforme qui s’appuie sur des protocoles innovants pour renforcer la **transparence et la justice**.  
-- C’est un projet qui se construit **avec la communauté, et non uniquement pour elle**.  
+These discoveries highlighted a recurring problem across most DEXs:
+**voting power is too often concentrated in the hands of a few whales.**
+In many models, governance simply decides where rewards go, not how the protocol should truly evolve, leaving most of the community on the sidelines.
 
 ---
 
-## La suite  
+## Our Difference
 
-Aujourd’hui, nous avons restructuré notre code et déployé la première **version officielle de TrustSwap**.  
+With **TrustSwap**, we want to build **something different**.
+Our goal is to put the **community back at the center**, establish a more balanced governance system, and go beyond simple yield distribution.
 
-Ce blog sera notre **carnet de bord** : chaque semaine, nous publierons un article pour partager l’avancée du projet, documenter nos choix, et instaurer une véritable transparence avec notre communauté.  
+TrustSwap is not just another DEX:
 
-Bienvenue dans l’aventure TrustSwap  
+* It’s a space where **trust** is the core value.
+* A platform that leverages innovative protocols to bring **transparency and fairness**.
+* A project **built with the community — not just for it.**
+
+---
+
+## What’s Next
+
+Today, we’ve restructured our codebase and deployed the **first official version of TrustSwap**.
+
+This blog will serve as our **public build journal**, every week, we’ll share updates on our progress, document our choices, and keep our community fully informed.
+
+Welcome to the **TrustSwap adventure.**
+ 

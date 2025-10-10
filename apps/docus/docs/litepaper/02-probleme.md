@@ -1,15 +1,14 @@
 ---
-title: Problème identifié
+title: Issue
 sidebar_position: 2
 ---
 
+Despite the major progress made by DEXs, several **structural limitations** remain:
 
-Malgré les avancées majeures apportées par les DEX, plusieurs limites structurelles persistent :
+* **Listing transparency:** While the blockchain itself is permissionless, most DEX interfaces are not. Visibility often depends on **whitelists or tokenlists** curated by teams (developers, aggregators). In practice, being “listed” means being **approved by maintainers**, based on subjective criteria, update delays, and with no reliable **trust signals** for users.
 
-- **Transparence des listings** : sur les DEX modernes, la chaîne est permissionless mais l’interface ne l’est pas vraiment. La visibilité repose souvent sur des whitelists/tokenlists maintenues par des équipes (devs, agrégateurs). En pratique, “être listé” revient à être validé par des mainteneurs, avec des critères hétérogènes, une latence d’update et sans signaux de confiance exploitables pour l’utilisateur.
+* **Lack of reputation and historical context:** Today, a wallet is just an **address without context**, no native trust score, no weighting for longevity, behavior, contribution, or audits. On the project side (deployers, multisig signers, team wallets), **trust isn’t codified**: it’s hard to link a new token to a verifiable **track record**.
 
-- **Absence de réputation et d’historique utilisateur** : aujourd’hui, un wallet reste une identité sans contexte : aucun score de fiabilité natif, aucune pondération par ancienneté, comportement, contribution ou audits. Du côté des équipes (déployeurs, signataires de multisig, wallets de team), la confiance n’est pas codifiée : il est difficile de relier un nouveau token à un track-record vérifiable.
+* **Limited access for new projects:** Many emerging tokens struggle to secure both **initial liquidity** and **visibility** to attract early users, reinforcing the dominance of already-established tokens.
 
-- **Accès difficile pour les nouveaux projets** : de nombreux tokens émergents peinent à obtenir à la fois la **liquidité initiale** et la **visibilité** nécessaire pour attirer les premiers utilisateurs, renforçant la domination des tokens déjà établis.
-
-- **Faible implication communautaire dans la gouvernance** : bien que de nombreux projets se réclament “décentralisés”, la participation réelle des utilisateurs aux décisions reste marginale, souvent limitée à un vote symbolique sur des propositions peu stratégiques.
+* **Weak community involvement in governance:** Although many protocols claim to be “decentralized,” actual user participation in decision-making remains minimal, often reduced to symbolic votes on low-stakes proposals.
