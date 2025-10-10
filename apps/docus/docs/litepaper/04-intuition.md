@@ -17,7 +17,6 @@ sidebar_position: 4
 * Only tokens validated by users with **meaningful on-chain reputation** are whitelisted.
 * A user’s reputation directly **influences the weight** of their vote.
 * Tokens can be **automatically delisted** if they receive too many negative votes or credible negative claims (e.g., “Team exit scam,” “Rug pull detected”).
-* The **creation of liquidity pools** may be subject to community validation.
 * Verified pools appear in the main interface, while unverified ones remain hidden or grouped in an **experimental** section.
 
 ---
