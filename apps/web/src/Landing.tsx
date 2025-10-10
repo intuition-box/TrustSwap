@@ -19,7 +19,7 @@ function Landing() {
       <span className={styles.h1Header}>Built on Trust<br/>Community Powered</span>
       <span className={styles.sousTitleHeader}>Dive into TrustSwap's vision.</span>
       <a className={styles.btnHeaderLanding} href={docsUrl}>
-        WhitePaper
+        LightPaper
       </a>
       </div>
       <div className={styles.swapContainerLanding}>
