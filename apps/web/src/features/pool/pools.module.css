@@ -37,7 +37,7 @@
 
 
 .sectionPool {
-    height: 100vh;
+    max-height: 100vh;
     padding-top: 9vh;
     display: flex;
     flex-direction: column;
