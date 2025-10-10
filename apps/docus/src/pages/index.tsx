@@ -21,7 +21,7 @@ function HomepageHeader() {
           <Link
             className="button button--secondary button--lg"
             to="/docs/litepaper/introduction">
-            Litepaper
+            Explore
           </Link>
         </div>
       </div>

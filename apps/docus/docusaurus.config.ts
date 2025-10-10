@@ -77,10 +77,7 @@ const config: Config = {
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
       title: 'TrusSwap Docs',
-      logo: {
-        alt: 'My Site Logo',
-        src: 'img/logo.svg',
-      },
+      
       items: [
         { type: 'doc', docId: 'litepaper/introduction', position: 'left', label: 'Litepaper' },
         { to: '/blog', label: 'Blog', position: 'left' } 
