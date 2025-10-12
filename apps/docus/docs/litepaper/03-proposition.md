@@ -12,7 +12,7 @@ sidebar_position: 3
 
 * **Trust & Reputation via Intuition**
   The goal is to turn **trust** from a mere *social signal* into an **executable parameter** of the DEX. The **Intuition knowledge graph** powers **verifiable triples** (doxxed teams, audits, incidents, fulfilled commitments), allowing these proofs to dynamically adjust the DEX’s **UX, priorities, and limits** in real time.
-  By integrating Intuition, TrustSwap gains access to **measurable, reputation-driven features**, a living trust layer directly embedded in market dynamics. ([docs.intuition.systems][4])
+  By integrating Intuition, TrustSwap gains access to **measurable, reputation-driven features**, a living trust layer directly embedded in market dynamics. A key aspect of this trust layer lies in its machine readability by trading agents, which now play a major role in DeFi. Each token, pool, team, and even each agent, will inherit a programmable TrustScore (powered by verifiable triples) that both the interface and agents can leverage to adapt routing, slippage, and order limits. The result is a reputation-sensitive execution, where financial performance relies as much on proof as on liquidity. ([docs.intuition.systems][4])
 
 * **DAO & Governance via Colony**
   Governance in TrustSwap isn’t symbolic, it’s structural. By launching with **Colony from day one**, the project anchors a **truly decentralized framework**.

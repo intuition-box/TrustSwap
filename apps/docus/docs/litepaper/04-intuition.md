@@ -21,6 +21,13 @@ sidebar_position: 4
 
 ---
 
+### **Machine-Readable Trust Layer**
+
+A key aspect of this **trust layer** lies in its **readability by trading agents**, which today play a major role in the DeFi landscape. Each **token**, **pool**, **team**, or even **agent** will inherit a **programmable TrustScore** (powered by verifiable triples) that both the interface and **trading agents** can leverage to **adapt routing, slippage, and order limits** in real time.
+
+
+---
+
 ### **Knowledge Graph Integration**
 
 * Every token is connected to **on-chain triples** (e.g., *Team doxxed*, *Audit completed by …*).
