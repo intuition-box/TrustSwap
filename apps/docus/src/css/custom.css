@@ -20,7 +20,9 @@
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 
-  body, main {
+.test {}
+
+  body {
     background-image:
     radial-gradient(#000000 2px, transparent 2px),
     linear-gradient(to bottom, #1e1e1e 0%, #080808 0%, #080808 100%);
@@ -28,6 +30,7 @@
     background-blend-mode: normal;
     color: #b6b6b6;
    }
+
 
    
    nav, footer {
@@ -41,6 +44,24 @@
    footer {
     border-top: 1px solid rgb(63, 63, 63);
    }
+
+   section {
+    color: #FFFFFF;
+  }
+
+
+
+ 
+  #__docusaurus {
+    background-image:
+    radial-gradient(#000000 2px, transparent 2px),
+    linear-gradient(to bottom, #1e1e1e 0%, #080808 0%, #080808 100%);
+    background-size: 4px 4px, 100% 100%;
+    background-blend-mode: normal;
+   }
+
+   
+
 
    
 }

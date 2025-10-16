@@ -19,9 +19,14 @@ function Landing() {
       <div className={styles.titleContainer}>
       <span className={styles.h1Header}>Built on Trust<br/>Community Powered</span>
       <span className={styles.sousTitleHeader}>Dive into TrustSwap's vision.</span>
+      <div className={styles.containerBtnHeaderLanding}>
       <a className={styles.btnHeaderLanding} href={docsUrl}>
         LitePaper
       </a>
+      <a className={styles.btnHeaderLandingLink} href={"https://docs.google.com/forms/d/e/1FAIpQLScw_r8W-Cfu16CvJX4R6YU3E5FOZOmHnw3Kl-cEBM5s36EiCA/viewform?pli=1"}>
+      Share your feedback
+      </a>
+      </div>
       </div>
       <div className={styles.swapContainerLanding}>
         

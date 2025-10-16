@@ -15,7 +15,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/landing" replace />} />
-          <Route path="/landing" element={<Landing />} />
+          <Route path="/Home" element={<Landing />} />
           <Route path="/swap" element={<SwapPage />} />
           <Route path="/pools" element={<PoolsPage />} />
           <Route path="/portfolio" element={<PortfolioPage />} />
