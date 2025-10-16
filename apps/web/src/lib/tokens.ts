@@ -34,7 +34,7 @@ export const TOKENLIST: TokenInfo[] = [
     symbol: "WTTRUST",
     name: "Wrapped TRUST",
     decimals: 18,
-    hidden: true,
+    hidden: false,
   },
 ];
 
