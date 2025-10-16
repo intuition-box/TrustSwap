@@ -12,6 +12,7 @@ export default function PortfolioPage() {
   if (!isConnected) {
     return (
       <div className={styles.sectionPortfolio}>
+             <div className={styles.halo}></div>
         <div className={styles.connectPrompt}>
           Connect your wallet
         </div>
@@ -21,7 +22,7 @@ export default function PortfolioPage() {
 
   return (
     <div className={styles.sectionPortfolio}>
-
+     <div className={styles.halo}></div>
       {error && (
         <div className="mb-4 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm">
           {error}

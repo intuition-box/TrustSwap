@@ -95,3 +95,25 @@
   border-radius: 50%;
   object-fit: cover;
 }
+
+.halo {
+  content: "";
+  position: fixed;
+  top: -10%;
+  left: 50%;
+  height: 150%;
+  width: 25%;
+  transform: translateX(-50%) rotate(16deg);
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    #4ADAEA 30%,
+    #000000 60%,
+    #4ADAEA 90%,
+    #000000aa 100%
+  );
+  opacity: 0.8;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+}

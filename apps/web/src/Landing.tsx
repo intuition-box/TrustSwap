@@ -7,6 +7,7 @@ import gbm from "../src/assets/gbm.png";
 import security from "../src/assets/security.png";
 import user from "../src/assets/user.png";
 import hub from "../src/assets/hub.png";
+import ia from "../src/assets/ia.png";
 import Roadmap from "./components/Roadmap"
 
 function Landing() {
@@ -68,6 +69,22 @@ function Landing() {
         </div>
       </div>
      </div>
+
+     <div className={styles.IAContainer}>
+      <div className={styles.imgIAContainer}>
+  <img
+              src={ia}
+              alt="AI"
+              className={styles.imgIA}
+            />
+      </div>
+
+      <div className={styles.textIAContainer}>
+      <span className={styles.titleIA}>TRUST LAYER<br/> for Agent IA </span>
+        <span>Today’s AI agents navigate a world without landmarks. The Trust Layer gives them a compass, a verifiable layer of trust to recognize the right tokens, the right contracts, and the right actors.</span>
+      </div>
+     </div>
+
      <div className={styles.mainContainer}>
       <span className={styles.h3Main}>“One protocol, many integrations. A unified ecosystem built around TrustSwap.”</span>
        <img
