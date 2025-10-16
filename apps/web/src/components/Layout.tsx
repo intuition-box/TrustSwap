@@ -49,7 +49,7 @@ export default function Layout() {
     <div>
       <header>
         <div className={styles.navHeader}>
-          <NavLink to="/Home" ref={swapRef} className={styles.logoPage}>
+          <NavLink to="/home" ref={swapRef} className={styles.logoPage}>
           <img
               src={logo}
               alt="TrustSwap"
