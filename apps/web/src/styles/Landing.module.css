@@ -82,6 +82,13 @@
   z-index: 10;
 }
 
+.containerBtnHeaderLanding {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+}
+
 
 
 .halo {
@@ -154,6 +161,31 @@
   margin-top: 15px;
   cursor: pointer;
   transition: 0.3s ease;
+  text-decoration: none;
+}
+
+
+.btnHeaderLandingLink {
+  width: 200px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: none;
+  background-color: transparent;
+  color: #bcbcbc;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  font-size: 16px;
+  margin-top: 15px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  text-decoration: none;
+}
+
+.btnHeaderLandingLink:hover {
+  background-color: rgb(35, 35, 35);
 }
 
 .btnHeaderLanding:hover {
@@ -167,7 +199,6 @@
 }
 
 .mainContainer {
-    min-height: 100vh;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -305,6 +336,7 @@
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
+  margin-top: 120px;
 
 }
 
@@ -347,6 +379,11 @@
   height: 100%;
   position: relative;
   top: -10px;
+}
+
+.IAContainer {
+  margin-bottom: 100px;
+  margin-top: 100px;
 }
 
 }
@@ -540,8 +577,7 @@
   }
 
   .btnHeaderLanding {
-    margin-left: auto;
-    margin-right: auto;
+   
   }
 
   .SwapCardHeader {
@@ -584,5 +620,12 @@
     margin-top: 0px;
     gap: 30px;
   }
+
+  .containerBtnHeaderLanding {
+    gap: 5px;
+
+    justify-content: center;
+  }
+
 
 }

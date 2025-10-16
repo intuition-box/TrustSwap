@@ -2,6 +2,7 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import styles from "../styles/Layout.module.css";
 import { ConnectButton } from "./ConnectButton";
+import logo from "../assets/logo.png";
 
 export default function Layout() {
   const location = useLocation();
@@ -48,8 +49,12 @@ export default function Layout() {
     <div>
       <header>
         <div className={styles.navHeader}>
-          <NavLink to="/landing" ref={swapRef} className={styles.logoPage}>
-            TrustSwap
+          <NavLink to="/Home" ref={swapRef} className={styles.logoPage}>
+          <img
+              src={logo}
+              alt="TrustSwap"
+              className={styles.imgCardTop}
+            />
           </NavLink>
           <div className={styles.containerNavBar}>
             <nav ref={navRef} className={styles.navbar}>

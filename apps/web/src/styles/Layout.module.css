@@ -1,6 +1,6 @@
 .logoPage {
     position: fixed;
-    top: 4vh;
+    top: 30px;
     font-size: 25px;
     left: 20px;
     font-weight: 500;
@@ -8,6 +8,10 @@
     color: var(--text-color);
     text-decoration: none;
     z-index: 100000;
+}
+
+.imgCardTop {
+    width: 150px;
 }
 
 .containerNavBar {
