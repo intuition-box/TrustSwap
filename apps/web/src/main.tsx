@@ -13,10 +13,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <RootProviders>
         <BrowserRouter>
           <LiveRefetchProvider>
-            <div className={styles.containerBody}>
-              <div className={styles.halo}></div>
+
               <App />
-              </div>
+             
           </LiveRefetchProvider>  
         </BrowserRouter>
       </RootProviders>

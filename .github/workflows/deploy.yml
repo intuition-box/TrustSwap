@@ -1,4 +1,4 @@
-name: Deploy Dapp to GitHub Pages
+name: Deploy Dapp & Docs to GitHub Pages
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'   # keep your choice
+          node-version: '20'
 
       - name: Enable Corepack & pnpm
         run: |
@@ -50,18 +50,39 @@ jobs:
       - name: Install dependencies (workspace root)
         run: pnpm install --frozen-lockfile
 
+      # ---- Build internal packages if needed ----
       - name: Build SDK
         run: pnpm -w --filter "@trustswap/sdk" run build
 
-      - name: Build with Vite (web)
+      # ---- Build Web (Vite) ----
+      - name: Build Web app
         run: pnpm -w --filter "./apps/web" run build
+
+      # ---- Build Docusaurus ----
+      # We force baseUrl to /docs/ so it serves under /docs on Pages.
+      - name: Build Docs (Docusaurus)
+        run: pnpm -w --filter "./apps/docus" run build
+
+      # ---- Assemble a single artifact for GitHub Pages ----
+      # Resulting structure:
+      #   ./.gh-pages/            => Web app (root)
+      #   ./.gh-pages/docs/       => Docusaurus site
+      - name: Prepare Pages artifact
+        run: |
+          rm -rf .gh-pages
+          mkdir -p .gh-pages
+          cp -r apps/web/dist/* .gh-pages/
+          mkdir -p .gh-pages/docs
+          cp -r apps/docus/build/* .gh-pages/docs/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: apps/web/dist
+          path: .gh-pages
 
   deploy:
+    # For PRs, this creates a Pages "Preview" deployment automatically.
+    # For pushes to main, it updates the production Pages site.
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

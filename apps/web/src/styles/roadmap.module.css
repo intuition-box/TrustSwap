@@ -1,0 +1,220 @@
+.roadmapContainer {
+    width: 100%;
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: transparent;
+    margin-top: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 900px;
+    position: relative;
+    overflow: hidden;
+}
+
+.roadmapTitle {
+    text-align: center;
+    font-size: 40px;
+    max-width: 1120px;
+    letter-spacing: -1px;
+    font-weight: 600;
+}
+
+.sousTitleRoadMap {
+    font-size: 20px;
+    color: var(--text-grey);
+    font-weight: 400;
+    margin-top: 10px;
+}
+
+.cards-container {
+    --base-rotation: 0deg;
+    --full-circle: 360deg;
+    --radius: 30vw;
+    --duration: 200ms;
+    --cards-container-size: calc(var(--radius) * 2);
+    --cards-container-padding: 2rem;
+    --border-color: transparent;
+    --label-offset: calc(var(--radius) * -1 - 1rem);
+    --label-size: 30px;
+    --label-color: #666;
+    --label-color-hover: rgb(255, 255, 255);
+    --label-line-h: 0;
+    --label-line-h-current: 7rem;
+    --label-dot-size: 10px;
+    --title-top: 5rem;
+    --title-offset-y: 30px;
+    --info-top: 8rem;
+    --info-width: min(70%, 500px);
+    --info-offset-y: 30px;
+    box-sizing: content-box;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) translateY(20%);
+    width: var(--cards-container-size);
+    height: var(--cards-container-size);
+    padding: var(--cards-container-padding);
+    clip-path: inset(0 0 50% 0);
+}
+
+
+.cards {
+    position: absolute;
+    inset: var(--cards-container-padding);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease-in-out var(--duration);
+    list-style: none;
+}
+
+.cards li > input {
+    display: none;
+}
+
+.cards li {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    transform-origin: center;
+    display: grid;
+    place-content: center;
+    transform: rotate(calc(var(--i) * 360deg / var(--items)));
+    pointer-events: none;
+}
+
+.cards li > label {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    transform: translateY(var(--label-offset));
+    width: var(--label-size);
+    height: var(--label-size);
+    width: auto;
+    cursor: pointer;
+    pointer-events: initial;
+    text-align: center;
+    color: var(--label-color);
+    font-size: clamp(.8rem, 2.5vw + .04rem,1rem);
+    transition: var(--duration) ease-in-out;
+    padding-top: 10px;
+}
+
+.cards li > label::before {
+    content: '';
+    position: absolute;
+    top: var(--cards-container-padding);
+    left: 50%;
+    translate: -50% 0;
+    width: var(--label-dot-size);
+    height: var(--label-dot-size);
+    aspect-ratio: 50%;
+    border-radius: 50%;
+    background-color: var(--label-color);
+    transition: background-color var(--duration) ease-in-out;
+}
+
+.cards li > label::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    translate: -50% 5px;
+    width: 1px;
+    height: var(--label-line-h);
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0 20px 100px 5px #FFFFFF;
+    transition: height 300ms ease-in-out var(--label-line-delay,0ms);
+}
+
+.cards li > label:hover {
+    --label-color: var(--label-color-hover);
+}
+
+.cards > li > h2,
+.cards > li > p {
+    position: absolute;
+    left: 50%;
+    text-align: center;
+    transform: translate(-50%, 0);
+    transform-origin: center;
+}
+
+.cards > li > h2 {
+    top: var(--title-top);
+    opacity: var(--title-opacity,0);
+    translate: 0 var(--title-offset-y);
+    transition: var(--duration) ease-in-out var(--title-delay,0ms);
+}
+
+.cards > li > p {
+    top: var(--info-top);
+    width: var(--info-width);
+    max-width: 50%;
+    z-index: 2;
+    font-size: 18px;
+    letter-spacing: -0.4px;
+    text-align: center;
+    text-wrap: pretty;
+    opacity: var(--info-opacity,0);
+    transition: var(--duration) ease-in-out var(--info-delay,0ms);
+}
+
+.textRoadmap {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-weight: 600;
+}
+
+.text {
+    color: var(--text-grey);
+    font-weight: 400;
+}
+
+li:has(input:checked) {
+    --label-opacity: 1;
+    --label-color: var(--label-color-hover);
+    --label-line-h: var(--label-line-h-current);
+    --label-line-delay: calc(var(--duration) * 2);
+    --title-opacity: 1;
+    --title-offset-y: 0;
+    --title-delay: calc(var(--duration) * 3);
+    --info-opacity: 1;
+    --info-offset-y: 0;
+    --info-delay: calc(var(--duration) * 4);
+}
+
+.cards:has(input:checked) {
+    transform: rotate(calc(var(--base-rotation) - (var(--index) * var(--full-circle) / var(--items))));
+}
+
+.cards:has(li:nth-child(1)>input:checked) { --index: 0; }
+.cards:has(li:nth-child(2)>input:checked) { --index: 1; }
+.cards:has(li:nth-child(3)>input:checked) { --index: 2; }
+.cards:has(li:nth-child(4)>input:checked) { --index: 3; }
+.cards:has(li:nth-child(5)>input:checked) { --index: 4; }
+.cards:has(li:nth-child(6)>input:checked) { --index: 5; }
+.cards:has(li:nth-child(7)>input:checked) { --index: 6; }
+.cards:has(li:nth-child(8)>input:checked) { --index: 7; }
+.cards:has(li:nth-child(9)>input:checked) { --index: 8; }
+.cards:has(li:nth-child(10)>input:checked) { --index: 9; }
+.cards:has(li:nth-child(11)>input:checked) { --index: 10; }
+.cards:has(li:nth-child(12)>input:checked) { --index: 11; }
+.cards:has(li:nth-child(13)>input:checked) { --index: 12; }
+.cards:has(li:nth-child(14)>input:checked) { --index: 13; }
+
+
+@media (max-width: 800px) {
+    .sousTitleRoadMap {
+        font-size: 1.8vh;
+        max-width: 70%;
+        text-align: center;
+      }
+
+      .cards-container {
+        --radius: 80vw;
+      }
+ }

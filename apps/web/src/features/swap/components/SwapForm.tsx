@@ -386,21 +386,38 @@ export default function SwapForm() {
     );
   }
 
-  // setters checksum
   const setTokenInSafe = (a: Address) => {
     try {
-      setTokenIn(getAddress(a));
+      const addr = getAddress(a);
+  
+      // Empêcher le même token en In et Out
+      if (tokenOut && getAddress(tokenOut) === addr) {
+        // Option 1 : swap automatiquement les tokens
+        setTokenOut(tokenIn);
+      }
+  
+      setTokenIn(addr);
     } catch {
       setTokenIn(a);
     }
   };
+  
   const setTokenOutSafe = (a: Address) => {
     try {
-      setTokenOut(getAddress(a));
+      const addr = getAddress(a);
+  
+      // Empêcher le même token en In et Out
+      if (tokenIn && getAddress(tokenIn) === addr) {
+        // Option 1 : swap automatiquement les tokens
+        setTokenIn(tokenOut!);
+      }
+  
+      setTokenOut(addr);
     } catch {
       setTokenOut(a);
     }
   };
+  
 
   useEffect(() => {
     // on change de paire → on invalide la quote et l'impact courant
@@ -425,25 +442,30 @@ export default function SwapForm() {
       </div>
 
       <div className={styles.inputSwapContainerTo}>
-        <FlipButton
-          onClick={() => {
-            if (!tokenOut) {
-              // juste remplir le To avec le From si To est vide
-              setTokenOut(tokenIn);
-              setAmountOut(amountIn);
-              return;
-            }
-            // flip classique
-            const nextIn  = (() => { try { return getAddress(tokenOut); } catch { return tokenOut; } })();
-            const nextOut = (() => { try { return getAddress(tokenIn);  } catch { return tokenIn;  } })();
-            setTokenIn(nextIn as Address);
-            setTokenOut(nextOut as Address);
-            setAmountIn(amountOut);
-            setAmountOut(amountIn);
-            setBestPath(null);
-            setLastOutBn(null);
-          }}
-        />
+      <FlipButton
+  onClick={() => {
+    if (!tokenOut) {
+      setTokenOut(tokenIn);
+      setAmountOut(amountIn);
+      setTokenIn(undefined);
+      setAmountIn("");
+      return;
+    }
+
+    const nextIn = (() => { try { return getAddress(tokenOut); } catch { return tokenOut; } })();
+    const nextOut = (() => { try { return getAddress(tokenIn); } catch { return tokenIn; } })();
+
+    if (nextIn === nextOut) return;
+
+    setTokenIn(nextIn as Address);
+    setTokenOut(nextOut as Address);
+    setAmountIn(amountOut);
+    setAmountOut(amountIn);
+    setBestPath(null);
+    setLastOutBn(null);
+  }}
+/>
+
 
         <TokenField
           label="To"
