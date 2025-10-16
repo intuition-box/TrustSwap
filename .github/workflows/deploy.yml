@@ -61,7 +61,7 @@ jobs:
       # ---- Build Docusaurus ----
       # We force baseUrl to /docs/ so it serves under /docs on Pages.
       - name: Build Docs (Docusaurus)
-        run: pnpm -w --filter "./apps/docus" run build -- --baseUrl /docs/
+        run: pnpm -w --filter "./apps/docus" exec docusaurus build --baseUrl /docs/
 
       # ---- Assemble a single artifact for GitHub Pages ----
       # Resulting structure:
