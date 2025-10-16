@@ -182,6 +182,7 @@
   font-weight: 600;
 }
 
+
 .h3Main {
   text-align: center;
   font-size: 40px;
@@ -294,6 +295,60 @@
 
 .titleGreyCard {
   color: var(--text-grey);
+}
+
+.IAContainer {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+
+}
+
+.imgIAContainer {
+  width: 60%;
+  height: 100%;
+  position: relative;
+  top: -120px;
+}
+
+.imgIA {
+  width: 100%;
+}
+
+.titleIA {
+  letter-spacing: -1px;
+  color: var(--text-color);
+  font-size: 45px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.textIAContainer {
+  width: 95%;
+  max-width: 400px;
+  height: 100%;
+  color: var(--text-grey);
+  text-align: center;
+}
+
+.textIAContainer {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+@media (max-width: 1000px) {
+  .imgIAContainer {
+  width: 80%;
+  height: 100%;
+  position: relative;
+  top: -10px;
+}
+
 }
 
 .titleContainerMAinReverse {

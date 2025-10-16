@@ -7,8 +7,11 @@ export default function SwapPage() {
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!haloRef.current) return;
-    const x = e.clientX;
-    const y = e.clientY;
+
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
     haloRef.current.style.left = `${x}px`;
     haloRef.current.style.top = `${y}px`;
     haloRef.current.style.opacity = "1";
@@ -20,15 +23,13 @@ export default function SwapPage() {
   };
 
   return (
-    <div
-      className={styles.containerBody}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className={styles.containerBody}>
       <div className={styles.halo}></div>
-      <div ref={haloRef} className={styles.followHalo}></div> {/* halo global */}
       <section className={styles.containerSwap}>
-        <div className={styles.swapCard}>
+        <div className={styles.swapCard}
+             onMouseMove={handleMouseMove}
+             onMouseLeave={handleMouseLeave}>
+          <div ref={haloRef} className={styles.followHalo}></div>
           <div className={styles.swapCardLineTop}></div>
           <SwapFeature />
           <div className={styles.swapCardLineBottom}></div>
