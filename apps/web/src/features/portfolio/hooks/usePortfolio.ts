@@ -3,13 +3,7 @@ import type { Address } from "viem";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import { abi, addresses } from "@trustswap/sdk";
-import {
-  TOKENLIST,
-  toUIList,
-  getOrFetchToken,
-  NATIVE_PLACEHOLDER,
-  isNative,
-} from "../../../lib/tokens"; // ← adjust path to your tokens file
+import { useTokenModule } from "../../../hooks/useTokenModule";
 
 type TokenInfoLite = {
   address?: Address;   // undefined => native
@@ -48,6 +42,7 @@ export function usePortfolio() {
   const [positions, setPositions] = useState<PoolPosition[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { TOKENLIST, toUIList, getOrFetchToken, NATIVE_PLACEHOLDER, isNative } = useTokenModule();
 
   // Build UI token list: start from TOKENLIST and hide items flagged as hidden
   const uiTokenList = useMemo(() => toUIList(TOKENLIST), []);

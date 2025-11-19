@@ -3,7 +3,8 @@ import { useChainId } from "wagmi";
 import type { Chain } from "viem";
 import { intuitionTestnet, intuitionMainnet } from "@trustswap/sdk";
 import { getAddresses } from "@trustswap/sdk";
-import { createTokenModule } from "../lib/tokens"; // adapte le chemin si besoin
+import { createTokenModule } from "../lib/tokens"; 
+
 
 const CHAINS_BY_ID: Record<number, Chain> = {
   [intuitionTestnet.id]: intuitionTestnet as unknown as Chain,

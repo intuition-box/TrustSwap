@@ -1,7 +1,8 @@
 import React from "react";
 import type { PoolPosition } from "../hooks/usePortfolio";
 import styles from "../portfolio.module.css";
-import { getTokenForUI } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
 import { getTokenIcon } from "../../../lib/getTokenIcon";
 
 function formatSmart(value: string) {
@@ -38,6 +39,7 @@ export function PoolPositionsTable({ data }: { data: PoolPosition[] }) {
         </thead>
         <tbody>
           {data.map((p) => {
+            const { getTokenForUI } = useTokenModule();
             const t0 = getTokenForUI(p.token0.address) ?? p.token0;
             const t1 = getTokenForUI(p.token1.address) ?? p.token1;
             const icon0 = getTokenIcon(t0.address ?? "");

@@ -3,13 +3,14 @@ import type { Address } from "viem";
 import { parseUnits } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import { useLiquidityActions } from "../../hooks/useLiquidityActions";
-import { toWrapped } from "../../../../lib/tokens";
 import { getTokenIcon } from "../../../../lib/getTokenIcon";
 import styles from "../../modal.module.css";
 import TokenField from "../../../swap/components/TokenField";
 import { quoteOutFromReserves } from "../../../../utils/quotes";
 import { abi, addresses } from "@trustswap/sdk";
-import { isZeroAddress } from "../../../../lib/erc20Read";
+import { useErc20Read } from "../../../../lib/erc20Read";
+import { useTokenModule } from "../../../../hooks/useTokenModule";
+
 
 type PairData = {
   pair: Address;
@@ -34,6 +35,8 @@ export function AddLiquidityDrawer({
 }) {
   const { address: to } = useAccount();
   const pc = usePublicClient();
+  const { toWrapped } = useTokenModule();
+  const { isZeroAddress } = useErc20Read();
   const { addLiquidity } = useLiquidityActions();
 
   const [tokenIn, setTokenIn] = useState<Address | undefined>(tokenA);

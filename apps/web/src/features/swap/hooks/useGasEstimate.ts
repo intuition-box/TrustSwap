@@ -3,7 +3,8 @@ import type { Address } from "viem";
 import { usePublicClient } from "wagmi";
 import { abi, addresses } from "@trustswap/sdk";
 import { formatUnits } from "viem";
-import { buildPath } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
 
 type Args = {
   account?: Address;
@@ -25,6 +26,7 @@ export function useGasEstimate() {
     if (!args.account) return null;
     if (!args.path || args.path.length < 2) return null;
 
+    const { buildPath } = useTokenModule();
     const path = buildPath(args.path);
     const symbol = args.nativeSymbol ?? "tTRUST";
     const nativeIn = !!args.nativeIn;

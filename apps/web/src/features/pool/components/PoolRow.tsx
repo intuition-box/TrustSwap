@@ -8,10 +8,10 @@ import { Volume1DCell } from "./cells/Volume1DCell";
 import { PoolAprCell } from "./cells/PoolAprCell";
 import { PoolActionsCell } from "./cells/PoolActionsCell";
 import styles from "../tableau.module.css";
-
-import { WNATIVE_ADDRESS } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
 
 function asUIToken<T extends { address: string; symbol: string; decimals?: number }>(t: T): T {
+  const { WNATIVE_ADDRESS } = useTokenModule();
   const isWNative = t?.address?.toLowerCase() === WNATIVE_ADDRESS.toLowerCase();
   if (!isWNative) return t;
   return { ...t, symbol: "tTRUST" } as T;

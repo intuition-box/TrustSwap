@@ -4,7 +4,7 @@ import { parseAbiItem } from "viem";
 import { usePublicClient } from "wagmi";
 import { addresses } from "@trustswap/sdk";
 import * as SDKAbi from "@trustswap/sdk/abi";
-import { WNATIVE_ADDRESS } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
 
 function toAbi(x: unknown): Abi {
   return (Array.isArray(x) ? x : (x as any)?.abi) as Abi;
@@ -30,6 +30,7 @@ export function useGlobalStats() {
   const [data, setData] = useState<{ tvlWT: bigint; vol24hWT: bigint; tx24h: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setErr] = useState<string | null>(null);
+  const { WNATIVE_ADDRESS } = useTokenModule();
 
   useEffect(() => {
     (async () => {
@@ -79,6 +80,7 @@ export function useGlobalStats() {
             { address: p, abi: UniPairAbi, functionName: "getReserves" } as const,
           ])),
         });
+
 
         const w = WNATIVE_ADDRESS.toLowerCase();
         const metas: PairMeta[] = [];

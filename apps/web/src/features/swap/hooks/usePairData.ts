@@ -1,7 +1,8 @@
 import type { Address } from "viem";
 import { usePublicClient } from "wagmi";
 import { abi, addresses } from "@trustswap/sdk";
-import { toWrapped } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
 
 export type PairData = {
   pair: Address;
@@ -15,11 +16,14 @@ const ZERO: Address = "0x0000000000000000000000000000000000000000";
 
 export function usePairData() {
   const pc = usePublicClient();
-
+  const { toWrapped } = useTokenModule();
+  
   return async function fetchPair(tokenA: Address, tokenB: Address): Promise<PairData | null> {
     if (!pc) return null;
     if (!tokenA || !tokenB) return null;
     if (tokenA.toLowerCase() === tokenB.toLowerCase()) return null;
+
+
 
     // ⚠️ wrap natif -> WNATIVE avant d’interroger la factory
     const a = toWrapped(tokenA);

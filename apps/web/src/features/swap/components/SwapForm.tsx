@@ -3,11 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Address } from "viem";
 import { getAddress, parseUnits, formatUnits } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
-import {
-  getDefaultPair,
-  TOKENLIST,
-  NATIVE_PLACEHOLDER,
-} from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
 import { useImportedTokens } from "../hooks/useImportedTokens";
 import { useQuoteDetails } from "../hooks/useQuoteDetails";
 import { useAllowance } from "../hooks/useAllowance";
@@ -24,8 +21,6 @@ import ApproveAndSwap from "./ApproveAndSwap";
 import DetailsDisclosure from "./DetailsDisclosure";
 import { addresses, abi } from "@trustswap/sdk";
 
-const isNative = (a?: Address) =>
-  !!a && a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
 
 const norm = (a?: string) => (a ? a.toLowerCase() : "");
 
@@ -66,6 +61,16 @@ type Meta = {
 export default function SwapForm() {
   const { address } = useAccount();
   const pc = usePublicClient();
+  const {
+  getDefaultPair,
+  TOKENLIST,
+  NATIVE_PLACEHOLDER,
+  WNATIVE_ADDRESS,
+  getTokenByAddressOrFallback,
+} = useTokenModule();
+
+  const isNative = (a?: Address) =>
+  !!a && a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
 
   const defaults = useMemo(() => getDefaultPair(), []);
   const [tokenIn, setTokenIn] = useState<Address>(defaults.tokenIn.address);
@@ -318,9 +323,13 @@ export default function SwapForm() {
       tokenOut ?? "0x0000000000000000000000000000000000000000",
       amountIn,
       amountOut,
-      pairData
+      pairData,
+      {
+        NATIVE_PLACEHOLDER,
+        WNATIVE_ADDRESS,
+        getTokenByAddressOrFallback,
+      }
     );
-    // deps: tout ce qui influence l'impact
   }, [
     tokenIn,
     tokenOut,
@@ -335,6 +344,9 @@ export default function SwapForm() {
     (pairData as any)?.decimals1,
     bestPath?.join(">"),
     lastOutBn?.toString(),
+    NATIVE_PLACEHOLDER,
+    WNATIVE_ADDRESS,
+    getTokenByAddressOrFallback,
   ]);
 
   async function onApproveAndSwap() {

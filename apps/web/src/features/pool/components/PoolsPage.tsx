@@ -8,7 +8,7 @@ import { PoolsTable } from "./PoolsTable";
 import { PoolsFilters } from "./filters/PoolsFilters";
 import { PoolsPagination } from "./filters/PoolsPagination";
 import { LiquidityModal } from "./liquidity/LiquidityModal";
-import { toUIAddress } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
 
 import styles from "../pools.module.css";
 
@@ -21,6 +21,7 @@ export default function PoolsPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [tokenA, setTokenA] = useState<Address | undefined>();
   const [tokenB, setTokenB] = useState<Address | undefined>();
+  const { toUIAddress } = useTokenModule();
 
   const pc = usePublicClient({ chainId: 13579 });
 

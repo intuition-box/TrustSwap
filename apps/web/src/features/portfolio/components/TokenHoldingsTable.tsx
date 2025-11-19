@@ -2,7 +2,8 @@
 import React from "react";
 import type { TokenHolding } from "../hooks/usePortfolio";
 import styles from "../portfolio.module.css";
-import { getTokenForUI, NATIVE_PLACEHOLDER } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
 import { getTokenIcon } from "../../../lib/getTokenIcon";
 
 function formatSmart(value: string) {
@@ -27,6 +28,7 @@ export function TokenHoldingsTable({ data }: { data: TokenHolding[] }) {
         <tbody>
           {data.map((h, i) => {
             // Map to UI token (WTTRUST -> tTRUST etc.)
+            const { getTokenForUI, NATIVE_PLACEHOLDER } = useTokenModule();
             const uiToken = getTokenForUI(h.token.address) ?? h.token;
             // Always provide an address for icon: native -> NATIVE_PLACEHOLDER
             const addrForIcon = (uiToken.address ?? NATIVE_PLACEHOLDER) as string;

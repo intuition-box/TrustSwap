@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { type Address, type Abi } from "viem";
 import { usePublicClient } from "wagmi";
 import { abi, addresses } from "@trustswap/sdk";
-import { getOrFetchToken } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
 import type { PoolItem } from "../types";
 
 const chunk = <T,>(a: T[], n = 300) =>
@@ -20,6 +21,7 @@ export function usePoolsData(limit = 50, offset = 0) {
   const [error, setError]     = useState<string | null>(null);
   const [items, setItems]     = useState<PoolItem[]>([]);
   const runIdRef = useRef(0);
+  const { getOrFetchToken } = useTokenModule();
 
   useEffect(() => {
     if (!pc) { dbg("no public client"); return; }

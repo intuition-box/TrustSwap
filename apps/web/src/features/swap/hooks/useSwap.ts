@@ -1,7 +1,7 @@
 import type { Address } from "viem";
 import { erc20Abi, parseUnits, formatUnits } from "viem";
 import { usePublicClient, useWalletClient, useChainId } from "wagmi";
-import { getOrFetchToken } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
 import { abi, addresses } from "@trustswap/sdk";
 import { useAlerts } from "../../../features/alerts/Alerts";
 
@@ -77,6 +77,7 @@ export function useSwap() {
   const publicClient = usePublicClient();
   const chainId = useChainId();
   const alerts = useAlerts();
+  const { getOrFetchToken } = useTokenModule();
 
   const approveIfNeeded = async (token: Address, owner: Address, amount: bigint) => {
     if (!publicClient || !wallet) throw new Error("Wallet not connected");

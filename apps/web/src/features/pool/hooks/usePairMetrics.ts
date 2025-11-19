@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import type { PoolItem } from "../types";
 import { aprFromFees } from "../utils";
 import { formatUnits } from "viem";
-import { WNATIVE_ADDRESS } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
 
 function safeUnits(x: unknown, decimals: number): number {
   try {
@@ -19,6 +19,7 @@ export function usePairMetrics(
   volMap: Record<string, number> = {},
   priceMap: Record<string, number> = {}
 ) {
+  const { WNATIVE_ADDRESS } = useTokenModule();
   const w = WNATIVE_ADDRESS.toLowerCase();
 
   return useMemo(() => {

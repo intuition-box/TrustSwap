@@ -1,12 +1,9 @@
 // apps/web/src/features/tokens/useDynamicTokenList.ts
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Address } from "viem";
-import {
-  TOKENLIST,
-  getOrFetchToken,
-  type TokenInfo,
-  WNATIVE_ADDRESS,
-} from "../../../lib/tokens";
+import { type TokenInfo } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
 
 const low = (s: string) => s.toLowerCase();
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -38,6 +35,7 @@ function pickTokenAddr(p: any, key: "token0" | "token1"): Address | undefined {
 }
 
 export function useDynamicTokenList(rawPools: any) {
+  const { getOrFetchToken, TOKENLIST, WNATIVE_ADDRESS } = useTokenModule();
   const base = useMemo(() => TOKENLIST, []);
   const [tokens, setTokens] = useState<TokenInfo[]>(base);
   const inFlight = useRef<Set<string>>(new Set());
