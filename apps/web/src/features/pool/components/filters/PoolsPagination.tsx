@@ -1,15 +1,16 @@
+// PoolsPagination.tsx
 import styles from "../../tableau.module.css";
 
 export function PoolsPagination({
   page,
-  totalPages,
+  hasNextPage,
   onPage,
 }: {
   page: number;
-  totalPages: number;
+  hasNextPage: boolean;
   onPage: (p: number) => void;
 }) {
-  if (totalPages <= 1) return null;
+  if (page === 1 && !hasNextPage) return null;
 
   return (
     <div className={styles.pagination}>
@@ -18,9 +19,11 @@ export function PoolsPagination({
           Prev
         </button>
       )}
-      <span>Page {page}</span>
-      {page < totalPages && (
-        <button onClick={() => onPage(page + 1)}>Next</button>
+      <span>{page}</span>
+      {hasNextPage && (
+        <button onClick={() => onPage(page + 1)}>
+          Next
+        </button>
       )}
     </div>
   );
