@@ -2,6 +2,7 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import styles from "../styles/Layout.module.css";
 import { ConnectButton } from "./ConnectButton";
+import { NetworkSelect } from "./NetworkSelect";
 import logo from "../assets/logo.png";
 
 export default function Layout() {
@@ -111,6 +112,7 @@ export default function Layout() {
             </nav>
           </div>
           <div className={styles.connectPage}>
+            <NetworkSelect />
             <ConnectButton />
           </div>
         </div>

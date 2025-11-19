@@ -1,7 +1,7 @@
 // packages/sdk/src/chain.ts
 import { defineChain } from "viem";
 
-export const INTUITION = defineChain({
+export const intuitionTestnet = defineChain({
   id: 13579,
   name: "Intuition Testnet",
   nativeCurrency: { name: "tTRUST", symbol: "tTRUST", decimals: 18 },
@@ -19,3 +19,29 @@ export const INTUITION = defineChain({
     }
   }
 });
+
+
+export const intuitionMainnet = defineChain({
+  id: 99999, // TODO: replace with real mainnet chain id
+  name: "Intuition Mainnet",
+  network: "intuition-mainnet",
+  nativeCurrency: {
+    name: "Trust",
+    symbol: "TRUST",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.intuition.systems/http"], // TODO: mainnet RPC
+    },
+    public: {
+      http: ["https://rpc.intuition.systems/http"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Intuition Mainnet Explorer",
+      url: "https://explorer.intuition.systems", // TODO: mainnet explorer
+    },
+  },
+})

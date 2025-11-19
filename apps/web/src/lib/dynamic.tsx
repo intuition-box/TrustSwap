@@ -5,21 +5,21 @@ import { DynamicWagmiConnector } from "@dynamic-labs/wagmi-connector"
 import { WagmiProvider } from "wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { wagmiConfig } from "./wagmi"
-import { INTUITION } from "@trustswap/sdk"
+import { intuitionTestnet } from "@trustswap/sdk"
 
 const queryClient = new QueryClient()
 
 function toDynamicEvmNetwork() {
   return {
-    chainId: INTUITION.id,
-    networkId: INTUITION.id,
-    name: INTUITION.name,
+    chainId: intuitionTestnet.id,
+    networkId: intuitionTestnet.id,
+    name: intuitionTestnet.name,
     vanityName: "Intuition",
     shortName: "intuition",
-    chainName: INTUITION.name,
-    rpcUrls: INTUITION.rpcUrls.default.http.slice(),
-    blockExplorerUrls: [INTUITION.blockExplorers?.default?.url].filter(Boolean) as string[],
-    nativeCurrency: INTUITION.nativeCurrency,
+    chainName: intuitionTestnet.name,
+    rpcUrls: intuitionTestnet.rpcUrls.default.http.slice(),
+    blockExplorerUrls: [intuitionTestnet.blockExplorers?.default?.url].filter(Boolean) as string[],
+    nativeCurrency: intuitionTestnet.nativeCurrency,
     testnet: true,
     iconUrls: [],
   }
