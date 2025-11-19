@@ -1,37 +1,48 @@
-import type { PropsWithChildren } from "react"
-import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core"
-import { EthereumWalletConnectors } from "@dynamic-labs/ethereum"
-import { DynamicWagmiConnector } from "@dynamic-labs/wagmi-connector"
-import { WagmiProvider } from "wagmi"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { wagmiConfig } from "./wagmi"
-import { intuitionTestnet } from "@trustswap/sdk"
+import type { PropsWithChildren } from "react";
+import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
+import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
+import { DynamicWagmiConnector } from "@dynamic-labs/wagmi-connector";
+import { WagmiProvider } from "wagmi";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const queryClient = new QueryClient()
+import { wagmiConfig } from "./wagmi";
+import { intuitionTestnet, intuitionMainnet } from "@trustswap/sdk";
 
-function toDynamicEvmNetwork() {
+const queryClient = new QueryClient();
+
+function toDynamicEvmNetwork(chain: typeof intuitionTestnet | typeof intuitionMainnet, opts: { testnet: boolean }) {
   return {
-    chainId: intuitionTestnet.id,
-    networkId: intuitionTestnet.id,
-    name: intuitionTestnet.name,
+    chainId: chain.id,
+    networkId: chain.id,
+    name: chain.name,
     vanityName: "Intuition",
     shortName: "intuition",
-    chainName: intuitionTestnet.name,
-    rpcUrls: intuitionTestnet.rpcUrls.default.http.slice(),
-    blockExplorerUrls: [intuitionTestnet.blockExplorers?.default?.url].filter(Boolean) as string[],
-    nativeCurrency: intuitionTestnet.nativeCurrency,
-    testnet: true,
+    chainName: chain.name,
+    rpcUrls: chain.rpcUrls.default.http.slice(),
+    blockExplorerUrls: [chain.blockExplorers?.default?.url].filter(Boolean) as string[],
+    nativeCurrency: chain.nativeCurrency,
+    testnet: opts.testnet,
     iconUrls: [],
-  }
+  };
 }
 
+const dynamicEvmNetworks = [
+  toDynamicEvmNetwork(intuitionTestnet, { testnet: true }),
+  toDynamicEvmNetwork(intuitionMainnet, { testnet: false }),
+];
+
 export function RootProviders({ children }: PropsWithChildren) {
-  // Prefer env var, fallback to hard-coded id
-  const envId = (import.meta.env.VITE_DYNAMIC_ENV_ID as string | undefined) ?? "78601171-b1f9-42d1-b651-b76f97becab7"
+  const envId =
+    (import.meta.env.VITE_DYNAMIC_ENV_ID as string | undefined) ??
+    "78601171-b1f9-42d1-b651-b76f97becab7";
 
   if (!envId) {
-    console.error("Missing Dynamic environmentId")
-    return <div style={{ padding: 16 }}>Wallet connect disabled: missing Dynamic environmentId.</div>
+    console.error("Missing Dynamic environmentId");
+    return (
+      <div style={{ padding: 16 }}>
+        Wallet connect disabled: missing Dynamic environmentId.
+      </div>
+    );
   }
 
   return (
@@ -39,7 +50,7 @@ export function RootProviders({ children }: PropsWithChildren) {
       settings={{
         environmentId: envId,
         walletConnectors: [EthereumWalletConnectors],
-        overrides: { evmNetworks: [toDynamicEvmNetwork()] },
+        overrides: { evmNetworks: dynamicEvmNetworks },
       }}
     >
       <WagmiProvider config={wagmiConfig}>
@@ -48,5 +59,5 @@ export function RootProviders({ children }: PropsWithChildren) {
         </QueryClientProvider>
       </WagmiProvider>
     </DynamicContextProvider>
-  )
+  );
 }
