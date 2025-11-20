@@ -2,7 +2,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { parseAbiItem, formatUnits } from "viem";
 import { usePublicClient } from "wagmi";
-import { WNATIVE_ADDRESS } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
 import type { PoolItem } from "../types"; // Adjust the path if PoolItem is defined elsewhere
 
 const swapEvent = parseAbiItem(
@@ -14,6 +15,7 @@ export function usePairsVolume1D(items: PoolItem[]) {
   const [volMap, setVolMap] = useState<Record<string, number>>({});
   const [priceMap, setPriceMap] = useState<Record<string, number>>({});
   const runIdRef = useRef(0);
+  const { WNATIVE_ADDRESS } = useTokenModule();
 
   // 🔑 clé stable quand les paires changent
   const pairsKey = useMemo(() => {

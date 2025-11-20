@@ -24,6 +24,14 @@ const config: HardhatUserConfig = {
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean)
+    },
+    intuitionMainnet: {
+      url: process.env.INTUITION_MAINNET_RPC_URL || "",
+      chainId: Number(process.env.CHAIN_ID_MAINNET || 0),
+      accounts: (process.env.PRIVATE_KEY_MAINNET || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
     }
   }
 };

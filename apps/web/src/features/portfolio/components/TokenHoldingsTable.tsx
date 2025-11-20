@@ -1,8 +1,7 @@
-// features/portfolio/components/TokenHoldingsTable.tsx
 import React from "react";
 import type { TokenHolding } from "../hooks/usePortfolio";
 import styles from "../portfolio.module.css";
-import { getTokenForUI, NATIVE_PLACEHOLDER } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
 import { getTokenIcon } from "../../../lib/getTokenIcon";
 
 function formatSmart(value: string) {
@@ -14,6 +13,8 @@ function formatSmart(value: string) {
 }
 
 export function TokenHoldingsTable({ data }: { data: TokenHolding[] }) {
+  const { getTokenForUI, NATIVE_PLACEHOLDER } = useTokenModule();
+
   return (
     <div className={styles.card}>
       <h3 className={styles.title}>Tokens</h3>
@@ -26,17 +27,22 @@ export function TokenHoldingsTable({ data }: { data: TokenHolding[] }) {
         </thead>
         <tbody>
           {data.map((h, i) => {
-            // Map to UI token (WTTRUST -> tTRUST etc.)
-            const uiToken = getTokenForUI(h.token.address) ?? h.token;
-            // Always provide an address for icon: native -> NATIVE_PLACEHOLDER
-            const addrForIcon = (uiToken.address ?? NATIVE_PLACEHOLDER) as string;
+            const isNative = !h.token.address;
+
+            // For native token, map to UI token (TRUST / tTRUST)
+            // For all ERC20 (including wTRUST), keep the raw token from the portfolio hook
+            const displayToken = isNative
+              ? getTokenForUI(NATIVE_PLACEHOLDER) ?? h.token
+              : h.token;
+
+            const addrForIcon = (displayToken.address ?? NATIVE_PLACEHOLDER) as string;
             const icon = getTokenIcon(addrForIcon);
 
             return (
               <tr key={i} className={styles.row}>
                 <td className={styles.tokenCell}>
-                  <img src={icon} alt={uiToken.symbol} className={styles.tokenIcon} />
-                  <span>{uiToken.symbol}</span>
+                  <img src={icon} alt={displayToken.symbol} className={styles.tokenIcon} />
+                  <span>{displayToken.symbol}</span>
                 </td>
                 <td className={styles.number}>{formatSmart(h.balanceFormatted)}</td>
               </tr>

@@ -5,13 +5,13 @@ import type { Address, Abi } from "viem";
 import { erc20Abi, formatUnits, zeroAddress } from "viem";
 import { addresses } from "@trustswap/sdk";
 import type { PoolItem } from "../types";
-import { getOrFetchToken, WNATIVE_ADDRESS } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
 import { FARMS } from "../../../lib/farms";
 import { useLiveRegister } from "../../../live/LiveRefetchProvider";
 
 const SEC_PER_YEAR = 31_536_000;
 const FEE_TO_LPS = 0.003; // 0.3% fees distributed to LPs
-
 // --- ABIs ---
 const STAKING_ABI = [
   { type: "function", name: "rewardRate",   stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
@@ -34,28 +34,30 @@ const PAIR_ABI = [
   ] },
 ] as const satisfies Abi;
 
-type StakingSlice = {
-  staking: Address | null;
-  rewardToken?: Awaited<ReturnType<typeof getOrFetchToken>>;
-  rewardRatePerSec?: bigint;
-  earned?: bigint;
-  stakedBalance?: bigint;       // user staked LP
-  walletLpBalance?: bigint;     // user wallet LP (outside farm)
-  periodFinish?: bigint;        // timestamp (sec)
-  periodFinishDate?: Date;
-
-  totalStakedLP?: bigint;       // farm total staked LP (all users)
-  totalSupplyLP?: bigint;       // LP token total supply
-  poolReserves?: { token0: Address; token1: Address; reserve0: bigint; reserve1: bigint };
-
-  poolAprPct?: number;          // fees APR (trading fees -> LPs)
-  epochAprPct?: number;         // farming APR (global)
-  epochAprUserPct?: number;     // OPTIONAL: user-specific APR
-};
 
 export function useStakingData(pools: PoolItem[]) {
   const { address: user } = useAccount();
   const client = usePublicClient();
+  const {WNATIVE_ADDRESS, getOrFetchToken} = useTokenModule();
+
+  type StakingSlice = {
+    staking: Address | null;
+    rewardToken?: Awaited<ReturnType<typeof getOrFetchToken>>;
+    rewardRatePerSec?: bigint;
+    earned?: bigint;
+    stakedBalance?: bigint;       // user staked LP
+    walletLpBalance?: bigint;     // user wallet LP (outside farm)
+    periodFinish?: bigint;        // timestamp (sec)
+    periodFinishDate?: Date;
+
+    totalStakedLP?: bigint;       // farm total staked LP (all users)
+    totalSupplyLP?: bigint;       // LP token total supply
+    poolReserves?: { token0: Address; token1: Address; reserve0: bigint; reserve1: bigint };
+
+    poolAprPct?: number;          // fees APR (trading fees -> LPs)
+    epochAprPct?: number;         // farming APR (global)
+    epochAprUserPct?: number;     // OPTIONAL: user-specific APR
+  };
 
   const [stakingMap, setStakingMap] = useState<Record<string, StakingSlice>>({});
 

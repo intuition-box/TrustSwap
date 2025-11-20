@@ -8,19 +8,23 @@ import { PoolsTable } from "./PoolsTable";
 import { PoolsFilters } from "./filters/PoolsFilters";
 import { PoolsPagination } from "./filters/PoolsPagination";
 import { LiquidityModal } from "./liquidity/LiquidityModal";
-import { toUIAddress } from "../../../lib/tokens";
+import { useTokenModule } from "../../../hooks/useTokenModule";
 
 import styles from "../pools.module.css";
 
 
 
 export default function PoolsPage() {
+
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");
+
+  const [hasNextPage, setHasNextPage] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
   const [tokenA, setTokenA] = useState<Address | undefined>();
   const [tokenB, setTokenB] = useState<Address | undefined>();
+  const { toUIAddress } = useTokenModule();
 
   const pc = usePublicClient({ chainId: 13579 });
 
@@ -88,8 +92,14 @@ export default function PoolsPage() {
                 page={page}
                 query={query}
                 onOpenLiquidity={openWithPair}
+                onPageInfoChange={(info) => setHasNextPage(info.hasNextPage)}
               />
-              <PoolsPagination page={page} onPage={onPageChange} />
+
+              <PoolsPagination
+                page={page}
+                hasNextPage={hasNextPage}
+                onPage={onPageChange}
+              />
             </>
           )}
 

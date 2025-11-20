@@ -3,13 +3,10 @@ import type { Address } from "viem";
 import { erc20Abi, formatUnits, zeroAddress } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  isNative as isNativeAddr,
-  NATIVE_PLACEHOLDER,
-  getOrFetchToken,   // ✅ utilise ce helper on-chain
-  WNATIVE_ADDRESS,
-  type TokenInfo,
-} from "../../../lib/tokens";
+import { type TokenInfo } from "../../../lib/tokens";
+
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
 import { useLiveRegister } from "../../../live/LiveRefetchProvider";
 
 type Result = {
@@ -26,6 +23,7 @@ export function useTokenBalance(token?: Address, owner?: Address): Result {
   const { chain } = useAccount();
   const pc = usePublicClient();
   const isUnsetToken = !token || token.toLowerCase() === zeroAddress;
+  const { NATIVE_PLACEHOLDER, getOrFetchToken, isNative } = useTokenModule();
 
   const [state, setState] = useState<Result>({
     isLoading: !!token && !!owner,
@@ -61,14 +59,14 @@ export function useTokenBalance(token?: Address, owner?: Address): Result {
     }
 
     try {
-      // ✅ récupère meta on-chain si besoin (ne throw pas si hors TOKENLIST)
-      const meta = isNativeAddr(token!)
+      // récupère meta on-chain si besoin (ne throw pas si hors TOKENLIST)
+      const meta = isNative(token!)
         ? nativeMeta
         : await getOrFetchToken(token!);
 
       let raw: bigint = 0n;
 
-      if (meta.isNative || isNativeAddr(token!)) {
+      if (meta.isNative || isNative(token!)) {
         raw = await pc.getBalance({ address: owner });
       } else {
         // balanceOf peut revert sur des tokens “non standard” → protège

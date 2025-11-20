@@ -3,8 +3,8 @@ import { useWalletClient, usePublicClient, useChainId } from "wagmi";
 import type { Address, Abi } from "viem";
 import { erc20Abi, maxUint256, parseGwei, zeroAddress } from "viem";
 import { addresses } from "@trustswap/sdk";
-import { toWrapped, WNATIVE_ADDRESS } from "../../../lib/tokens";
 import { useAlerts } from "../../../features/alerts/Alerts";
+import { useTokenModule } from "../../../hooks/useTokenModule";
 
 // --- Réseau / addresses
 const ROUTER = addresses.UniswapV2Router02 as Address;
@@ -158,6 +158,7 @@ export function useLiquidityActions() {
   const publicClient = usePublicClient();
   const chainId = useChainId();
   const alerts = useAlerts();
+  const { toWrapped, WNATIVE_ADDRESS } = useTokenModule();
 
   async function estimateOverrides<TAbi extends Abi, TFn extends string>(base: {
     address: Address;
@@ -242,7 +243,7 @@ export function useLiquidityActions() {
     }
   }
 
-  // WTTRUST = vrai wrapped natif (avec alertes)
+  // WTRUST = vrai wrapped natif (avec alertes)
   async function wrapNative(amount: bigint) {
     try {
       const base = {

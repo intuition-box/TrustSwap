@@ -11,7 +11,7 @@ export default function DetailsDisclosure({
 }: {
   slippageBps: number;
   onChangeSlippage: (v: number) => void;
-  priceText?: string;             // ex: "1 WTTRUST ≈ 123.456 TSWP"
+  priceText?: string;             // ex: "1 WTRUST ≈ 123.456 TSWP"
   priceImpactPct?: number | null; // ex: 0.42 (%)
   networkFeeText?: string | null; // ex: "0.00087 tTRUST"
 }) {
