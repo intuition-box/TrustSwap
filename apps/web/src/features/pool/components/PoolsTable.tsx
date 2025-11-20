@@ -82,7 +82,9 @@ export function PoolsTable({
     );
   }
 
-  if (!items.length) return <div>Aucune pool</div>;
+  if (!items.length)
+    return <div className={styles.centerMessage}>No pools available</div>;
+
 
   return (
     <PoolsTableInner
