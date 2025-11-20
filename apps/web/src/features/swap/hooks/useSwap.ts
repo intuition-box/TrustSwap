@@ -2,24 +2,8 @@ import type { Address } from "viem";
 import { erc20Abi, parseUnits, formatUnits } from "viem";
 import { usePublicClient, useWalletClient, useChainId } from "wagmi";
 import { useTokenModule } from "../../../hooks/useTokenModule";
-import { abi, addresses } from "@trustswap/sdk";
+import { abi, getAddresses } from "@trustswap/sdk";
 import { useAlerts } from "../../../features/alerts/Alerts";
-
-const NATIVE_PLACEHOLDER = addresses.NATIVE_PLACEHOLDER as Address; // tTRUST (pseudo "native")
-const WNATIVE = addresses.WTTRUST as Address;                       // WTTRUST (wrapped)
-const ROUTER = addresses.UniswapV2Router02 as Address;
-
-const isNative = (addr?: Address) =>
-  !!addr && addr.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
-
-const isWrapped = (addr?: Address) =>
-  !!addr && addr.toLowerCase() === WNATIVE.toLowerCase();
-
-const eqAddr = (a?: Address, b?: Address) =>
-  !!a && !!b && a.toLowerCase() === b.toLowerCase();
-
-const toWrapped = (addr: Address) => (isNative(addr) ? WNATIVE : addr);
-const buildPath = (path: Address[]) => path.map(toWrapped) as Address[];
 
 function explorerTx(chainId: number | undefined, hash?: `0x${string}`) {
   if (!hash) return undefined;
@@ -33,9 +17,12 @@ function explorerTx(chainId: number | undefined, hash?: `0x${string}`) {
 
 function prettifySwapError(err: any): string {
   const raw =
-    String(err?.shortMessage || "") + " | " +
-    String(err?.message || "") + " | " +
-    String(err?.cause?.shortMessage || "") + " | " +
+    String(err?.shortMessage || "") +
+    " | " +
+    String(err?.message || "") +
+    " | " +
+    String(err?.cause?.shortMessage || "") +
+    " | " +
     String(err?.cause?.message || "");
   const msg = raw.toLowerCase();
 
@@ -45,7 +32,8 @@ function prettifySwapError(err: any): string {
     msg.includes("request rejected") ||
     msg.includes("action rejected") ||
     String(err?.code) === "4001"
-  ) return "Transaction rejected by user.";
+  )
+    return "Transaction rejected by user.";
 
   if (raw.includes("TransferHelper::transferFrom: transferFrom failed"))
     return "Insufficient allowance or balance for the input token.";
@@ -54,7 +42,8 @@ function prettifySwapError(err: any): string {
     raw.includes("INSUFFICIENT_OUTPUT_AMOUNT") ||
     raw.includes("ExcessiveInputAmount") ||
     msg.includes("insufficient output")
-  ) return "Slippage too low (insufficient output).";
+  )
+    return "Slippage too low (insufficient output).";
 
   if (msg.includes("deadline") || msg.includes("expired"))
     return "Transaction deadline exceeded.";
@@ -62,11 +51,9 @@ function prettifySwapError(err: any): string {
   if (raw.includes("Transfers restricted") || msg.includes("transfer restricted"))
     return "Token has transfer restrictions.";
 
-  if (msg.includes("insufficient funds for gas"))
-    return "Insufficient funds for gas.";
+  if (msg.includes("insufficient funds for gas")) return "Insufficient funds for gas.";
 
-  if (msg.includes("nonce too low"))
-    return "Nonce too low.";
+  if (msg.includes("nonce too low")) return "Nonce too low.";
   if (msg.includes("replacement transaction underpriced") || msg.includes("fee too low"))
     return "Replacement transaction underpriced.";
 
@@ -78,19 +65,36 @@ export function useSwap() {
   const publicClient = usePublicClient();
   const chainId = useChainId();
   const alerts = useAlerts();
-  const { getOrFetchToken } = useTokenModule();
+
+  const {
+    NATIVE_PLACEHOLDER,
+    WNATIVE_ADDRESS,
+    isNative,
+    isWrapped,
+    toWrapped,
+    buildPath,
+    getOrFetchToken,
+  } = useTokenModule();
+
+  const resolvedChainId = chainId;
+  const { UniswapV2Router02 } = getAddresses(resolvedChainId);
+  const router = UniswapV2Router02 as Address;
+  const nativePlaceholder = NATIVE_PLACEHOLDER as Address;
+  const wNative = WNATIVE_ADDRESS as Address;
+
+  const eqAddr = (a?: Address, b?: Address) =>
+    !!a && !!b && a.toLowerCase() === b.toLowerCase();
 
   const approveIfNeeded = async (token: Address, owner: Address, amount: bigint) => {
     if (!publicClient || !wallet) throw new Error("Wallet not connected");
-    if (isNative(token)) return; // no approve for pseudo-native
-    if (isWrapped(token)) return; // no approve needed for wrap/unwrap flows
-    
+    if (isNative(token)) return;
+    if (isWrapped(token)) return;
 
     const allowance = (await publicClient.readContract({
       address: token,
       abi: erc20Abi,
       functionName: "allowance",
-      args: [owner, ROUTER],
+      args: [owner, router],
     })) as bigint;
 
     if (allowance >= amount) return;
@@ -100,7 +104,7 @@ export function useSwap() {
         address: token,
         abi: erc20Abi,
         functionName: "approve",
-        args: [ROUTER, amount],
+        args: [router, amount],
       });
 
       alerts.push({
@@ -148,15 +152,14 @@ export function useSwap() {
     if (!wallet) throw new Error("Wallet not connected");
     if (!publicClient) throw new Error("No public client");
     if (!tokenIn || !tokenOut) throw new Error("Missing token addresses");
-    // Guard unsupported flows: TOKEN -> WTTRUST without a pool
+
+    // Guard: direct non-native -> wrapped without pool
     if (isWrapped(tokenOut) && !isNative(tokenIn)) {
       throw new Error(
-        "Cannot swap directly to WTTRUST from non-native token. Swap to tTRUST first, then wrap to WTTRUST."
+        "Cannot swap directly to wrapped native from non-native token. Swap to native first, then wrap."
       );
     }
 
-
-    // Allow native <-> wrapped as a valid "pair" even if addresses are effectively the same asset
     const sameAsset =
       (isNative(tokenIn) && isWrapped(tokenOut)) ||
       (isWrapped(tokenIn) && isNative(tokenOut));
@@ -169,7 +172,6 @@ export function useSwap() {
       throw new Error("Native-to-native swap is not supported");
     }
 
-    // Resolve decimals for input
     const [tIn, tOut] = await Promise.all([
       getOrFetchToken(toWrapped(tokenIn)),
       getOrFetchToken(toWrapped(tokenOut)),
@@ -183,30 +185,28 @@ export function useSwap() {
     try {
       let hash: `0x${string}`;
 
-      // ===== Wrap / Unwrap special-cases (no router) =====
+      // Wrap / Unwrap (direct calls to wrapped native contract)
       if (isNative(tokenIn) && isWrapped(tokenOut)) {
-        // Wrap: deposit native into WTTRUST
         hash = await wallet.writeContract({
-          address: WNATIVE,
-          abi: abi.WTTRUST, // must include deposit()/withdraw(uint256)
+          address: wNative,
+          abi: abi.WTTRUST, // ABI for the wrapped native token
           functionName: "deposit",
           args: [],
           value: amountIn,
         });
       } else if (isWrapped(tokenIn) && isNative(tokenOut)) {
-        // Unwrap: withdraw WTTRUST back to native
         hash = await wallet.writeContract({
-          address: WNATIVE,
+          address: wNative,
           abi: abi.WTTRUST,
           functionName: "withdraw",
           args: [amountIn],
         });
       }
-      // ===== Router swaps (classic) =====
+      // Router swaps
       else if (isNative(tokenIn) && !isNative(tokenOut)) {
         const path = buildPath([tokenIn, tokenOut]);
         hash = await wallet.writeContract({
-          address: ROUTER,
+          address: router,
           abi: abi.UniswapV2Router02,
           functionName: "swapExactETHForTokens",
           args: [minOut, path, owner, deadline],
@@ -216,7 +216,7 @@ export function useSwap() {
         const path = buildPath([tokenIn, tokenOut]);
         await approveIfNeeded(tokenIn, owner, amountIn);
         hash = await wallet.writeContract({
-          address: ROUTER,
+          address: router,
           abi: abi.UniswapV2Router02,
           functionName: "swapExactTokensForETH",
           args: [amountIn, minOut, path, owner, deadline],
@@ -225,7 +225,7 @@ export function useSwap() {
         const path = buildPath([tokenIn, tokenOut]);
         await approveIfNeeded(tokenIn, owner, amountIn);
         hash = await wallet.writeContract({
-          address: ROUTER,
+          address: router,
           abi: abi.UniswapV2Router02,
           functionName: "swapExactTokensForTokens",
           args: [amountIn, minOut, path, owner, deadline],
@@ -243,9 +243,8 @@ export function useSwap() {
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-      // Friendly success message
-      const labelIn = isNative(tokenIn) ? "tTRUST" : (tIn.symbol || "TOKEN");
-      const labelOut = isNative(tokenOut) ? "tTRUST" : (tOut.symbol || "TOKEN");
+      const labelIn = isNative(tokenIn) ? "tTRUST" : tIn.symbol || "TOKEN";
+      const labelOut = isNative(tokenOut) ? "tTRUST" : tOut.symbol || "TOKEN";
       const shownMinOut = formatUnits(minOut, Number(tOut.decimals ?? 18));
 
       alerts.push({

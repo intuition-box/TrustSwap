@@ -1,6 +1,6 @@
 import type { Address, Chain } from "viem";
 import type { Addresses } from "@trustswap/sdk";
-import { createPublicClient, http, erc20Abi } from "viem";
+import { createPublicClient, http, erc20Abi, zeroAddress } from "viem";
 
 export type TokenInfo = {
   address: Address;
@@ -31,33 +31,56 @@ type TokenModule = {
 
 export function createTokenModule(chain: Chain, addrBook: Addresses): TokenModule {
   const NATIVE_PLACEHOLDER = addrBook.NATIVE_PLACEHOLDER as Address;
-  const WNATIVE_ADDRESS = addrBook.WTTRUST as Address;
+  const WT = (addrBook.WTTRUST ?? zeroAddress) as Address;
+  const TSWP_ADDR = (addrBook.TSWP ?? zeroAddress) as Address;
 
-  const TOKENLIST: TokenInfo[] = [
-    {
-      address: NATIVE_PLACEHOLDER,
-      symbol: chain.nativeCurrency?.symbol ?? "tTRUST",
-      name: chain.nativeCurrency?.name ?? "Native TRUST",
-      decimals: 18,
-      isNative: true,
-    },
-    {
-      address: addrBook.TSWP as Address,
-      symbol: "TSWP",
-      name: "TrustSwap",
-      decimals: 18,
-    },
-    {
-      address: WNATIVE_ADDRESS,
-      symbol: "WTTRUST",
+  const isZero = (addr?: string) =>
+    !addr || addr.toLowerCase() === zeroAddress;
+
+  const WNATIVE_ADDRESS = WT;
+
+  const baseTokens: TokenInfo[] = [];
+
+  // Native pseudo-token
+  baseTokens.push({
+    address: NATIVE_PLACEHOLDER,
+    symbol: chain.nativeCurrency?.symbol ?? "tTRUST",
+    name: chain.nativeCurrency?.name ?? "Native TRUST",
+    decimals: 18,
+    isNative: true,
+  });
+
+  // Choose wrapped symbol per chain
+  const wrappedSymbol = chain.id === 1155 ? "WTRUST" : "WTTRUST";
+
+  // Wrapped native
+  if (!isZero(WT)) {
+    baseTokens.push({
+      address: WT,
+      symbol: wrappedSymbol,
       name: "Wrapped TRUST",
       decimals: 18,
       hidden: false,
-    },
-  ];
+    });
+  }
+
+  // Governance token (optional, may be absent on some networks)
+  if (!isZero(TSWP_ADDR)) {
+    baseTokens.push({
+      address: TSWP_ADDR,
+      symbol: "TSWP",
+      name: "TrustSwap",
+      decimals: 18,
+    });
+  }
+
+  const TOKENLIST: TokenInfo[] = baseTokens;
 
   const TOKEN_CACHE: Record<string, TokenInfo> = {};
-  for (const t of TOKENLIST) TOKEN_CACHE[t.address.toLowerCase()] = t;
+  for (const t of TOKENLIST) {
+    if (!t.address) continue;
+    TOKEN_CACHE[t.address.toLowerCase()] = t;
+  }
 
   const client = createPublicClient({
     chain,
@@ -85,7 +108,7 @@ export function createTokenModule(chain: Chain, addrBook: Addresses): TokenModul
 
   function getTokenByAddress(addr: string | Address): TokenInfo {
     const t = TOKENLIST.find(
-      t => t.address.toLowerCase() === addr.toLowerCase(),
+      t => t.address.toLowerCase() === String(addr).toLowerCase(),
     );
     if (!t) throw new Error(`Token not in tokenlist: ${addr}`);
     return t;
@@ -94,8 +117,7 @@ export function createTokenModule(chain: Chain, addrBook: Addresses): TokenModul
   function getDefaultPair(): { tokenIn: TokenInfo; tokenOut: TokenInfo } {
     const native = TOKENLIST.find(t => t.isNative) ?? TOKENLIST[0];
     const other =
-      TOKENLIST.find(t => t.address !== native.address && !t.hidden) ??
-      native;
+      TOKENLIST.find(t => t.address !== native.address && !t.hidden) ?? native;
     return { tokenIn: native, tokenOut: other };
   }
 

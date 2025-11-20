@@ -89,7 +89,7 @@ export function useDynamicTokenList(rawPools: any) {
 
         for (const f of fetched) {
           if (f && !map.has(low(f.address))) {
-            const hidden = low(f.address) === low(WNATIVE_ADDRESS); // masque WTTRUST si besoin
+            const hidden = low(f.address) === low(WNATIVE_ADDRESS); // masque WTRUST si besoin
             map.set(low(f.address), hidden ? { ...f, hidden: true } : f);
           }
         }

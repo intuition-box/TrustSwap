@@ -11,6 +11,7 @@ export interface Addresses {
   NATIVE_PLACEHOLDER: HexAddr;
   TSWP: HexAddr;
   WTTRUST: HexAddr;
+  WTRUST: HexAddr;
   StakingRewardsFactory: HexAddr;
 }
 

@@ -135,7 +135,7 @@ export function useLpPosition(tokenA?: Address, tokenB?: Address): LpPosition {
 
         // 5) Décimales pour format (safe on-chain).
         //    Ici on prend celles des ERC-20 de la pair (readA/readB).
-        //    WTTRUST a 18, et les ERC-20 importés seront lus on-chain via getOrFetchToken.
+        //    WTRUST a 18, et les ERC-20 importés seront lus on-chain via getOrFetchToken.
         const [metaA, metaB] = await Promise.all([
           getOrFetchToken(readA),
           getOrFetchToken(readB),

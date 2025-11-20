@@ -49,7 +49,7 @@ export function PoolRow({
     >
       <IndexCell index={index} loading={loading} />
 
-      {/* Display the tokens UI (symbol tTRUST if WTTRUST) */}
+      {/* Display the tokens UI (symbol tTRUST if WTRUST) */}
       <PoolCell token0={uiToken0} token1={uiToken1} pair={pool.pair} loading={loading} />
 
       {/* Pass also the UI tokens if needed (if TvlCell displays the symbols somewhere) */}

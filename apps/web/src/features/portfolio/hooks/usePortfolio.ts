@@ -196,7 +196,7 @@ export function usePortfolio() {
           // Guard against zero totalSupply
           if (totalSupply === 0n) continue;
 
-          // Map WTTRUST -> native placeholder for UI, fetch meta safely
+          // Map WTRUST -> native placeholder for UI, fetch meta safely
           const [t0Meta, t1Meta] = await Promise.all([
             getOrFetchToken(isNative(token0Addr) ? NATIVE_PLACEHOLDER : token0Addr),
             getOrFetchToken(isNative(token1Addr) ? NATIVE_PLACEHOLDER : token1Addr),

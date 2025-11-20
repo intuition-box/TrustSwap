@@ -1,4 +1,3 @@
-// web/src/hooks/swap/useQuoteDetails.ts
 import type { Address } from "viem";
 import { parseUnits, formatUnits } from "viem";
 import { usePublicClient } from "wagmi";
@@ -6,7 +5,11 @@ import { abi } from "@trustswap/sdk";
 import { useTokenModule } from "../../../hooks/useTokenModule";
 import { useTrustswapAddresses } from "../../../hooks/useTrustswapAddresses";
 
-function getDecimalsSafe(addr: Address, isNative: (a?: Address) => boolean, getTokenByAddress: (addr: Address) => { decimals: number }) {
+function getDecimalsSafe(
+  addr: Address,
+  isNative: (a?: Address) => boolean,
+  getTokenByAddress: (addr: Address) => { decimals: number }
+) {
   if (isNative(addr)) return 18;
   try {
     return getTokenByAddress(addr).decimals ?? 18;
@@ -17,13 +20,12 @@ function getDecimalsSafe(addr: Address, isNative: (a?: Address) => boolean, getT
 
 export function useQuoteDetails() {
   const pc = usePublicClient();
-  const { UniswapV2Router02, WTTRUST } = useTrustswapAddresses();
+  const { UniswapV2Router02 } = useTrustswapAddresses();
 
   const {
     NATIVE_PLACEHOLDER,
     WNATIVE_ADDRESS,
     isNative,
-    toWrapped,
     getTokenByAddress,
   } = useTokenModule();
 
@@ -47,8 +49,7 @@ export function useQuoteDetails() {
     const amountIn = parseUnits(String(v), decimalsIn);
 
     const router = UniswapV2Router02 as Address;
-    const wNativeFromAddrs = WTTRUST as Address;
-    const wNative = WNATIVE_ADDRESS ?? wNativeFromAddrs;
+    const wNative = WNATIVE_ADDRESS as Address;
 
     const nativeEq = (a?: Address) =>
       !!a && a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();

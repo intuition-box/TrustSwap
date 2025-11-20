@@ -243,7 +243,7 @@ export function useLiquidityActions() {
     }
   }
 
-  // WTTRUST = vrai wrapped natif (avec alertes)
+  // WTRUST = vrai wrapped natif (avec alertes)
   async function wrapNative(amount: bigint) {
     try {
       const base = {

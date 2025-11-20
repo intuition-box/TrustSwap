@@ -27,7 +27,7 @@ export function TokenHoldingsTable({ data }: { data: TokenHolding[] }) {
         </thead>
         <tbody>
           {data.map((h, i) => {
-            // Map to UI token (WTTRUST -> tTRUST etc.)
+            // Map to UI token (WTRUST -> tTRUST etc.)
             const { getTokenForUI, NATIVE_PLACEHOLDER } = useTokenModule();
             const uiToken = getTokenForUI(h.token.address) ?? h.token;
             // Always provide an address for icon: native -> NATIVE_PLACEHOLDER
