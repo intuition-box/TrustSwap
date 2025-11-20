@@ -32,10 +32,10 @@ export const intuitionMainnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ["https://rpc.intuition.systems"], // TODO: mainnet RPC
+      http: ["https://rpc.intuition.systems/http"], // TODO: mainnet RPC
     },
     public: {
-      http: ["https://rpc.intuition.systems"],
+      http: ["https://rpc.intuition.systems/http"],
     },
   },
   blockExplorers: {
@@ -46,8 +46,8 @@ export const intuitionMainnet = defineChain({
   },
   contracts: {
     multicall3: {
-      address: "0x6E26ea6ab2236a28e3F2B59F532b79273e0Dc575",
-      blockCreated: 4252441
+      address: "0x31E7C4ef16e1c3c149D2F0a62517d621bDa6D037",
+      blockCreated: 117543
     }
   }
 })

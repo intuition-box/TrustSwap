@@ -21,6 +21,16 @@ export function usePoolsData(limit = 50, offset = 0) {
 
   // Let wagmi give us the right client for the current chain
   const pc = usePublicClient({ chainId: fallbackChainId });
+  const rpcUrl =
+    (pc?.transport as any)?.value?.url ??
+    (pc?.transport as any)?.url ??
+    "UNKNOWN";
+
+  dbg("PublicClient RPC URL", {
+    chainId: pc?.chain?.id,
+    rpcUrl,
+    rawTransport: pc?.transport,
+  });
 
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
