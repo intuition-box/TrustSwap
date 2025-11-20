@@ -256,4 +256,63 @@
 
 }
 
+.networkSelectContainer {
+    position: fixed;
+    top: 3vh;
+    right: 20vh;
+    padding: 5px;
+    z-index: 10000;
+}
 
+.networkSelect {
+    height: 30px;
+    border-radius: 2vh;
+    background-color: var(--black);
+    color: var(--text-color);
+    border: 1px solid var(--black-border);
+    padding: 0 30px 0 16px; /* espace pour la flèche */
+    font-size: 11px;
+    cursor: pointer;
+
+    box-shadow:
+      inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+      inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+      inset 0 -0.75px 0.5px var(--btn-shadow-black),
+      0 4px 4px -1px var(--btn-shadow-black),
+      0 2px 3px -1px var(--btn-shadow-black),
+      0 0.5px 0.5px var(--btn-shadow-black),
+      0 0 0 0.75px var(--btn-shadow-black);
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    appearance: none;
+    outline: none;
+    transition: all 0.25s ease;
+
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDE0IDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGggZD0iTTcgOEwwIDBIMTRMOSAwTDcgOFoiIGZpbGw9IiNmZmYiLz4KPC9zdmc+Cg==");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 12px;
+}
+
+/* Hover */
+.networkSelect:hover {
+    color: var(--text-color);
+    border-color: rgba(255,255,255,0.18);
+    transform: translateY(-1px);
+}
+
+/* Active (click) */
+.networkSelect:active {
+    transform: scale(0.98);
+}
+
+/* Dropdown options */
+.networkSelect option {
+    background-color: var(--black);
+    color: var(--text-color);
+    border: none;
+    padding: 10px;
+    font-size: 14px;
+}

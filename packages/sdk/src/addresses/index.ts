@@ -15,7 +15,7 @@ export interface Addresses {
 }
 
 export const INTUITION_TESTNET_CHAIN_ID = 13579;
-export const INTUITION_MAINNET_CHAIN_ID = 4242;
+export const INTUITION_MAINNET_CHAIN_ID = 1155;
 
 const BOOK: Record<number, Addresses> = {
   [INTUITION_TESTNET_CHAIN_ID]: INTUITION_13579 as Addresses,

@@ -59,7 +59,7 @@ export function useTokenBalance(token?: Address, owner?: Address): Result {
     }
 
     try {
-      // ✅ récupère meta on-chain si besoin (ne throw pas si hors TOKENLIST)
+      // récupère meta on-chain si besoin (ne throw pas si hors TOKENLIST)
       const meta = isNative(token!)
         ? nativeMeta
         : await getOrFetchToken(token!);

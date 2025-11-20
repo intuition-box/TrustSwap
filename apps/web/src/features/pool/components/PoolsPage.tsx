@@ -15,7 +15,6 @@ import styles from "../pools.module.css";
 
 
 export default function PoolsPage() {
-  const PAGE_SIZE = 8;
 
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");

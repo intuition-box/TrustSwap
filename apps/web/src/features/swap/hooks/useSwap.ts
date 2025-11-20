@@ -25,6 +25,7 @@ function explorerTx(chainId: number | undefined, hash?: `0x${string}`) {
   if (!hash) return undefined;
   const map: Record<number, string> = {
     13579: "https://testnet.explorer.intuition.systems/tx/",
+    1155: "https://explorer.intuition.systems/tx/",
   };
   const base = map[chainId ?? 0];
   return base ? `${base}${hash}` : undefined;

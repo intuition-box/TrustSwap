@@ -112,8 +112,10 @@ export default function Layout() {
             </nav>
           </div>
           <div className={styles.connectPage}>
-            <NetworkSelect />
             <ConnectButton />
+          </div>
+          <div className={styles.networkSelectContainer}>
+            <NetworkSelect />
           </div>
         </div>
       </header>

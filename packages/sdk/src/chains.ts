@@ -3,7 +3,7 @@ import { defineChain } from "viem";
 
 export const intuitionTestnet = defineChain({
   id: 13579,
-  name: "Intuition Testnet",
+  name: "Testnet",
   nativeCurrency: { name: "tTRUST", symbol: "tTRUST", decimals: 18 },
   rpcUrls: {
     default: { http: ["https://testnet.rpc.intuition.systems/http"] },
@@ -22,8 +22,8 @@ export const intuitionTestnet = defineChain({
 
 
 export const intuitionMainnet = defineChain({
-  id: 99999, // TODO: replace with real mainnet chain id
-  name: "Intuition Mainnet",
+  id: 1155,
+  name: "Mainnet",
   network: "intuition-mainnet",
   nativeCurrency: {
     name: "Trust",
@@ -32,10 +32,10 @@ export const intuitionMainnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ["https://rpc.intuition.systems/http"], // TODO: mainnet RPC
+      http: ["https://rpc.intuition.systems"], // TODO: mainnet RPC
     },
     public: {
-      http: ["https://rpc.intuition.systems/http"],
+      http: ["https://rpc.intuition.systems"],
     },
   },
   blockExplorers: {
@@ -44,4 +44,10 @@ export const intuitionMainnet = defineChain({
       url: "https://explorer.intuition.systems", // TODO: mainnet explorer
     },
   },
+  contracts: {
+    multicall3: {
+      address: "0x6E26ea6ab2236a28e3F2B59F532b79273e0Dc575",
+      blockCreated: 4252441
+    }
+  }
 })

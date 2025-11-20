@@ -1,6 +1,8 @@
 import React from "react";
 import { useChainId, useSwitchChain } from "wagmi";
 import { CHAINS } from "../lib/wagmi";
+import styles from "../styles/Layout.module.css";
+
 
 export function NetworkSelect() {
   const chainId = useChainId();
@@ -17,7 +19,7 @@ export function NetworkSelect() {
     <select
       value={chainId}
       onChange={handleChange}
-      className="rounded-md border px-2 py-1 text-sm bg-transparent"
+      className={styles.networkSelect}
     >
       {CHAINS.map((chain) => (
         <option key={chain.id} value={chain.id}>

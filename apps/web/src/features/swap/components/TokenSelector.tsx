@@ -55,7 +55,7 @@ export default function TokenSelector({
   const { TOKENLIST } = useTokenModule();
   const baseTokens: Token[] = useMemo(
     () => (tokens && tokens.length ? tokens : (TOKENLIST as unknown as Token[])),
-    [tokens]
+    [tokens, TOKENLIST]
   );
 
   // Imported tokens (user)

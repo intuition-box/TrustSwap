@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Abi, Address } from "viem";
 import { parseAbiItem } from "viem";
-import { usePublicClient } from "wagmi";
-import { addresses } from "@trustswap/sdk";
+import { usePublicClient, useChainId } from "wagmi";
+import { getAddresses } from "@trustswap/sdk";
 import * as SDKAbi from "@trustswap/sdk/abi";
 import { useTokenModule } from "../../../hooks/useTokenModule";
 
@@ -22,11 +22,14 @@ type PairMeta = {
   t1: Address;
   r0: bigint;
   r1: bigint;
-  wIs0?: boolean; // true si t0==WNATIVE, false si t1==WNATIVE, undefined sinon
+  wIs0?: boolean;
 };
 
 export function useGlobalStats() {
-  const pc = usePublicClient();
+  const wagmiChainId = useChainId();
+  const fallbackChainId = wagmiChainId;
+  const pc = usePublicClient({ chainId: fallbackChainId });
+
   const [data, setData] = useState<{ tvlWT: bigint; vol24hWT: bigint; tx24h: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setErr] = useState<string | null>(null);
@@ -43,7 +46,9 @@ export function useGlobalStats() {
           return;
         }
 
-        const factory = addresses.UniswapV2Factory as Address;
+        const activeChainId = pc.chain?.id ?? fallbackChainId;
+        const { UniswapV2Factory } = getAddresses(Number(activeChainId));
+        const factory = UniswapV2Factory as Address;
 
         // 1) pairs
         const len = await pc.readContract({

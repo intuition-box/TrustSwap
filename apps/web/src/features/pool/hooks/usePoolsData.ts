@@ -1,8 +1,8 @@
 // apps/web/src/features/pools/hooks/usePoolsData.ts
 import { useEffect, useRef, useState } from "react";
 import { type Address, type Abi } from "viem";
-import { usePublicClient } from "wagmi";
-import { abi, addresses } from "@trustswap/sdk";
+import { usePublicClient, useChainId } from "wagmi";
+import { abi, getAddresses } from "@trustswap/sdk";
 import { useTokenModule } from "../../../hooks/useTokenModule";
 
 import type { PoolItem } from "../types";
@@ -16,7 +16,12 @@ const PAIR_ABI    = toAbi(abi.UniswapV2Pair);
 const dbg = (...args: any[]) => console.log("[usePoolsData]", ...args);
 
 export function usePoolsData(limit = 50, offset = 0) {
-  const pc = usePublicClient({ chainId: 13579 });
+  const wagmiChainId = useChainId();
+  const fallbackChainId = wagmiChainId;
+
+  // Let wagmi give us the right client for the current chain
+  const pc = usePublicClient({ chainId: fallbackChainId });
+
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
   const [items, setItems]     = useState<PoolItem[]>([]);
@@ -24,21 +29,36 @@ export function usePoolsData(limit = 50, offset = 0) {
   const { getOrFetchToken } = useTokenModule();
 
   useEffect(() => {
-    if (!pc) { dbg("no public client"); return; }
+    if (!pc) {
+      dbg("no public client");
+      return;
+    }
 
-    dbg("start", { limit, offset, chainId: pc?.chain?.id, hasMulticall3: !!pc.chain?.contracts?.multicall3 });
+    const activeChainId = pc.chain?.id ?? fallbackChainId;
+    const { UniswapV2Factory, StakingRewardsFactory } = getAddresses(Number(activeChainId));
+
+    dbg("start", {
+      limit,
+      offset,
+      chainId: activeChainId,
+      hasMulticall3: !!pc.chain?.contracts?.multicall3,
+    });
 
     const runId = ++runIdRef.current;
+
     (async () => {
       try {
-        setLoading(true); setError(null);
+        setLoading(true);
+        setError(null);
 
-        const factory = addresses.UniswapV2Factory as Address;
+        const factory = UniswapV2Factory as Address;
         const canMulticall = !!pc.chain?.contracts?.multicall3;
         dbg("factory", factory);
 
         const total = await pc.readContract({
-          address: factory, abi: FACTORY_ABI, functionName: "allPairsLength",
+          address: factory,
+          abi: FACTORY_ABI,
+          functionName: "allPairsLength",
         }) as bigint;
         dbg("total pairs", total?.toString());
 
@@ -47,7 +67,6 @@ export function usePoolsData(limit = 50, offset = 0) {
         const idxs  = Array.from({ length: end - start }, (_, i) => BigInt(start + i));
         dbg("range", { start, end, count: idxs.length });
 
-        // 1) Pairs
         const pairs: Address[] = [];
         for (const ids of chunk(idxs, 900)) {
           dbg("fetch pairs chunk", { size: ids.length, mode: canMulticall ? "multicall" : "loop" });
@@ -55,18 +74,29 @@ export function usePoolsData(limit = 50, offset = 0) {
             ? await pc.multicall({
                 allowFailure: false,
                 contracts: ids.map((i) => ({
-                  address: factory, abi: FACTORY_ABI, functionName: "allPairs", args: [i],
+                  address: factory,
+                  abi: FACTORY_ABI,
+                  functionName: "allPairs",
+                  args: [i],
                 })),
               })
             : await Promise.all(ids.map((i) =>
-                pc.readContract({ address: factory, abi: FACTORY_ABI, functionName: "allPairs", args: [i] })
+                pc.readContract({
+                  address: factory,
+                  abi: FACTORY_ABI,
+                  functionName: "allPairs",
+                  args: [i],
+                }),
               ));
           pairs.push(...(res as Address[]));
           dbg("pairs so far", pairs.length);
         }
-        if (!pairs.length) { if (runId === runIdRef.current) setItems([]); return; }
 
-        // 2) token0 / token1 / reserves
+        if (!pairs.length) {
+          if (runId === runIdRef.current) setItems([]);
+          return;
+        }
+
         type Meta = { pair: Address; t0: Address; t1: Address; r0: bigint; r1: bigint };
         const metas: Meta[] = [];
 
@@ -104,22 +134,24 @@ export function usePoolsData(limit = 50, offset = 0) {
           dbg("metas so far", metas.length);
         }
 
-        // 3) Enrichissement metadata tokens
         dbg("enrich tokens", { count: metas.length });
-        const rows: PoolItem[] = await Promise.all(metas.map(async (m) => {
-          const [t0Info, t1Info] = await Promise.all([
-            getOrFetchToken(m.t0), getOrFetchToken(m.t1),
-          ]);
-          return {
-            pair: m.pair,
-            token0: t0Info,
-            token1: t1Info,
-            reserve0: m.r0,
-            reserve1: m.r1,
-            srf: addresses.StakingRewardsFactory as Address,
-            staking: null,
-          } satisfies PoolItem;
-        }));
+        const rows: PoolItem[] = await Promise.all(
+          metas.map(async (m) => {
+            const [t0Info, t1Info] = await Promise.all([
+              getOrFetchToken(m.t0),
+              getOrFetchToken(m.t1),
+            ]);
+            return {
+              pair: m.pair,
+              token0: t0Info,
+              token1: t1Info,
+              reserve0: m.r0,
+              reserve1: m.r1,
+              srf: StakingRewardsFactory as Address,
+              staking: null,
+            } satisfies PoolItem;
+          }),
+        );
         dbg("rows ready", rows.length);
 
         if (runId === runIdRef.current) setItems(rows);
@@ -131,7 +163,7 @@ export function usePoolsData(limit = 50, offset = 0) {
         dbg("done");
       }
     })();
-  }, [pc?.chain?.id, limit, offset]); 
+  }, [pc, fallbackChainId, limit, offset, getOrFetchToken]);
 
   return { loading, error, items };
 }
