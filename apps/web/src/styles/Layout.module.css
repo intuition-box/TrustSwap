@@ -259,7 +259,7 @@
 .networkSelectContainer {
     position: fixed;
     top: 3vh;
-    right: 20vh;
+    right: 19vh;
     padding: 5px;
     z-index: 10000;
 }
