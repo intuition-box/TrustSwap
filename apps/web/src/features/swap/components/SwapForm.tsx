@@ -80,6 +80,8 @@ export default function SwapForm() {
   const isNative = (a?: Address) =>
     !!a && a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
 
+  const isWrapped = (a?: Address) =>
+    !!a && a.toLowerCase() === WTTRUST.toLowerCase();
 
   const defaults = useMemo(() => getDefaultPair(), []);
   const [tokenIn, setTokenIn] = useState<Address>(defaults.tokenIn.address);
@@ -367,25 +369,50 @@ export default function SwapForm() {
     const v = Number(normalizeAmountStr(amountIn));
     if (!isFinite(v) || v <= 0) return;
 
-    // Réutilise la dernière quote si disponible, sinon hook
-    const outBn =
-      lastOutBn ??
-      (await (async () => {
-        const qd = await quoteDetails(
-          tokenIn,
-          tokenOut ?? "0x0000000000000000000000000000000000000000",
-          String(v)
-        );
-        if (!qd) throw new Error("No route/liquidity for this pair");
-        return qd.amountOutBn;
-      })());
-    const minOut = outBn - (outBn * BigInt(slippageBps)) / 10_000n;
+    const isWrap =
+      !!tokenOut &&
+      isNative(tokenIn) &&
+      isWrapped(tokenOut as Address);
+
+    const isUnwrap =
+      !!tokenOut &&
+      isWrapped(tokenIn as Address) &&
+      isNative(tokenOut as Address);
+
+    const sameAsset = isWrap || isUnwrap;
+
+    let outBn: bigint;
+
+    if (sameAsset) {
+      // For wrap/unwrap, 1:1 amount, no routing
+      const tiMeta = getMeta(tokenIn);
+      outBn = parseUnits(String(v), tiMeta.decimals);
+    } else {
+      // Reuse last quote if available, otherwise recompute with quoteDetails
+      outBn =
+        lastOutBn ??
+        (await (async () => {
+          const qd = await quoteDetails(
+            tokenIn,
+            tokenOut ?? "0x0000000000000000000000000000000000000000",
+            String(v)
+          );
+          if (!qd) throw new Error("No route/liquidity for this pair");
+          return qd.amountOutBn;
+        })());
+    }
+
+    const minOut = sameAsset
+      ? outBn // wrap/unwrap is 1:1, no slippage
+      : outBn - (outBn * BigInt(slippageBps)) / 10_000n;
+
     const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
 
     const ti = getMeta(tokenIn);
     const amtIn = parseUnits(String(v), ti.decimals);
 
-    if (!isNative(tokenIn)) {
+    // No allowance/approve for wrap/unwrap, only for router swaps
+    if (!sameAsset && !isNative(tokenIn)) {
       const curr = await allowance(address, tokenIn, ROUTER);
       if (curr < amtIn) {
         await approve(tokenIn, ROUTER, amtIn);

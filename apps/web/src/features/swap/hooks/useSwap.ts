@@ -87,8 +87,7 @@ export function useSwap() {
 
   const approveIfNeeded = async (token: Address, owner: Address, amount: bigint) => {
     if (!publicClient || !wallet) throw new Error("Wallet not connected");
-    if (isNative(token)) return;
-    if (isWrapped(token)) return;
+    if (isNative(token)) return; // do not approve native
 
     const allowance = (await publicClient.readContract({
       address: token,
@@ -185,11 +184,11 @@ export function useSwap() {
     try {
       let hash: `0x${string}`;
 
-      // Wrap / Unwrap (direct calls to wrapped native contract)
+      // Wrap / unwrap (direct calls to wrapped native contract)
       if (isNative(tokenIn) && isWrapped(tokenOut)) {
         hash = await wallet.writeContract({
           address: wNative,
-          abi: abi.WTTRUST, // ABI for the wrapped native token
+          abi: abi.WTTRUST, // must be the wrapper ABI
           functionName: "deposit",
           args: [],
           value: amountIn,
@@ -243,8 +242,9 @@ export function useSwap() {
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-      const labelIn = isNative(tokenIn) ? "tTRUST" : tIn.symbol || "TOKEN";
-      const labelOut = isNative(tokenOut) ? "tTRUST" : tOut.symbol || "TOKEN";
+      const labelIn = isNative(tokenIn) ? "TRUST" : tIn.symbol || "TOKEN";
+      const labelOut =
+        isNative(tokenOut) ? "TRUST" : isWrapped(tokenOut) ? "wTRUST" : tOut.symbol || "TOKEN";
       const shownMinOut = formatUnits(minOut, Number(tOut.decimals ?? 18));
 
       alerts.push({
