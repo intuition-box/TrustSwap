@@ -4,13 +4,14 @@ import type { Address } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import { erc20Abi, formatUnits, zeroAddress } from "viem";
 import { abi, addresses } from "@trustswap/sdk";
-import {
-  NATIVE_PLACEHOLDER,
-  WNATIVE_ADDRESS,
-  getOrFetchToken, 
-} from "../../../lib/tokens";
+
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
+
 
 function toERC20ForRead(addr?: Address): Address | undefined {
+  const { NATIVE_PLACEHOLDER, WNATIVE_ADDRESS } = useTokenModule();
+
   if (!addr) return undefined;
   return addr.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase()
     ? (WNATIVE_ADDRESS as Address)
@@ -48,6 +49,9 @@ export type LpPosition = {
 export function useLpPosition(tokenA?: Address, tokenB?: Address): LpPosition {
   const pc = usePublicClient(); // ✅ pas de chainId forcé ici
   const { address: owner } = useAccount();
+
+  const { getOrFetchToken } = useTokenModule();
+
 
   // adresses “lecture” (toujours ERC-20)
   const readA = toERC20ForRead(tokenA);
@@ -131,7 +135,7 @@ export function useLpPosition(tokenA?: Address, tokenB?: Address): LpPosition {
 
         // 5) Décimales pour format (safe on-chain).
         //    Ici on prend celles des ERC-20 de la pair (readA/readB).
-        //    WTTRUST a 18, et les ERC-20 importés seront lus on-chain via getOrFetchToken.
+        //    WTRUST a 18, et les ERC-20 importés seront lus on-chain via getOrFetchToken.
         const [metaA, metaB] = await Promise.all([
           getOrFetchToken(readA),
           getOrFetchToken(readB),

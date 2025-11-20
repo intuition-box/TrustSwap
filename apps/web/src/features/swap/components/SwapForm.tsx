@@ -2,12 +2,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Address } from "viem";
 import { getAddress, parseUnits, formatUnits } from "viem";
-import { useAccount, usePublicClient } from "wagmi";
-import {
-  getDefaultPair,
-  TOKENLIST,
-  NATIVE_PLACEHOLDER,
-} from "../../../lib/tokens";
+import { useAccount, usePublicClient, useChainId } from "wagmi";
+import { useTokenModule } from "../../../hooks/useTokenModule";
+
 import { useImportedTokens } from "../hooks/useImportedTokens";
 import { useQuoteDetails } from "../hooks/useQuoteDetails";
 import { useAllowance } from "../hooks/useAllowance";
@@ -22,10 +19,9 @@ import TokenField from "./TokenField";
 import FlipButton from "./FlipButton";
 import ApproveAndSwap from "./ApproveAndSwap";
 import DetailsDisclosure from "./DetailsDisclosure";
-import { addresses, abi } from "@trustswap/sdk";
+import { addresses as TESTNET_ADDRESSES, abi, getAddresses } from "@trustswap/sdk";
 
-const isNative = (a?: Address) =>
-  !!a && a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
+
 
 const norm = (a?: string) => (a ? a.toLowerCase() : "");
 
@@ -66,6 +62,26 @@ type Meta = {
 export default function SwapForm() {
   const { address } = useAccount();
   const pc = usePublicClient();
+  const chainId = useChainId();
+
+  const {
+  getDefaultPair,
+  TOKENLIST,
+  NATIVE_PLACEHOLDER,
+  WNATIVE_ADDRESS,
+  getTokenByAddressOrFallback,
+} = useTokenModule();
+
+  const resolvedChainId = chainId;
+  const { WTTRUST, TSWP, UniswapV2Router02 } = getAddresses(resolvedChainId);
+  const WNATIVE = WNATIVE_ADDRESS as Address;
+  const ROUTER = UniswapV2Router02 as Address;
+
+  const isNative = (a?: Address) =>
+    !!a && a.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
+
+  const isWrapped = (a?: Address) =>
+    !!a && a.toLowerCase() === WTTRUST.toLowerCase();
 
   const defaults = useMemo(() => getDefaultPair(), []);
   const [tokenIn, setTokenIn] = useState<Address>(defaults.tokenIn.address);
@@ -113,7 +129,8 @@ export default function SwapForm() {
       });
     }
     return m;
-  }, [imported]);
+  }, [TOKENLIST, imported]);
+
 
   function getMeta(addr?: Address): Meta {
     if (!addr) {
@@ -134,18 +151,19 @@ export default function SwapForm() {
   }
 
   function buildPaths(tin: Address, tout: Address): Address[][] {
-    const WT = addresses.WTTRUST as Address;
-    const TSWP = addresses.TSWP as Address;
+    const WT = WNATIVE as Address;
+    const tswpAddr = TSWP as Address;
 
     const A = isNative(tin) ? WT : tin;
     const B = isNative(tout) ? WT : tout;
 
-    
-    const paths: Address[][] = [
-      [A, B],
-      [A, WT, B],
-      [A, TSWP, B],
-    ];
+    const paths: Address[][] = [[A, B], [A, WT, B]];
+
+    // Optional governance token hop if configured and distinct
+    const isZero = (addr: Address) => addr.toLowerCase() === "0x0000000000000000000000000000000000000000";
+    if (!isZero(tswpAddr) && tswpAddr !== A && tswpAddr !== B) {
+      paths.push([A, tswpAddr, B]);
+    }
 
     const seen = new Set<string>();
     const uniq: Address[][] = [];
@@ -159,6 +177,7 @@ export default function SwapForm() {
     return uniq;
   }
 
+
   
   async function fastRouterQuote(
     tin: Address,
@@ -170,7 +189,7 @@ export default function SwapForm() {
     const paths = buildPaths(tin, tout);
     const calls = paths.map(async (path) => {
       const amounts = (await pc.readContract({
-        address: addresses.UniswapV2Router02 as Address,
+        address: ROUTER,
         abi: abi.UniswapV2Router02,
         functionName: "getAmountsOut",
         args: [amtIn, path],
@@ -318,9 +337,13 @@ export default function SwapForm() {
       tokenOut ?? "0x0000000000000000000000000000000000000000",
       amountIn,
       amountOut,
-      pairData
+      pairData,
+      {
+        NATIVE_PLACEHOLDER,
+        WNATIVE_ADDRESS,
+        getTokenByAddressOrFallback,
+      }
     );
-    // deps: tout ce qui influence l'impact
   }, [
     tokenIn,
     tokenOut,
@@ -335,6 +358,9 @@ export default function SwapForm() {
     (pairData as any)?.decimals1,
     bestPath?.join(">"),
     lastOutBn?.toString(),
+    NATIVE_PLACEHOLDER,
+    WNATIVE_ADDRESS,
+    getTokenByAddressOrFallback,
   ]);
 
   async function onApproveAndSwap() {
@@ -343,36 +369,53 @@ export default function SwapForm() {
     const v = Number(normalizeAmountStr(amountIn));
     if (!isFinite(v) || v <= 0) return;
 
-    // Réutilise la dernière quote si disponible, sinon hook
-    const outBn =
-      lastOutBn ??
-      (await (async () => {
-        const qd = await quoteDetails(
-          tokenIn,
-          tokenOut ?? "0x0000000000000000000000000000000000000000",
-          String(v)
-        );
-        if (!qd) throw new Error("No route/liquidity for this pair");
-        return qd.amountOutBn;
-      })());
-    const minOut = outBn - (outBn * BigInt(slippageBps)) / 10_000n;
+    const isWrap =
+      !!tokenOut &&
+      isNative(tokenIn) &&
+      isWrapped(tokenOut as Address);
+
+    const isUnwrap =
+      !!tokenOut &&
+      isWrapped(tokenIn as Address) &&
+      isNative(tokenOut as Address);
+
+    const sameAsset = isWrap || isUnwrap;
+
+    let outBn: bigint;
+
+    if (sameAsset) {
+      // For wrap/unwrap, 1:1 amount, no routing
+      const tiMeta = getMeta(tokenIn);
+      outBn = parseUnits(String(v), tiMeta.decimals);
+    } else {
+      // Reuse last quote if available, otherwise recompute with quoteDetails
+      outBn =
+        lastOutBn ??
+        (await (async () => {
+          const qd = await quoteDetails(
+            tokenIn,
+            tokenOut ?? "0x0000000000000000000000000000000000000000",
+            String(v)
+          );
+          if (!qd) throw new Error("No route/liquidity for this pair");
+          return qd.amountOutBn;
+        })());
+    }
+
+    const minOut = sameAsset
+      ? outBn // wrap/unwrap is 1:1, no slippage
+      : outBn - (outBn * BigInt(slippageBps)) / 10_000n;
+
     const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
 
     const ti = getMeta(tokenIn);
     const amtIn = parseUnits(String(v), ti.decimals);
 
-    if (!isNative(tokenIn)) {
-      const curr = await allowance(
-        address,
-        tokenIn,
-        addresses.UniswapV2Router02 as Address
-      );
+    // No allowance/approve for wrap/unwrap, only for router swaps
+    if (!sameAsset && !isNative(tokenIn)) {
+      const curr = await allowance(address, tokenIn, ROUTER);
       if (curr < amtIn) {
-        await approve(
-          tokenIn,
-          addresses.UniswapV2Router02 as Address,
-          amtIn
-        );
+        await approve(tokenIn, ROUTER, amtIn);
       }
     }
 

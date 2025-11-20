@@ -1,51 +1,48 @@
-// features/shared/hooks/useTokenMeta.ts
+// web/src/hooks/useTokenMeta.ts
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import { getOrFetchToken, isNative, NATIVE_PLACEHOLDER } from "../lib/tokens";
+import { useTokenModule } from "./useTokenModule";
 
 export type UIMeta = {
-  address: Address;       // adresse "UI" (placeholder si natif)
+  address: Address;
   symbol: string;
   name?: string;
-  decimals: number;       // 18 si natif
-  isNative?: boolean;     // true si tTRUST
+  decimals: number;
+  isNative?: boolean;
 };
 
 export function useTokenMeta(addr?: Address) {
-  const [state, setState] = useState<{ meta?: UIMeta; loading: boolean; error?: unknown }>({
+  const { getTokenMetaSafe } = useTokenModule();
+
+  const [state, setState] = useState<{
+    meta?: UIMeta;
+    loading: boolean;
+    error?: unknown;
+  }>({
     loading: !!addr,
   });
 
   useEffect(() => {
     let alive = true;
+
     (async () => {
-      if (!addr) { if (alive) setState({ loading: false }); return; }
+      if (!addr) {
+        if (alive) setState({ loading: false });
+        return;
+      }
 
       try {
-        if (isNative(addr)) {
-          if (!alive) return;
-          setState({
-            loading: false,
-            meta: {
-              address: NATIVE_PLACEHOLDER,
-              symbol: "tTRUST",
-              name: "Native TRUST",
-              decimals: 18,
-              isNative: true,
-            },
-          });
-          return;
-        }
-
-        const onchain = await getOrFetchToken(addr);
+        const info = await getTokenMetaSafe(addr);
         if (!alive) return;
+
         setState({
           loading: false,
           meta: {
-            address: addr,
-            symbol: onchain.symbol,
-            name: onchain.name,
-            decimals: Number(onchain.decimals ?? 18),
+            address: info.address,
+            symbol: info.symbol,
+            name: info.name,
+            decimals: info.decimals,
+            isNative: info.isNative,
           },
         });
       } catch (error) {
@@ -54,8 +51,10 @@ export function useTokenMeta(addr?: Address) {
       }
     })();
 
-    return () => { alive = false; };
-  }, [addr]);
+    return () => {
+      alive = false;
+    };
+  }, [addr, getTokenMetaSafe]);
 
   return state;
 }

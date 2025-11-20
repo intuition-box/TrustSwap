@@ -5,7 +5,8 @@ import { formatUnits, parseUnits } from "viem";
 import styles from "../../modal.module.css";
 import { clampDecimalsForInput, tidyOnBlur } from "../../../../utils/number";
 import { useLiquidityActions } from "../../hooks/useLiquidityActions";
-import { toWrapped } from "../../../../lib/tokens";
+import { useTokenModule } from "../../../../hooks/useTokenModule";
+
 import { getTokenIcon } from "../../../../lib/getTokenIcon";
 import { useLpPosition } from "../../hooks/useLpPosition";
 import { fmtUnits, formatAmountStr } from "../../utils";
@@ -29,6 +30,8 @@ export function RemoveLiquidityDrawer({
 
   const [lpAmount, setLpAmount] = useState("");
   const [lpRawOverride, setLpRawOverride] = useState<bigint | null>(null);
+  const { toWrapped } = useTokenModule();
+  
 
   // Position LP réelle
   const {

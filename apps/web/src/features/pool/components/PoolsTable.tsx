@@ -1,5 +1,5 @@
 // apps/web/src/features/pools/components/PoolsTable.tsx
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import type { Address } from "viem";
 
 import { usePoolsData } from "../hooks/usePoolsData";
@@ -17,13 +17,23 @@ export function PoolsTable({
   page,
   query,
   onOpenLiquidity,
+  onPageInfoChange,
 }: {
   page: number;
   query: string;
   onOpenLiquidity: (a: Address, b: Address) => void;
+  onPageInfoChange?: (info: { hasNextPage: boolean }) => void;
 }) {
-  const pageSize = 10;
+  const pageSize = 8;
   const { items, loading, error } = usePoolsData(pageSize, (page - 1) * pageSize);
+
+  useEffect(() => {
+    if (!onPageInfoChange) return;
+    if (loading || error) return;
+
+    // Si on a une page "pleine", il y a potentiellement une page suivante
+    onPageInfoChange({ hasNextPage: items.length === pageSize });
+  }, [items.length, loading, error, onPageInfoChange]);
 
   const skeletonPool: PoolItem = {
     pair: "0x0000000000000000000000000000000000000000",
@@ -72,7 +82,9 @@ export function PoolsTable({
     );
   }
 
-  if (!items.length) return <div>Aucune pool</div>;
+  if (!items.length)
+    return <div className={styles.centerMessage}>No pools available</div>;
+
 
   return (
     <PoolsTableInner
