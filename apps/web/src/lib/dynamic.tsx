@@ -27,8 +27,8 @@ function toDynamicEvmNetwork(chain: typeof intuitionTestnet | typeof intuitionMa
 }
 
 const dynamicEvmNetworks = [
-  toDynamicEvmNetwork(intuitionTestnet, { testnet: true }),
   toDynamicEvmNetwork(intuitionMainnet, { testnet: false }),
+  toDynamicEvmNetwork(intuitionTestnet, { testnet: true }),
 ];
 
 export function RootProviders({ children }: PropsWithChildren) {
