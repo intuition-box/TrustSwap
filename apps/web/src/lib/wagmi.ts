@@ -19,8 +19,9 @@ function withMulticall(chain: Chain): Chain {
 }
 
 export const CHAINS: Chain[] = [
-  withMulticall(intuitionTestnet as unknown as Chain),
   withMulticall(intuitionMainnet as unknown as Chain),
+  withMulticall(intuitionTestnet as unknown as Chain),
+
 ];
 
 export const wagmiConfig = createConfig({
