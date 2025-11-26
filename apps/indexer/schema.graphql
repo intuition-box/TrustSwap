@@ -8,6 +8,31 @@ type Pair {
   createdAtBlock: BigInt!
   createdAtTx: String!
   logIndex: Int!
+
+  swapCount: BigInt!
+  mintCount: BigInt!
+  burnCount: BigInt!
+}
+
+type Token {
+  id: ID!
+  address: String!
+  chainId: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTx: String!
+  pairCount: BigInt!
+  swapCount: BigInt!
+}
+
+type User {
+  id: ID!
+  address: String!
+  chainId: BigInt!
+  swapCount: BigInt!
+  totalAmount0In: BigInt!
+  totalAmount1In: BigInt!
+  totalAmount0Out: BigInt!
+  totalAmount1Out: BigInt!
 }
 
 type Mint {
@@ -45,17 +70,6 @@ type Swap {
   amount1In: BigInt!
   amount0Out: BigInt!
   amount1Out: BigInt!
-  createdAtBlock: BigInt!
-  createdAtTx: String!
-  logIndex: Int!
-}
-
-type Sync {
-  id: ID!
-  chainId: BigInt!
-  pairAddress: String!
-  reserve0: BigInt!
-  reserve1: BigInt!
   createdAtBlock: BigInt!
   createdAtTx: String!
   logIndex: Int!

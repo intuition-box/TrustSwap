@@ -1,31 +1,38 @@
 # yaml-language-server: $schema=./node_modules/envio/evm.schema.json
-name: trustswap-indexer
+name: trustswap-v2-indexer
+description: Indexer for TrustSwap UniswapV2 fork
+ecosystem: evm
+
+schema: ./schema.graphql
+output: ./generated
+
+contracts:
+  - name: UniswapV2Factory
+    abi_file_path: ./abis/UniswapV2Factory.json
+    handler: ./src/EventHandlers.ts
+    events:
+      - event: "PairCreated(address indexed token0, address indexed token1, address pair, uint256)"
+
+  - name: UniswapV2Pair
+    abi_file_path: ./abis/UniswapV2Pair.json
+    handler: ./src/EventHandlers.ts
+    events:
+      - event: "Swap(address indexed sender, uint256 amount0In, uint256 amount1In, uint256 amount0Out, uint256 amount1Out, address indexed to)"
+      - event: "Mint(address indexed sender, uint256 amount0, uint256 amount1)"
+      - event: "Burn(address indexed sender, uint256 amount0, uint256 amount1, address indexed to)"
+      - event: "Sync(uint112 reserve0, uint112 reserve1)"
 
 networks:
   - id: 13579
-    start_block: 0
+    start_block: 1050408
     rpc_config:
-      url: https://testnet.rpc.intuition.systems/http
+      url: "https://testnet.rpc.intuition.systems/http"
     contracts:
-      - name: Factory
-        address:
-          - 0xd103E057242881214793d5A1A7c2A5B84731c75c
-        handler: src/EventHandlers.ts
-        events:
-          - event: PairCreated(address indexed token0, address indexed token1, address pair, uint256 )
-      - name: PairContract
-        address:
-          - 0x0aBF70FF93e146E19fbdfb6dc9FE6c50dcC34551  # ex: TKA/TKB
-        handler: src/EventHandlers.ts
-        events:
-          - event: Mint(address indexed sender, uint256 amount0, uint256 amount1)
-          - event: Burn(address indexed sender, uint256 amount0, uint256 amount1, address indexed to)
-          - event: Swap(address indexed sender, uint256 amount0In, uint256 amount1In, uint256 amount0Out, uint256 amount1Out, address indexed to)
-          - event: Sync(uint112 reserve0, uint112 reserve1)
-
+      - name: UniswapV2Factory
+        address: "0xd103E057242881214793d5A1A7c2A5B84731c75c"
+      - name: UniswapV2Pair
+        # no address here – pairs will be discovered dynamically
+        
 field_selection:
   transaction_fields:
     - hash
-
-unordered_multichain_mode: true
-preload_handlers: true

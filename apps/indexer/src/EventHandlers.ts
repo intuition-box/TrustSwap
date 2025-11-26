@@ -1,39 +1,125 @@
-/*
- * Please refer to https://docs.envio.dev for a thorough guide on all Envio indexer features
- */
 import {
-  Factory,
+  UniswapV2Factory,
+  UniswapV2Pair,
   Pair as PairEntity,
+  Token,
+  User,
+  Swap,
   Mint,
   Burn,
-  Swap,
-  Sync,
-  PairContract,
 } from "generated";
 
-Factory.PairCreated.handler(async ({ event, context }) => {
-  const id = `${event.chainId}_${event.params.pair.toLowerCase()}`;
+// Helper to build stable IDs
+function makePairId(chainId: bigint | number, pairAddress: string): string {
+  return `${chainId}_${pairAddress.toLowerCase()}`;
+}
 
-  const entity: PairEntity = {
-    id,
-    chainId: BigInt(event.chainId),
-    token0: event.params.token0,
-    token1: event.params.token1,
-    pairAddress: event.params.pair,
-    allPairsLength: event.params._3,
-    createdAtBlock: BigInt(event.block.number),
-    createdAtTx: event.transaction.hash ?? "",
-    logIndex: event.logIndex,
-  };
+function makeTokenId(chainId: bigint | number, tokenAddress: string): string {
+  return `${chainId}_${tokenAddress.toLowerCase()}`;
+}
 
-  context.Pair.set(entity);
+function makeUserId(chainId: bigint | number, userAddress: string): string {
+  return `${chainId}_${userAddress.toLowerCase()}`;
+}
+
+/**
+ * Handle PairCreated events from UniswapV2Factory
+ * - register / update Pair entity
+ * - register / update Token entities for token0 / token1
+ */
+
+UniswapV2Factory.PairCreated.contractRegister(({ event, context }: any) => {
+  context.addUniswapV2Pair(event.params.pair);
+
+  context.log.info(
+    `Registered new UniswapV2Pair at ${event.params.pair} (token0=${event.params.token0}, token1=${event.params.token1})`,
+  );
 });
 
-PairContract.Mint.handler(async ({ event, context }) => {
-  const entity: Mint = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    chainId: BigInt(event.chainId),
-    pairAddress: event.srcAddress,
+UniswapV2Factory.PairCreated.handler(async ({ event, context }) => {
+  const chainId = BigInt(event.chainId);
+  const pairAddress = event.params.pair;
+  const pairId = makePairId(chainId, pairAddress);
+
+  // Upsert Pair
+  const existingPair = await context.Pair.get(pairId);
+
+  const pairEntity: PairEntity = {
+    id: pairId,
+    chainId,
+    token0: event.params.token0,
+    token1: event.params.token1,
+    pairAddress,
+    allPairsLength: event.params._3,
+    createdAtBlock: existingPair
+      ? existingPair.createdAtBlock
+      : BigInt(event.block.number),
+    createdAtTx: existingPair
+      ? existingPair.createdAtTx
+      : (event.transaction.hash ?? ""),
+    logIndex: existingPair ? existingPair.logIndex : event.logIndex,
+    swapCount: existingPair ? existingPair.swapCount : 0n,
+    mintCount: existingPair ? existingPair.mintCount : 0n,
+    burnCount: existingPair ? existingPair.burnCount : 0n,
+  };
+
+  await context.Pair.set(pairEntity);
+
+  // Upsert Token0
+  const token0Id = makeTokenId(chainId, event.params.token0);
+  const existingToken0 = await context.Token.get(token0Id);
+
+  const token0Entity: Token = {
+    id: token0Id,
+    address: event.params.token0,
+    chainId,
+    createdAtBlock: existingToken0
+      ? existingToken0.createdAtBlock
+      : BigInt(event.block.number),
+    createdAtTx: existingToken0
+      ? existingToken0.createdAtTx
+      : (event.transaction.hash ?? ""),
+    pairCount: (existingToken0 ? existingToken0.pairCount : 0n) + 1n,
+    swapCount: existingToken0 ? existingToken0.swapCount : 0n,
+  };
+
+  await context.Token.set(token0Entity);
+
+  // Upsert Token1
+  const token1Id = makeTokenId(chainId, event.params.token1);
+  const existingToken1 = await context.Token.get(token1Id);
+
+  const token1Entity: Token = {
+    id: token1Id,
+    address: event.params.token1,
+    chainId,
+    createdAtBlock: existingToken1
+      ? existingToken1.createdAtBlock
+      : BigInt(event.block.number),
+    createdAtTx: existingToken1
+      ? existingToken1.createdAtTx
+      : (event.transaction.hash ?? ""),
+    pairCount: (existingToken1 ? existingToken1.pairCount : 0n) + 1n,
+    swapCount: existingToken1 ? existingToken1.swapCount : 0n,
+  };
+
+  await context.Token.set(token1Entity);
+});
+
+/**
+ * Handle Mint events on UniswapV2Pair
+ */
+UniswapV2Pair.Mint.handler(async ({ event, context }) => {
+  const chainId = BigInt(event.chainId);
+  const pairAddress = event.srcAddress;
+  const pairId = makePairId(chainId, pairAddress);
+
+  const mintId = `${chainId}_${event.block.number}_${event.logIndex}`;
+
+  const mintEntity: Mint = {
+    id: mintId,
+    chainId,
+    pairAddress,
     sender: event.params.sender,
     amount0: event.params.amount0,
     amount1: event.params.amount1,
@@ -42,14 +128,33 @@ PairContract.Mint.handler(async ({ event, context }) => {
     logIndex: event.logIndex,
   };
 
-  context.Mint.set(entity);
+  await context.Mint.set(mintEntity);
+
+  // Update Pair mintCount
+  const pair = await context.Pair.get(pairId);
+  if (pair) {
+    const updatedPair: PairEntity = {
+      ...pair,
+      mintCount: (pair.mintCount ?? 0n) + 1n,
+    };
+    await context.Pair.set(updatedPair);
+  }
 });
 
-PairContract.Burn.handler(async ({ event, context }) => {
-  const entity: Burn = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    chainId: BigInt(event.chainId),
-    pairAddress: event.srcAddress,
+/**
+ * Handle Burn events on UniswapV2Pair
+ */
+UniswapV2Pair.Burn.handler(async ({ event, context }) => {
+  const chainId = BigInt(event.chainId);
+  const pairAddress = event.srcAddress;
+  const pairId = makePairId(chainId, pairAddress);
+
+  const burnId = `${chainId}_${event.block.number}_${event.logIndex}`;
+
+  const burnEntity: Burn = {
+    id: burnId,
+    chainId,
+    pairAddress,
     sender: event.params.sender,
     to: event.params.to,
     amount0: event.params.amount0,
@@ -59,14 +164,37 @@ PairContract.Burn.handler(async ({ event, context }) => {
     logIndex: event.logIndex,
   };
 
-  context.Burn.set(entity);
+  await context.Burn.set(burnEntity);
+
+  // Update Pair burnCount
+  const pair = await context.Pair.get(pairId);
+  if (pair) {
+    const updatedPair: PairEntity = {
+      ...pair,
+      burnCount: (pair.burnCount ?? 0n) + 1n,
+    };
+    await context.Pair.set(updatedPair);
+  }
 });
 
-PairContract.Swap.handler(async ({ event, context }) => {
-  const entity: Swap = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    chainId: BigInt(event.chainId),
-    pairAddress: event.srcAddress,
+/**
+ * Handle Swap events on UniswapV2Pair
+ * - create Swap entity
+ * - update Pair.swapCount
+ * - update User stats
+ * - update Token.swapCount for token0/token1
+ */
+UniswapV2Pair.Swap.handler(async ({ event, context }) => {
+  const chainId = BigInt(event.chainId);
+  const pairAddress = event.srcAddress;
+  const pairId = makePairId(chainId, pairAddress);
+
+  const swapId = `${chainId}_${event.block.number}_${event.logIndex}`;
+
+  const swapEntity: Swap = {
+    id: swapId,
+    chainId,
+    pairAddress,
     sender: event.params.sender,
     to: event.params.to,
     amount0In: event.params.amount0In,
@@ -78,20 +206,64 @@ PairContract.Swap.handler(async ({ event, context }) => {
     logIndex: event.logIndex,
   };
 
-  context.Swap.set(entity);
-});
+  await context.Swap.set(swapEntity);
 
-PairContract.Sync.handler(async ({ event, context }) => {
-  const entity: Sync = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    chainId: BigInt(event.chainId),
-    pairAddress: event.srcAddress,
-    reserve0: event.params.reserve0,
-    reserve1: event.params.reserve1,
-    createdAtBlock: BigInt(event.block.number),
-    createdAtTx: event.transaction.hash ?? "",
-    logIndex: event.logIndex,
+  // Update Pair swapCount
+  const pair = await context.Pair.get(pairId);
+  if (pair) {
+    const updatedPair: PairEntity = {
+      ...pair,
+      swapCount: (pair.swapCount ?? 0n) + 1n,
+    };
+    await context.Pair.set(updatedPair);
+  }
+
+  // Upsert User (based on sender)
+  const userId = makeUserId(chainId, event.params.sender);
+  const existingUser = await context.User.get(userId);
+
+  const totalAmount0In =
+    (existingUser ? existingUser.totalAmount0In : 0n) + event.params.amount0In;
+  const totalAmount1In =
+    (existingUser ? existingUser.totalAmount1In : 0n) + event.params.amount1In;
+  const totalAmount0Out =
+    (existingUser ? existingUser.totalAmount0Out : 0n) + event.params.amount0Out;
+  const totalAmount1Out =
+    (existingUser ? existingUser.totalAmount1Out : 0n) + event.params.amount1Out;
+
+  const userEntity: User = {
+    id: userId,
+    address: event.params.sender,
+    chainId,
+    swapCount: (existingUser ? existingUser.swapCount : 0n) + 1n,
+    totalAmount0In,
+    totalAmount1In,
+    totalAmount0Out,
+    totalAmount1Out,
   };
 
-  context.Sync.set(entity);
+  await context.User.set(userEntity);
+
+  // Optionally, update Token swapCount for token0 / token1 using the Pair entity
+  if (pair) {
+    const token0Id = makeTokenId(chainId, pair.token0);
+    const token1Id = makeTokenId(chainId, pair.token1);
+
+    const token0 = await context.Token.get(token0Id);
+    const token1 = await context.Token.get(token1Id);
+
+    if (token0) {
+      await context.Token.set({
+        ...token0,
+        swapCount: (token0.swapCount ?? 0n) + 1n,
+      });
+    }
+
+    if (token1) {
+      await context.Token.set({
+        ...token1,
+        swapCount: (token1.swapCount ?? 0n) + 1n,
+      });
+    }
+  }
 });
