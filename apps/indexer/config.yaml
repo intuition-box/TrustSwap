@@ -24,7 +24,7 @@ contracts:
 
 networks:
   - id: 13579
-    start_block: 1050408
+    start_block: 0
     rpc_config:
       url: "https://testnet.rpc.intuition.systems/http"
     contracts:
@@ -32,7 +32,8 @@ networks:
         address: "0xd103E057242881214793d5A1A7c2A5B84731c75c"
       - name: UniswapV2Pair
         # no address here – pairs will be discovered dynamically
-        
+
 field_selection:
   transaction_fields:
     - hash
+    - from

@@ -110,6 +110,8 @@ UniswapV2Factory.PairCreated.handler(async ({ event, context }) => {
  * Handle Mint events on UniswapV2Pair
  */
 UniswapV2Pair.Mint.handler(async ({ event, context }) => {
+  console.log("🔥 Swap event received for", event.srcAddress);
+
   const chainId = BigInt(event.chainId);
   const pairAddress = event.srcAddress;
   const pairId = makePairId(chainId, pairAddress);
@@ -186,7 +188,7 @@ UniswapV2Pair.Burn.handler(async ({ event, context }) => {
  */
 UniswapV2Pair.Swap.handler(async ({ event, context }) => {
   const chainId = BigInt(event.chainId);
-  const pairAddress = event.srcAddress;
+  const pairAddress = event.srcAddress; // ✅ this is the pair contract address
   const pairId = makePairId(chainId, pairAddress);
 
   const swapId = `${chainId}_${event.block.number}_${event.logIndex}`;
@@ -218,8 +220,9 @@ UniswapV2Pair.Swap.handler(async ({ event, context }) => {
     await context.Pair.set(updatedPair);
   }
 
-  // Upsert User (based on sender)
-  const userId = makeUserId(chainId, event.params.sender);
+  // Upsert User based on transaction.from (EOA)
+  const txFrom = event.transaction.from ?? event.params.sender;
+  const userId = makeUserId(chainId, txFrom);
   const existingUser = await context.User.get(userId);
 
   const totalAmount0In =
@@ -227,13 +230,15 @@ UniswapV2Pair.Swap.handler(async ({ event, context }) => {
   const totalAmount1In =
     (existingUser ? existingUser.totalAmount1In : 0n) + event.params.amount1In;
   const totalAmount0Out =
-    (existingUser ? existingUser.totalAmount0Out : 0n) + event.params.amount0Out;
+    (existingUser ? existingUser.totalAmount0Out : 0n) +
+    event.params.amount0Out;
   const totalAmount1Out =
-    (existingUser ? existingUser.totalAmount1Out : 0n) + event.params.amount1Out;
+    (existingUser ? existingUser.totalAmount1Out : 0n) +
+    event.params.amount1Out;
 
   const userEntity: User = {
     id: userId,
-    address: event.params.sender,
+    address: txFrom,
     chainId,
     swapCount: (existingUser ? existingUser.swapCount : 0n) + 1n,
     totalAmount0In,
@@ -244,7 +249,7 @@ UniswapV2Pair.Swap.handler(async ({ event, context }) => {
 
   await context.User.set(userEntity);
 
-  // Optionally, update Token swapCount for token0 / token1 using the Pair entity
+  // Update Token swapCount for token0 / token1
   if (pair) {
     const token0Id = makeTokenId(chainId, pair.token0);
     const token1Id = makeTokenId(chainId, pair.token1);
