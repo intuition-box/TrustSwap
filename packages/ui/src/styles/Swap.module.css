@@ -340,3 +340,231 @@
       margin-left: 1vh;
     }
   }
+
+
+  /* Pro layout */
+
+.proContainerBody {
+  position: relative;
+  min-height: 100vh;
+  padding-top: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.proMain {
+  width: 95%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr);
+  gap: 24px;
+  padding: 0 24px;
+  margin-bottom: 24px;
+}
+
+.proLeft {
+  background: rgba(35, 35, 35, 0.2);
+  border-radius: 20px;
+  padding: 6px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(101, 101, 101, 0.3);
+}
+
+.proRight {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.proBottom {
+  width: 95%;
+  max-width: 1200px;
+  padding: 0 24px 40px;
+}
+
+/* Chart */
+
+.proChartRoot {
+  height: 90%;
+  min-height: 300px;
+  border-radius: 20px;
+  background-color: var(--black);
+  border: 1px solid var(--black-border);
+  box-shadow:
+    inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+    inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+    inset 0 -0.75px 0.5px var(--btn-shadow-black),
+    0 4px 4px -1px var(--btn-shadow-black),
+    0 2px 3px -1px var(--btn-shadow-black),
+    0 0.5px 0.5px var(--btn-shadow-black),
+    0 0 0 0.75px var(--btn-shadow-black);
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.proChartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.proChartPair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.proChartPairIcons {
+  display: flex;
+  align-items: center;
+}
+
+.tokenIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tokenIconMain {
+  background: linear-gradient(135deg, #23d5e3, #3b82f6);
+  margin-right: -8px;
+  z-index: 2;
+}
+
+.tokenIconQuote {
+  background: linear-gradient(135deg, #10b981, #22d3ee);
+  border: 2px solid #050505;
+}
+
+.proChartPairSymbol {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.proChartPairPrice {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.proChartTimeframes {
+  display: inline-flex;
+  border-radius: 999px;
+  background: rgb(12, 12, 12);
+  padding: 2px;
+}
+
+.proChartTfButton {
+  border: none;
+  background: transparent;
+  color: var(--text-grey);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.proChartTfButton:hover {
+  color: var(--text-color);
+  background: rgb(116, 116, 116);
+}
+
+.proChartCanvas {
+  flex: 1;
+  margin-top: 8px;
+  border-radius: 16px;
+  background: radial-gradient(circle at top, #151515, #050505);
+  border: 1px solid rgba(80, 80, 80, 0.5);
+  position: relative;
+}
+
+.proChartPlaceholderText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* Recent swaps */
+
+.recentSwapsRoot {
+  border-radius: 2vh;
+  background-color: var(--black);
+  border: 1px solid var(--black-border);
+  box-shadow:
+    inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+    inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+    inset 0 -0.75px 0.5px var(--btn-shadow-black),
+    0 4px 4px -1px var(--btn-shadow-black),
+    0 2px 3px -1px var(--btn-shadow-black),
+    0 0.5px 0.5px var(--btn-shadow-black),
+    0 0 0 0.75px var(--btn-shadow-black);
+  padding: 16px 18px 18px;
+}
+
+.recentSwapsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.recentSwapsTitle {
+  font-size: 14px;
+  letter-spacing: -0.4px;
+}
+
+.recentSwapsTableWrapper {
+  overflow-x: auto;
+}
+
+.recentSwapsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.recentSwapsTable thead th {
+  text-align: left;
+  padding: 6px 4px;
+  opacity: 0.7;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(80, 80, 80, 0.7);
+}
+
+.recentSwapsTable td {
+  padding: 6px 4px;
+  white-space: nowrap;
+}
+
+.recentSwapsTable tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.swapSideBuy {
+  color: #22c55e;
+}
+
+.swapSideSell {
+  color: #ef4444;
+}
+
+/* Responsive */
+
+@media (max-width: 1024px) {
+  .proMain {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .proRight {
+    justify-content: center;
+  }
+}
