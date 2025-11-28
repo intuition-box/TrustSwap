@@ -204,6 +204,7 @@ UniswapV2Pair.Swap.handler(async ({ event, context }) => {
     amount0Out: event.params.amount0Out,
     amount1Out: event.params.amount1Out,
     createdAtBlock: BigInt(event.block.number),
+    blockTimestamp: BigInt(event.block.timestamp),
     createdAtTx: event.transaction.hash ?? "",
     logIndex: event.logIndex,
   };

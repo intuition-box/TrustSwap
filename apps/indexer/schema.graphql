@@ -73,4 +73,5 @@ type Swap {
   createdAtBlock: BigInt!
   createdAtTx: String!
   logIndex: Int!
+  blockTimestamp: BigInt!
 }
