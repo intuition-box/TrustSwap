@@ -8,6 +8,7 @@ import logo from "../assets/logo.png";
 export default function Layout() {
   const location = useLocation();
   const [bgStyle, setBgStyle] = useState<{ width: number; left: number }>({ width: 0, left: 0 });
+  const [showSwapMenu, setShowSwapMenu] = useState(false);
 
   const swapRef = useRef<HTMLAnchorElement>(null);
   const poolsRef = useRef<HTMLAnchorElement>(null);
@@ -72,15 +73,48 @@ export default function Layout() {
                   />
                 </>
               )}
-              <NavLink
-                to="/swap"
-                ref={swapRef}
-                className={({ isActive }) =>
-                  `${styles.linkBase} ${isActive ? styles.linkTextActive : ""}`
-                }
+              <div
+                className={styles.dropdownWrapper}
+                onMouseEnter={() => setShowSwapMenu(true)}
+                onMouseLeave={() => setShowSwapMenu(false)}
               >
-                Swap
-              </NavLink>
+                <NavLink
+                  to="/swap"
+                  ref={swapRef}
+                  className={() =>
+                    `${styles.linkBase} ${
+                      location.pathname.startsWith("/swap") ? styles.linkTextActive : ""
+                    }`
+                  }
+                >
+                  Swap
+                </NavLink>
+
+                {showSwapMenu && (
+                  <div className={styles.dropdownMenu}>
+                    <NavLink
+                      to="/swap"
+                      end
+                      className={({ isActive }) =>
+                        `${styles.dropdownItem} ${isActive ? styles.dropdownItemActive : ""}`
+                      }
+                    >
+                      Classic
+                    </NavLink>
+
+                    <NavLink
+                      to="/swap/pro"
+                      end
+                      className={({ isActive }) =>
+                        `${styles.dropdownItem} ${isActive ? styles.dropdownItemActive : ""}`
+                      }
+                    >
+                      Pro
+                    </NavLink>
+                  </div>
+                )}
+              </div>
+
               <NavLink
                 to="/pools"
                 ref={poolsRef}
