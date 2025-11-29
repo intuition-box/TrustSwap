@@ -8,11 +8,13 @@ import PortfolioPage from "./pages/PortfolioPage";
 import NotFound from "./pages/NotFound";
 import Landing from "./Landing";
 
+import { SwapProvider } from "./features/swap/SwapContext";
 import './styles/App.css';
 
 export default function App() {
 
   return (
+    <SwapProvider>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/home" replace />} />
@@ -25,6 +27,6 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-
+    </SwapProvider>
   );
 }

@@ -543,6 +543,8 @@
 .recentSwapsTable td {
   padding: 6px 4px;
   white-space: nowrap;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+
 }
 
 .recentSwapsTable tbody tr:hover {
@@ -566,5 +568,55 @@
 
   .proRight {
     justify-content: center;
+  }
+}
+
+
+
+/* ============================
+   BUY / SELL COLORS
+   ============================*/
+.swapSideBuy {
+  color: #2ecc71; /* green */
+  font-weight: 600;
+}
+
+.swapSideSell {
+  color: #ff4d4d; /* red */
+  font-weight: 600;
+}
+
+/* ============================
+   TX HASH LINK
+   ============================*/
+.txLink {
+  color: var(--swap-text-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.15s ease;
+}
+
+.txLink:hover {
+  opacity: 0.8;
+}
+
+/* ============================
+   RESPONSIVE
+   ============================*/
+@media (max-width: 800px) {
+  .recentSwapsTitle {
+    font-size: 14px;
+  }
+
+  .recentSwapsTable {
+    font-size: 12px;
+  }
+
+  .recentSwapsTable thead tr th {
+    padding: 6px;
+  }
+
+  .recentSwapsTable td {
+    padding: 4px;
   }
 }

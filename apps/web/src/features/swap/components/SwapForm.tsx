@@ -21,6 +21,7 @@ import ApproveAndSwap from "./ApproveAndSwap";
 import DetailsDisclosure from "./DetailsDisclosure";
 import { addresses as TESTNET_ADDRESSES, abi, getAddresses } from "@trustswap/sdk";
 
+import { useSwapContext } from "../SwapContext";
 
 
 const norm = (a?: string) => (a ? a.toLowerCase() : "");
@@ -105,6 +106,13 @@ export default function SwapForm() {
   const [bestPath, setBestPath] = useState<Address[] | null>(null);
   const [lastOutBn, setLastOutBn] = useState<bigint | null>(null);
 
+  const {
+    tokenIn: ctxTokenIn,
+    tokenOut: ctxTokenOut,
+    setTokenIn: setContextTokenIn,
+    setTokenOut: setContextTokenOut,
+    setPairAddress,
+  } = useSwapContext();
 
   const { tokens: imported } = useImportedTokens();
 
@@ -149,6 +157,64 @@ export default function SwapForm() {
       decimals: 18,
     };
   }
+
+  useEffect(() => {
+    if (!tokenIn) {
+      if (ctxTokenIn !== null) {
+        setContextTokenIn(null);
+      }
+      return;
+    }
+
+    const meta = getMeta(tokenIn);
+    const poolAddress = isNative(tokenIn) ? WNATIVE : meta.address;
+
+    if (
+      ctxTokenIn &&
+      ctxTokenIn.address === poolAddress &&
+      ctxTokenIn.symbol === meta.symbol &&
+      ctxTokenIn.decimals === meta.decimals
+    ) {
+      return;
+    }
+
+    setContextTokenIn({
+      address: poolAddress,
+      symbol: meta.symbol,
+      decimals: meta.decimals,
+    });
+  }, [tokenIn, ctxTokenIn, WNATIVE, setContextTokenIn]);
+  
+
+  useEffect(() => {
+    if (!tokenOut) {
+      if (ctxTokenOut !== null) {
+        setContextTokenOut(null);
+      }
+      return;
+    }
+
+    const addr = tokenOut as Address;
+    const meta = getMeta(addr);
+    const poolAddress = isNative(addr) ? WNATIVE : meta.address;
+
+    if (
+      ctxTokenOut &&
+      ctxTokenOut.address === poolAddress &&
+      ctxTokenOut.symbol === meta.symbol &&
+      ctxTokenOut.decimals === meta.decimals
+    ) {
+      return;
+    }
+
+    setContextTokenOut({
+      address: poolAddress,
+      symbol: meta.symbol,
+      decimals: meta.decimals,
+    });
+  }, [tokenOut, ctxTokenOut, WNATIVE, setContextTokenOut]);
+
+
 
   function buildPaths(tin: Address, tout: Address): Address[][] {
     const WT = WNATIVE as Address;
@@ -269,11 +335,13 @@ export default function SwapForm() {
     (async () => {
       const pd = await fetchPair(tokenIn, tokenOut);
       if (id !== pairReq.current) return; // anti-race
+      const lpAddr = pd?.pair as Address | undefined;
       setPairData(pd);
+      setPairAddress(lpAddr ?? null);
       if (!pd) console.warn("[pairData] no LP for", tokenIn, tokenOut);
     })();
     return () => { /* rien, on s'appuie sur id */ };
-  }, [tokenIn, tokenOut, fetchPair]);
+  }, [tokenIn, tokenOut, fetchPair, setPairAddress]);
 
   // Estimation réseau
   useEffect(() => {
