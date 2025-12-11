@@ -206,6 +206,8 @@ export function useRecentSwapsForPair(pairAddress: Address | null) {
     let cancelled = false;
 
     async function fetchData() {
+      if (!pairAddress) return;
+      
       setIsLoading(true);
       try {
         const res = await graphqlRequest<

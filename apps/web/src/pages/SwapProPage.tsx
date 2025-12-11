@@ -3,6 +3,7 @@ import styles from "@ui/styles/Swap.module.css";
 import SwapFeature from "../features/swap";
 import { ProSwapChart } from "../features/swap/components/ProSwapChart";
 import { RecentSwaps } from "../features/swap/components/RecentSwaps";
+import { AIChatPanel } from "../features/swap/components/AIChatPanel";
 
 export default function SwapProPage() {
   const haloRef = useRef<HTMLDivElement>(null);
@@ -48,7 +49,12 @@ export default function SwapProPage() {
       </section>
 
       <section className={styles.proBottom}>
-        <RecentSwaps />
+        <div>
+          <RecentSwaps />
+        </div>
+        <div>
+          <AIChatPanel />
+        </div>
       </section>
     </div>
   );

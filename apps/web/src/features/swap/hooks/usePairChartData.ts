@@ -42,6 +42,11 @@ type SwapsForChartResponse = {
   }[];
 };
 
+function roundPrice(n: number, decimals = 4): number {
+  return Number(n.toFixed(decimals));
+}
+
+
 export function usePairChartData(pairAddress: Address | null) {
   const [data, setData] = useState<PairChartData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,6 +60,8 @@ export function usePairChartData(pairAddress: Address | null) {
     let cancelled = false;
 
     async function fetchData() {
+      if (!pairAddress) return;
+      
       setIsLoading(true);
       try {
         const res = await graphqlRequest<
@@ -80,9 +87,9 @@ export function usePairChartData(pairAddress: Address | null) {
 
             let price: number | null = null;
             if (a0In > 0 && a1Out > 0) {
-              price = a1Out / a0In;
+              price = roundPrice(a1Out / a0In);
             } else if (a1In > 0 && a0Out > 0) {
-              price = a0Out / a1In;
+              price = roundPrice(a0Out / a1In);
             }
 
             return { ts, price };

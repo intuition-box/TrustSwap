@@ -51,7 +51,7 @@ export function RecentSwaps() {
         <h2 className={styles.recentSwapsTitle}>Recent activity</h2>
       </div>
 
-      <div className={styles.recentSwapsTableWrapper}>
+      <div className={styles.recentSwapsTableScrollable}>
         <table className={styles.recentSwapsTable}>
           <thead>
             <tr>
