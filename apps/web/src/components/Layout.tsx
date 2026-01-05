@@ -5,14 +5,39 @@ import { ConnectButton } from "./ConnectButton";
 import { NetworkSelect } from "./NetworkSelect";
 import logo from "../assets/logo.png";
 
+  const LAST_SWAP_VIEW_KEY = "trustswap:lastSwapView";
+  const DEFAULT_SWAP_PATH = "/swap";
+
+  function getLastSwapPath(): string {
+    const v = localStorage.getItem(LAST_SWAP_VIEW_KEY);
+    if (v === "/swap/pro") return "/swap/pro";
+    if (v === "/swap") return "/swap";
+    return DEFAULT_SWAP_PATH;
+  }
+
+  function setLastSwapPath(path: string) {
+    if (path === "/swap" || path === "/swap/pro") {
+      localStorage.setItem(LAST_SWAP_VIEW_KEY, path);
+    }
+  }
+
 export default function Layout() {
   const location = useLocation();
   const [bgStyle, setBgStyle] = useState<{ width: number; left: number }>({ width: 0, left: 0 });
+  const [showSwapMenu, setShowSwapMenu] = useState(false);
 
   const swapRef = useRef<HTMLAnchorElement>(null);
   const poolsRef = useRef<HTMLAnchorElement>(null);
   const portfolioRef = useRef<HTMLAnchorElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
+
+  const [swapTarget, setSwapTarget] = useState<string>(() => {
+    try {
+      return getLastSwapPath();
+    } catch {
+      return DEFAULT_SWAP_PATH;
+    }
+  });
 
   function getActiveRef(pathname: string) {
     if (pathname.startsWith("/swap")) return swapRef.current;
@@ -46,6 +71,18 @@ export default function Layout() {
     };
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (location.pathname === "/swap" || location.pathname.startsWith("/swap/")) {
+      const normalized = location.pathname.startsWith("/swap/pro") ? "/swap/pro" : "/swap";
+      try {
+        setLastSwapPath(normalized);
+        setSwapTarget(normalized);
+      } catch {
+        // ignore
+      }
+    }
+  }, [location.pathname]);
+
   return (
     <div>
       <header>
@@ -72,15 +109,48 @@ export default function Layout() {
                   />
                 </>
               )}
-              <NavLink
-                to="/swap"
-                ref={swapRef}
-                className={({ isActive }) =>
-                  `${styles.linkBase} ${isActive ? styles.linkTextActive : ""}`
-                }
+              <div
+                className={styles.dropdownWrapper}
+                onMouseEnter={() => setShowSwapMenu(true)}
+                onMouseLeave={() => setShowSwapMenu(false)}
               >
-                Swap
-              </NavLink>
+                <NavLink
+                  to={swapTarget}
+                  ref={swapRef}
+                  className={() =>
+                    `${styles.linkBase} ${
+                      location.pathname.startsWith("/swap") ? styles.linkTextActive : ""
+                    }`
+                  }
+                >
+                  Swap
+                </NavLink>
+
+                {showSwapMenu && (
+                  <div className={styles.dropdownMenu}>
+                    <NavLink
+                      to="/swap"
+                      end
+                      className={({ isActive }) =>
+                        `${styles.dropdownItem} ${isActive ? styles.dropdownItemActive : ""}`
+                      }
+                    >
+                      Classic
+                    </NavLink>
+
+                    <NavLink
+                      to="/swap/pro"
+                      end
+                      className={({ isActive }) =>
+                        `${styles.dropdownItem} ${isActive ? styles.dropdownItemActive : ""}`
+                      }
+                    >
+                      Pro
+                    </NavLink>
+                  </div>
+                )}
+              </div>
+
               <NavLink
                 to="/pools"
                 ref={poolsRef}
