@@ -5,6 +5,22 @@ import { ConnectButton } from "./ConnectButton";
 import { NetworkSelect } from "./NetworkSelect";
 import logo from "../assets/logo.png";
 
+  const LAST_SWAP_VIEW_KEY = "trustswap:lastSwapView";
+  const DEFAULT_SWAP_PATH = "/swap";
+
+  function getLastSwapPath(): string {
+    const v = localStorage.getItem(LAST_SWAP_VIEW_KEY);
+    if (v === "/swap/pro") return "/swap/pro";
+    if (v === "/swap") return "/swap";
+    return DEFAULT_SWAP_PATH;
+  }
+
+  function setLastSwapPath(path: string) {
+    if (path === "/swap" || path === "/swap/pro") {
+      localStorage.setItem(LAST_SWAP_VIEW_KEY, path);
+    }
+  }
+
 export default function Layout() {
   const location = useLocation();
   const [bgStyle, setBgStyle] = useState<{ width: number; left: number }>({ width: 0, left: 0 });
@@ -14,6 +30,14 @@ export default function Layout() {
   const poolsRef = useRef<HTMLAnchorElement>(null);
   const portfolioRef = useRef<HTMLAnchorElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
+
+  const [swapTarget, setSwapTarget] = useState<string>(() => {
+    try {
+      return getLastSwapPath();
+    } catch {
+      return DEFAULT_SWAP_PATH;
+    }
+  });
 
   function getActiveRef(pathname: string) {
     if (pathname.startsWith("/swap")) return swapRef.current;
@@ -45,6 +69,18 @@ export default function Layout() {
       window.removeEventListener("resize", onResize);
       ro.disconnect();
     };
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (location.pathname === "/swap" || location.pathname.startsWith("/swap/")) {
+      const normalized = location.pathname.startsWith("/swap/pro") ? "/swap/pro" : "/swap";
+      try {
+        setLastSwapPath(normalized);
+        setSwapTarget(normalized);
+      } catch {
+        // ignore
+      }
+    }
   }, [location.pathname]);
 
   return (
@@ -79,7 +115,7 @@ export default function Layout() {
                 onMouseLeave={() => setShowSwapMenu(false)}
               >
                 <NavLink
-                  to="/swap"
+                  to={swapTarget}
                   ref={swapRef}
                   className={() =>
                     `${styles.linkBase} ${
