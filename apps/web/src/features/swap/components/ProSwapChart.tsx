@@ -125,10 +125,12 @@ export function ProSwapChart() {
     },
     grid: {
       borderColor: "rgba(255,255,255,0.08)",
-      strokeDashArray: 4,
+      strokeDashArray: 1,
       padding: {
         left: 0,
-        right: 0,
+        right: 10,
+        top: 0,
+        bottom: 10,
       },
     },
     tooltip: {
@@ -196,7 +198,7 @@ export function ProSwapChart() {
             options={options}
             series={series}
             type="candlestick"
-            height={260}
+            height="100%"
           />
         )}
       </div>
