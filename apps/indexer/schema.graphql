@@ -1,0 +1,77 @@
+type Pair {
+  id: ID!
+  chainId: BigInt!
+  token0: String!
+  token1: String!
+  pairAddress: String!
+  allPairsLength: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTx: String!
+  logIndex: Int!
+
+  swapCount: BigInt!
+  mintCount: BigInt!
+  burnCount: BigInt!
+}
+
+type Token {
+  id: ID!
+  address: String!
+  chainId: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTx: String!
+  pairCount: BigInt!
+  swapCount: BigInt!
+}
+
+type User {
+  id: ID!
+  address: String!
+  chainId: BigInt!
+  swapCount: BigInt!
+  totalAmount0In: BigInt!
+  totalAmount1In: BigInt!
+  totalAmount0Out: BigInt!
+  totalAmount1Out: BigInt!
+}
+
+type Mint {
+  id: ID!
+  chainId: BigInt!
+  pairAddress: String!
+  sender: String!
+  amount0: BigInt!
+  amount1: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTx: String!
+  logIndex: Int!
+}
+
+type Burn {
+  id: ID!
+  chainId: BigInt!
+  pairAddress: String!
+  sender: String!
+  to: String!
+  amount0: BigInt!
+  amount1: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTx: String!
+  logIndex: Int!
+}
+
+type Swap {
+  id: ID!
+  chainId: BigInt!
+  pairAddress: String!
+  sender: String!
+  to: String!
+  amount0In: BigInt!
+  amount1In: BigInt!
+  amount0Out: BigInt!
+  amount1Out: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTx: String!
+  logIndex: Int!
+  blockTimestamp: BigInt!
+}

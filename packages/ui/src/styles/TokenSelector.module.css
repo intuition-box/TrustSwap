@@ -1,7 +1,7 @@
 .btnTokenSelector {
-  height: 5.4vh;
-  border-radius: 1.5vh;
-  margin-right: 2vh;
+  height: 68px;
+  border-radius: 20px;
+  margin-right: 22px;
   background-color: var(--black);
   border: 1px solid var(--black-border);
   box-shadow: 
@@ -14,7 +14,7 @@
     0 0 0 0.75px var(--btn-shadow-black);
   color: var(--text-color);
   font-weight: 500;
-  font-size: 1.9vh;
+  font-size: 23px;
   letter-spacing: -0.08vh;
   cursor: pointer;
   display: flex;
@@ -35,12 +35,12 @@
 
 
   .tokenIcon {
-    width: 3.2vh;
+    width: 38px;
     margin-right: 0.3vh;
   }
 
   .arrowIcone {
-    width: 2.5vh;
+    width: 30px;
   }
 
   .titleSearchToken {
@@ -244,5 +244,5 @@
   .tokenPlaceholder{
     display: flex;
     align-items: center;
-    width: 10vh;
+    width: 130px;
   }

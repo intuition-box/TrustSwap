@@ -54,7 +54,7 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(49, 49, 49, 0.3);
     color: var(--text-color);
-    border-radius: 30px;
+    border-radius: 20px;
     height: auto;
     width: 500px;
     z-index: 2;
@@ -133,12 +133,12 @@
       0 2px 3px -1px var(--btn-shadow-black),
       0 0.5px 0.5px var(--btn-shadow-black),
       0 0 0 0.75px var(--btn-shadow-black);
-    border-radius: 2.5vh;
+    border-radius: 20px;
     padding-top: 1.3vh;
     color: var(--text-grey-input);
     font-weight: 500;
     letter-spacing: -0.08vh;
-    font-size: 1.6vh;
+    font-size: 18px;
     padding-bottom: 2vh;
     margin-bottom: 0.6vh;
   }
@@ -155,7 +155,7 @@
       0 2px 3px -1px var(--btn-shadow-black),
       0 0.5px 0.5px var(--btn-shadow-black),
       0 0 0 0.75px var(--btn-shadow-black);
-    border-radius: 2.5vh;
+    border-radius: 20px;
     padding-top: 1.3vh;
     color: var(--text-grey-input);
     font-weight: 500;
@@ -231,8 +231,8 @@
       0 0 0 0.75px var(--btn-shadow-black);
     margin-left: auto;
     margin-right: auto;
-    height: 5.4vh;
-    width: 5.4vh;
+    height: 66px;
+    width: 66px;
     cursor: pointer;
     border-radius: 1.3vh;
     display: flex;
@@ -340,3 +340,506 @@
       margin-left: 1vh;
     }
   }
+
+
+  /* Pro layout */
+
+.proContainerBody {
+  position: relative;
+  min-height: 900px;
+  padding-top: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.proMain {
+  width: 95%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr);
+  gap: 24px;
+  padding: 0 24px;
+  margin-bottom: 24px;
+}
+
+
+
+.proRight {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.proBottom {
+    width: 95%;
+    max-width: 1200px;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr);
+    gap: 24px;
+    padding: 0 24px;
+    margin-bottom: 24px;
+}
+
+
+
+/* Chart */
+
+.proChartRoot {
+  height: 90%;
+  min-height: 400px;
+  border-radius: 20px;
+  position: relative;
+  background: rgba(0, 0, 0, 0.624);
+  border: 1px solid var(--black-border);
+  box-shadow:
+    inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+    inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+    inset 0 -0.75px 0.5px var(--btn-shadow-black),
+    0 4px 4px -1px var(--btn-shadow-black),
+    0 2px 3px -1px var(--btn-shadow-black),
+    0 0.5px 0.5px var(--btn-shadow-black),
+    0 0 0 0.75px var(--btn-shadow-black);
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.proChartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.proChartPair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.proChartPairIcons {
+  display: flex;
+  align-items: center;
+}
+
+.tokenIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tokenIconMain {
+  background: linear-gradient(135deg, #23d5e3, #3b82f6);
+  margin-right: -8px;
+  z-index: 2;
+}
+
+.tokenIconQuote {
+  background: linear-gradient(135deg, #10b981, #22d3ee);
+  border: 2px solid #050505;
+}
+
+.proChartPairSymbol {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.proChartPairPrice {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.proChartTimeframes {
+  display: inline-flex;
+  border-radius: 999px;
+  background: rgb(12, 12, 12);
+  padding: 2px;
+}
+
+.proChartTfButton {
+  border: none;
+  background: transparent;
+  color: var(--text-grey);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.proChartTfButton:hover {
+  color: var(--text-color);
+  background: rgb(116, 116, 116);
+}
+
+.proChartCanvas {
+  flex: 1;
+  margin-top: 8px;
+  border-radius: 16px;
+  background: radial-gradient(circle at top, #151515, #050505);
+  border: 1px solid rgba(80, 80, 80, 0.5);
+  position: relative;
+}
+
+.proChartPlaceholderText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* Recent swaps */
+
+.recentSwapsRoot {
+  height: 90%;
+  border-radius: 20px;
+  position: relative;
+  background: rgba(0, 0, 0, 0.624);
+  border: 1px solid var(--black-border);
+  box-shadow:
+    inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+    inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+    inset 0 -0.75px 0.5px var(--btn-shadow-black),
+    0 4px 4px -1px var(--btn-shadow-black),
+    0 2px 3px -1px var(--btn-shadow-black),
+    0 0.5px 0.5px var(--btn-shadow-black),
+    0 0 0 0.75px var(--btn-shadow-black);
+  padding: 16px 18px 18px;
+}
+
+.recentSwapsTableScrollable {
+  max-height: 360px;          /* ≈ 20 lignes */
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: 8px;
+  padding-right: 6px;         /* pour éviter que le scroll se colle au bord */
+}
+
+/* Optional: custom scrollbar for a cleaner UI */
+.recentSwapsTableScrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.recentSwapsTableScrollable::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 6px;
+}
+
+.recentSwapsTableScrollable::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.recentSwapsTable thead th {
+  position: sticky;
+  top: 0;
+  background: var(--black);
+  z-index: 5;
+}
+
+.recentSwapsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.recentSwapsTitle {
+  font-size: 14px;
+  letter-spacing: -0.4px;
+}
+
+.recentSwapsTableWrapper {
+  overflow-x: auto;
+}
+
+.recentSwapsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.recentSwapsTable thead th {
+  text-align: left;
+  padding: 6px 4px;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(80, 80, 80, 0.7);
+}
+
+.recentSwapsTable td {
+  padding: 6px 4px;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+
+}
+
+.recentSwapsTable tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.swapSideBuy {
+  color: #22c55e;
+}
+
+.swapSideSell {
+  color: #ef4444;
+}
+
+/* Responsive */
+
+@media (max-width: 1024px) {
+  .proMain {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .proRight {
+    justify-content: center;
+  }
+}
+
+
+
+/* ============================
+   BUY / SELL COLORS
+   ============================*/
+.swapSideBuy {
+  color: #2ecc71; /* green */
+  font-weight: 600;
+}
+
+.swapSideSell {
+  color: #ff4d4d; /* red */
+  font-weight: 600;
+}
+
+/* ============================
+   TX HASH LINK
+   ============================*/
+.txLink {
+  color: var(--swap-text-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.15s ease;
+}
+
+.txLink:hover {
+  opacity: 0.8;
+}
+
+/* ============================
+   RESPONSIVE
+   ============================*/
+@media (max-width: 800px) {
+  .recentSwapsTitle {
+    font-size: 14px;
+  }
+
+  .recentSwapsTable {
+    font-size: 12px;
+  }
+
+  .recentSwapsTable thead tr th {
+    padding: 6px;
+  }
+
+  .recentSwapsTable td {
+    padding: 4px;
+  }
+}
+
+
+.proChartCard {
+  background: rgba(35, 35, 35, 0.2);
+  border-radius: 16px;
+  padding: 12px 14px 8px;
+  border: 1px solid rgba(101, 101, 101, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.proChartHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.proChartPair {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-color);
+  letter-spacing: -0.4px;
+  margin-bottom: 2px;
+}
+
+.proChartPriceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.proChartPrice {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-color);
+  letter-spacing: -0.6px;
+}
+
+.priceChangePositive {
+  font-size: 12px;
+  font-weight: 500;
+  color: #2ecc71;
+}
+
+.priceChangeNegative {
+  font-size: 12px;
+  font-weight: 500;
+  color: #ff4d4d;
+}
+
+.proChartTimeframeGroup {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.proChartTimeframe,
+.proChartTimeframeActive {
+  min-width: 34px;
+  padding: 3px 6px;
+  border-radius: 999px;
+  border: none;
+  font-size: 10px;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.proChartTimeframe {
+  background: transparent;
+  color: var(--text-grey);
+}
+
+.proChartTimeframe:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-color);
+}
+
+.proChartTimeframeActive {
+  background: var(--black);
+  color: var(--text-color);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.proChartBody {
+  margin-top: 4px;
+}
+
+.proChartEmpty {
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--text-grey);
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.proSwapGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.proSwapLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.proSwapRight {
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+
+/* Chat card styling */
+.aiChatRoot {
+  position: relative;
+  background: rgba(0, 0, 0, 0.624);
+  border-radius: 20px;
+  border: 1px solid var(--black-border);
+  box-shadow:
+    inset 0 1px 3px -0.25px rgba(255, 255, 255, 0.12),
+    inset 0 0.5px 0.25px -0.25px rgba(255, 255, 255, 0.16),
+    inset 0 -0.75px 0.5px var(--btn-shadow-black),
+    0 4px 4px -1px var(--btn-shadow-black),
+    0 2px 3px -1px var(--btn-shadow-black),
+    0 0.5px 0.5px var(--btn-shadow-black),
+    0 0 0 0.75px var(--btn-shadow-black);
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.aiChatHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.aiChatTitle {
+  font-size: 14px;
+  letter-spacing: -0.4px;
+}
+
+.aiChatTag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+}
+
+.aiChatBody {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aiChatPlaceholder {
+  font-size: 12px;
+  opacity: 0.7;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Responsive: stack bottom panels on narrow screens */
+@media (max-width: 1024px) {
+  .proBottom {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
